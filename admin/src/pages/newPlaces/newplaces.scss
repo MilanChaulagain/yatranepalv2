@@ -1,0 +1,133 @@
+// Define some basic variables for consistency
+
+// Main content area, adjusting for the sidebar
+
+.new {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(120deg, #f5faff 60%, #e0e7ef 100%);
+}
+
+.newContainer {
+  flex: 6;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.top {
+  padding: 32px 32px 0 32px;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2d5c7f;
+  letter-spacing: 1px;
+}
+
+.bottom {
+  display: flex;
+  gap: 40px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 6px 32px rgba(45,92,127,0.10);
+  padding: 40px 32px;
+  margin: 32px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.left {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.left img {
+  width: 260px;
+  height: 260px;
+  object-fit: cover;
+  border-radius: 18px;
+  border: 2.5px solid #e0e0e0;
+  background: #f5faff;
+  box-shadow: 0 4px 16px rgba(45,92,127,0.10);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.left img:hover {
+  box-shadow: 0 8px 32px rgba(45,92,127,0.18);
+  transform: scale(1.04);
+}
+
+.right {
+  flex: 2;
+  min-width: 320px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.formInput {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.formInput label {
+  font-size: 1.08rem;
+  color: #2d5c7f;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.formInput input,
+.formInput select {
+  padding: 12px 14px;
+  border: 1.5px solid #cfd8dc;
+  border-radius: 10px;
+  font-size: 1.05rem;
+  background: #f8f9fa;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.formInput input:focus,
+.formInput select:focus {
+  border: 2px solid #2d5c7f;
+  outline: none;
+  box-shadow: 0 2px 8px rgba(45,92,127,0.10);
+}
+
+button {
+  margin-top: 22px;
+  padding: 14px 0;
+  background: linear-gradient(90deg, #2d5c7f 60%, #ffb347 100%);
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(45,92,127,0.10);
+  transition: background 0.2s, transform 0.2s;
+}
+
+button:hover {
+  background: linear-gradient(90deg, #ffb347 0%, #2d5c7f 100%);
+  transform: translateY(-2px) scale(1.04);
+}
+
+@media (max-width: 900px) {
+  .bottom {
+    flex-direction: column;
+    gap: 24px;
+    padding: 24px 8px;
+    margin: 16px 0;
+  }
+  .left img {
+    width: 180px;
+    height: 180px;
+  }
+}

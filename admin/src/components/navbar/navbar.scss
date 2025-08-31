@@ -1,0 +1,87 @@
+.navbar {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  background-color: #fff; /* White background */
+  color: #555;
+  border-bottom: 1px solid #e0e0e0; /* Lighter border */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+
+  .wrapper {
+    width: 100%;
+    padding: 0 30px; /* Increased padding */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    .left {
+      display: flex;
+      align-items: center;
+      .search {
+        display: flex;
+        align-items: center;
+        border: 1px solid #ccc; /* Slightly darker border */
+        border-radius: 20px; /* Rounded corners */
+        padding: 5px 10px;
+        background-color: #f9f9f9; /* Light background for search */
+        
+        input {
+          border: none;
+          outline: none;
+          background: transparent;
+          font-size: 14px; /* Increased font size */
+          &::placeholder {
+            color: #aaa; /* Lighter placeholder color */
+          }
+        }
+        .search-icon {
+            color: #aaa; /* Lighter icon color */
+            margin-left: 5px;
+        }
+      }
+    }
+
+    .right {
+      display: flex;
+      align-items: center;
+
+      .item {
+        display: flex;
+        align-items: center;
+        margin-left: 25px; /* Increased margin */
+        position: relative;
+        cursor: pointer; /* Indicate clickable items */
+        color: #333; /* Darker text color */
+
+        .icon {
+          font-size: 22px; /* Slightly larger icons */
+          color: #555; /* Icon color */
+        }
+
+        .avatar {
+          width: 36px; /* Slightly larger avatar */
+          height: 36px;
+          border-radius: 50%;
+          margin-left: 10px; /* Space between icon and avatar */
+        }
+
+        .counter {
+          width: 18px;
+          height: 18px;
+          background-color: #d9534f; /* Red color for counter */
+          border-radius: 50%;
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 10px;
+          font-weight: bold;
+          position: absolute;
+          top: -8px; /* Adjusted position */
+          right: -8px; /* Adjusted position */
+        }
+      }
+    }
+  }
+}
+
