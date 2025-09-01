@@ -40,8 +40,6 @@ const Navbar = () => {
     setProfileMenuOpen(false);
   };
 
-  
-
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {

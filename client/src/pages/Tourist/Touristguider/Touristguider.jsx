@@ -61,25 +61,12 @@ const TouristGuideForm = () => {
     };
     const uploadToCloudinary = async () => {
         if (!imageFile) return "";
-
         const data = new FormData();
         data.append("file", imageFile);
-        data.append("upload_preset", process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET);
+        data.append("", "");
 
         const res = await axios.post(
-            `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_CLOUD_NAME}/image/upload`,
-        data,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-          onUploadProgress: (progressEvent) => {
-            const percentCompleted = Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total
-            );
-            console.log(`Upload progress: ${percentCompleted}%`);
-          },
-        }
+            data
         );
 
         return res.data.secure_url;
