@@ -1,0 +1,149 @@
+@import "variables";
+
+// Common layout styles for pages with navbar and sidebar
+.page-wrapper {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.page-content {
+  margin-left: $sidebar-width;
+  margin-top: $navbar-height;
+  flex: 1;
+  min-width: 0;
+  background: var(--background-gradient);
+  position: relative;
+  min-height: calc(100vh - #{$navbar-height});
+  
+  .content-inner {
+    padding: $spacing-unit * 3;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba($text-muted, 0.2);
+      border-radius: $border-radius-pill;
+      
+      &:hover {
+        background-color: rgba($text-muted, 0.3);
+      }
+    }
+  }
+}
+
+// Common container styles
+.content-container {
+  background: linear-gradient(145deg, rgba($background-paper, 0.95) 0%, rgba($background-paper, 0.9) 100%);
+  border-radius: $border-radius-xl;
+  box-shadow: $shadow-lg;
+  padding: $spacing-unit * 3;
+  margin-bottom: $spacing-unit * 3;
+  border: 1px solid rgba($text-muted, 0.08);
+  backdrop-filter: blur(8px);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 100%);
+    pointer-events: none;
+  }
+}
+
+// Grid layouts
+.grid-layout {
+  display: grid;
+  gap: $spacing-unit * 3;
+  padding: $spacing-unit * 3;
+  
+  &-2 {
+    grid-template-columns: repeat(2, 1fr);
+    
+    @media (max-width: $breakpoint-md) {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  &-3 {
+    grid-template-columns: repeat(3, 1fr);
+    
+    @media (max-width: $breakpoint-lg) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    
+    @media (max-width: $breakpoint-md) {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+// Page header styles
+.page-header {
+  margin-bottom: $spacing-unit * 4;
+  
+  h1, h2 {
+    font-size: $font-size-xxl;
+    font-weight: $font-weight-bold;
+    color: $text-primary;
+    margin-bottom: $spacing-unit * 2;
+    position: relative;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 0;
+      width: 60px;
+      height: 4px;
+      background: $gradient-primary;
+      border-radius: $border-radius-sm;
+    }
+  }
+  
+  .header-actions {
+    margin-top: $spacing-unit * 2;
+    display: flex;
+    gap: $spacing-unit * 2;
+    align-items: center;
+  }
+}
+
+// Section styles
+.section {
+  margin-bottom: $spacing-unit * 4;
+  
+  &-title {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    margin-bottom: $spacing-unit * 3;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: $breakpoint-md) {
+  .page-content {
+    margin-left: 80px; // Collapsed sidebar width
+  }
+  
+  .content-container {
+    padding: $spacing-unit * 2;
+  }
+  
+  .grid-layout {
+    padding: $spacing-unit * 2;
+    gap: $spacing-unit * 2;
+  }
+}

@@ -2,10 +2,11 @@ import "./newplaces.scss";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Navbar from "../../components/navbar/Navbar";
 import DriveFolderUploadOutlinedIcon from "@mui/icons-material/DriveFolderUploadOutlined";
-import { useState } from "react";
-import { Loader } from "@googlemaps/js-api-loader";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import { useState, useEffect } from "react";
 import { placeInputs } from "../../formSource";
 import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 const categoryOptions = [
@@ -17,51 +18,113 @@ const categoryOptions = [
 ];
 
 const NewPlace = () => {
-
   const [files, setFiles] = useState(null);
   const [info, setInfo] = useState({});
   const [loadingLatLng, setLoadingLatLng] = useState(false);
+  const [suggestedLocations, setSuggestedLocations] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  useEffect(() => {
+    return () => setLoadingLatLng(false);
+  }, []);
 
   const handleChange = (e) => {
     setInfo((prev) => ({ ...prev, [e.target.id]: e.target.value }));
+    setError("");
   };
 
-  // Auto-fetch latitude and longitude when location field loses focus
-  const handleLocationBlur = async (e) => {
-    const location = e.target.value;
-    if (!location) return;
-    setLoadingLatLng(true);
-    try {
-      // Use Google Maps Geocoding API
-      const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(location)}&key=${apiKey}`
-      );
-      const data = await response.json();
-      if (data.status === "OK" && data.results.length > 0) {
-        const { lat, lng } = data.results[0].geometry.location;
-        setInfo((prev) => ({
-          ...prev,
-          latitude: lat.toString(),
-          longitude: lng.toString(),
-        }));
-      }
-    } catch (err) {
-      // Optionally handle error
-      console.error("Failed to fetch coordinates:", err);
-    } finally {
-      setLoadingLatLng(false);
+const handleSuggestLocation = async () => {
+  const { name, city, address, location } = info;
+  if (!name && !city && !address && !location) {
+    setError("Please fill in at least the place name, city, address, or location.");
+    return;
+  }
+
+  setLoadingLatLng(true);
+  setError("");
+
+  try {
+    let query = "";
+    if (name && city && address) query = `${name}, ${address}, ${city}, Nepal`;
+    else if (name && city) query = `${name}, ${city}, Nepal`;
+    else if (name && address) query = `${name}, ${address}, Nepal`;
+    else if (address && city) query = `${address}, ${city}, Nepal`;
+    else if (name) query = `${name}, Nepal`;
+    else if (city) query = `${city}, Nepal`;
+    else if (address) query = `${address}, Nepal`;
+    else if (location) query = `${location}, Nepal`;
+
+    const apiKey = process.env.REACT_APP_LOCATIONIQ_ACCESS_TOKEN;
+    const response = await fetch(
+      `https://us1.locationiq.com/v1/search?key=${apiKey}&q=${encodeURIComponent(query)}&format=json`
+    );
+
+    if (!response.ok) throw new Error("Failed request");
+
+    const data = await response.json();
+
+    if (!data || data.length === 0) {
+      setError("No location suggestion found.");
+      return;
     }
+
+    // Pick the best suggestion
+    const scored = data.map((result) => ({
+      lat: parseFloat(result.lat),
+      lng: parseFloat(result.lon),
+      confidence: getConfidenceScore(result, name, city, address),
+      address: result.display_name
+    }));
+
+    scored.sort((a, b) => b.confidence - a.confidence);
+    const best = scored[0];
+
+    // Autofill lat/lng
+    setInfo((prev) => ({
+      ...prev,
+      latitude: best.lat.toString(),
+      longitude: best.lng.toString(),
+    }));
+
+    // Set for display
+    setSuggestedLocations([best]);
+    setShowSuggestions(true);
+
+  } catch (err) {
+    setError("Failed to get location suggestion.");
+  } finally {
+    setLoadingLatLng(false);
+  }
+};
+
+  const getConfidenceScore = (result, name, city, address) => {
+    let score = 0;
+    const displayName = result.display_name.toLowerCase();
+    if (name && displayName.includes(name.toLowerCase())) score += 3;
+    if (city && displayName.includes(city.toLowerCase())) score += 2;
+    if (address && displayName.includes(address.toLowerCase())) score += 2;
+    if (displayName.includes("nepal")) score += 1;
+    if (result.class === "tourism") score += 2;
+    if (result.class === "amenity") score += 1;
+    return score;
+  };
+
+  const handleSelectSuggestion = (suggestion) => {
+    setInfo((prev) => ({
+      ...prev,
+      latitude: suggestion.lat.toString(),
+      longitude: suggestion.lng.toString(),
+    }));
+    setShowSuggestions(false);
+    setSuggestedLocations([]);
   };
 
   const handleClick = async (e) => {
     e.preventDefault();
-
-    // Validate required fields
     if (!info.name || !info.address || !info.city || !info.category) {
-      alert("Please fill in all required fields.");
+      setError("Please fill in all required fields.");
       return;
     }
 
@@ -69,7 +132,7 @@ const NewPlace = () => {
     const lng = parseFloat(info.longitude);
 
     if (isNaN(lat) || isNaN(lng)) {
-      alert("Please enter valid numbers for latitude and longitude.");
+      setError("Please suggest/select valid latitude and longitude first.");
       return;
     }
 
@@ -83,33 +146,21 @@ const NewPlace = () => {
             data.append("upload_preset", process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET);
 
             const res = await axios.post(
-               `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_CLOUD_NAME}/image/upload`,
-              data,
-              {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-          onUploadProgress: (progressEvent) => {
-            const percentCompleted = Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total
-            );
-            console.log(`Upload progress: ${percentCompleted}%`);
-          },
-        }
+              `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_CLOUD_NAME}/image/upload`,
+              data
             );
             return res.data.url;
           })
         );
       } catch (err) {
-        console.error("Image upload failed:", err);
-        alert("One or more image uploads failed!");
+        setError("Image upload failed.");
         return;
       }
     }
 
     const newPlace = {
       ...info,
-      img: photoUrls[0] || "", 
+      img: photoUrls[0] || "",
       location: {
         type: "Point",
         coordinates: [lng, lat],
@@ -121,11 +172,10 @@ const NewPlace = () => {
 
     try {
       await axios.post("/place", newPlace);
-      alert("Place created successfully!");
+      toast.success("Place saved successfully");
       navigate("/place");
     } catch (err) {
-      console.error("Place creation failed:", err.response?.data || err.message);
-      alert("Failed to create place: " + (err.response?.data?.message || err.message));
+      setError("Failed to create place.");
     }
   };
 
@@ -163,7 +213,6 @@ const NewPlace = () => {
                 />
               </div>
 
-
               {placeInputs.map((input) => (
                 <div className="formInput" key={input.id}>
                   <label>{input.label}</label>
@@ -172,14 +221,14 @@ const NewPlace = () => {
                     type={input.type}
                     placeholder={input.placeholder}
                     onChange={handleChange}
-                    {...(input.id === "location" ? { onBlur: handleLocationBlur } : {})}
+                    value={info[input.id] || ""}
                   />
                 </div>
               ))}
 
               <div className="formInput">
                 <label>Category</label>
-                <select id="category" defaultValue="" onChange={handleChange} required>
+                <select id="category" value={info.category || ""} onChange={handleChange}>
                   <option value="" disabled>
                     -- Select a category --
                   </option>
@@ -191,34 +240,66 @@ const NewPlace = () => {
                 </select>
               </div>
 
+              {error && <div className="errorBox">{error}</div>}
+
+              <div className="locationSuggestionSection">
+                <div className="sectionHeader">
+                  <LocationOnIcon className="icon" />
+                  <h3>Smart Location Finder</h3>
+                </div>
+                <p>
+                  Fill in the place details above, then click below to get accurate location
+                  suggestions.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleSuggestLocation}
+                  disabled={loadingLatLng}
+                  className="suggestBtn"
+                >
+                  {loadingLatLng ? "Searching..." : "🎯 Suggest Exact Location"}
+                </button>
+
+                {showSuggestions && suggestedLocations.length > 0 && (
+  <div className="suggestionsBox">
+    <h4>Best location match:</h4>
+    <div className="suggestionItem">
+      📍 {suggestedLocations[0].address}
+      <br />
+      Lat: {suggestedLocations[0].lat.toFixed(6)}, 
+      Lng: {suggestedLocations[0].lng.toFixed(6)} —{" "}
+      {suggestedLocations[0].confidence > 5
+        ? "High confidence"
+        : suggestedLocations[0].confidence > 2
+        ? "Medium confidence"
+        : "Low confidence"}
+    </div>
+  </div>
+)}
+              </div>
 
               <div className="formInput">
                 <label>Latitude</label>
                 <input
                   id="latitude"
                   type="text"
-                  placeholder="27.7172"
-                  onChange={handleChange}
                   value={info.latitude || ""}
-                  readOnly={loadingLatLng}
+                  readOnly
                 />
               </div>
-
               <div className="formInput">
                 <label>Longitude</label>
                 <input
                   id="longitude"
                   type="text"
-                  placeholder="85.3240"
-                  onChange={handleChange}
                   value={info.longitude || ""}
-                  readOnly={loadingLatLng}
+                  readOnly
                 />
               </div>
 
-              {loadingLatLng && <div style={{ color: '#2d5c7f', fontSize: '0.95rem' }}>Fetching coordinates...</div>}
-
-              <button onClick={handleClick}>Send</button>
+              <button onClick={handleClick} disabled={loadingLatLng}>
+                {loadingLatLng ? "Processing..." : "Send"}
+              </button>
             </form>
           </div>
         </div>

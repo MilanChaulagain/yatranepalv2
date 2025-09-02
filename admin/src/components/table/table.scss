@@ -1,28 +1,132 @@
+@import "../../style/variables.scss";
+
+.table-wrapper {
+  background: var(--surface-color);
+  border-radius: $border-radius-lg;
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  padding: $spacing-lg;
+  
+  .table-header {
+    margin-bottom: $spacing-lg;
+    
+    .table-title {
+      font-weight: $font-weight-bold;
+      color: var(--text-primary);
+      position: relative;
+      display: inline-block;
+      padding-bottom: $spacing-xs;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 40px;
+        height: 3px;
+        background: var(--primary-gradient);
+        border-radius: $border-radius-sm;
+      }
+    }
+  }
+}
+
 .table {
+  background: var(--surface-color);
+  
+  .tableCell {
+    border-bottom: 1px solid var(--border-color);
+    padding: $spacing-md $spacing-sm;
+    
+    &.header {
+      background: var(--alternate-row-color);
+      color: var(--text-primary);
+      font-weight: $font-weight-bold;
+      text-transform: uppercase;
+      font-size: $font-size-sm;
+      letter-spacing: 0.5px;
+    }
+  }
+  
+  .table-row {
+    transition: all 0.2s ease-in-out;
+    
+    &:hover {
+      background-color: var(--row-hover-color);
+      transform: translateY(-1px);
+      box-shadow: var(--row-hover-shadow);
+    }
+  }
+  
   .cellWrapper {
     display: flex;
     align-items: center;
+    gap: $spacing-md;
 
     .image {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      margin-right: 10px;
+      width: 40px;
+      height: 40px;
+      border-radius: $border-radius-pill;
       object-fit: cover;
+      box-shadow: var(--card-shadow);
+    }
+    
+    .service-name {
+      font-weight: $font-weight-medium;
+      color: var(--text-primary);
     }
   }
 
-  .status {
-    padding: 5px;
-    border-radius: 5px;
-
-    &.Approved {
-      color: green;
-      background-color: rgba(0, 128, 0, 0.151);
+  .id-cell {
+    font-family: 'Roboto Mono', monospace;
+    color: var(--text-secondary);
+  }
+  
+  .date-cell {
+    color: var(--text-secondary);
+  }
+  
+  .amount-cell {
+    font-weight: $font-weight-semibold;
+    color: var(--text-primary);
+  }
+  
+  .method-cell {
+    color: var(--text-secondary);
+  }
+  
+  .status-chip {
+    font-weight: $font-weight-medium;
+    text-transform: capitalize;
+    border-radius: $border-radius-pill;
+    transition: all 0.3s ease;
+    
+    &.approved {
+      background: var(--success-light);
+      color: var(--success-dark);
+      
+      &::before {
+        background: var(--success);
+      }
+      
+      &:hover {
+        background: var(--success-lighter);
+        transform: translateY(-1px);
+      }
     }
-    &.Pending {
-      color: goldenrod;
-      background-color: rgba(189, 189, 3, 0.103);
+    
+    &.pending {
+      background: var(--warning-light);
+      color: var(--warning-dark);
+      
+      &::before {
+        background: var(--warning);
+      }
+      
+      &:hover {
+        background: var(--warning-lighter);
+        transform: translateY(-1px);
+      }
     }
   }
 }

@@ -33,10 +33,13 @@ import {
 } from "./datatablesource";
 
 import "./style/dark.scss";
+import "./style/global.scss";
+
 import { useContext } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { DarkModeContext } from "./context/darkModeContext";
 import { AuthContext } from "./context/AuthContext";
+import toast, { Toaster } from "react-hot-toast";
 
 function App() {
   const { darkMode } = useContext(DarkModeContext);
@@ -48,7 +51,8 @@ function App() {
   };
 
   return (
-    <div className={darkMode ? "app dark" : "app"}>
+    <div className={`app ${darkMode ? 'dark' : ''} fade-in main-layout`}>
+      <Toaster position="top-right" reverseOrder={false} />
       <BrowserRouter basename="/admin">
         <Routes>
           <Route path="/">

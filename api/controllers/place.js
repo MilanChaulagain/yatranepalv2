@@ -222,3 +222,24 @@ export const getAllCategories = async (req, res) => {
         });
     }
 };
+
+// Get all available cities
+export const getAllCities = async (req, res) => {
+    try {
+        const cities = await Place.distinct('city');
+        // Filter out null/undefined values and sort alphabetically
+        const validCities = cities
+            .filter(city => city && city.trim() !== '')
+            .sort();
+        
+        res.status(200).json({
+            success: true,
+            data: validCities
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+};

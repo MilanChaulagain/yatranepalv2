@@ -7,7 +7,7 @@ import FeaturedProperties from "../../components/featuredProperties/FeaturedProp
 import PropertyList from "../../components/propertyList/PropertyList";
 import MailList from "../../components/mailList/MailList";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBed, faCalendarDays, faPerson, faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+import { faBed, faCalendarDays, faPerson, faMagnifyingGlass, faMapMarkerAlt, faBuilding, faHome, faHotel } from "@fortawesome/free-solid-svg-icons";
 import { DateRange } from "react-date-range";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
@@ -35,12 +35,59 @@ const Stays = () => {
     });
     const [min, setMin] = useState(0);
     const [max, setMax] = useState(1000);
+    const [selectedCategory, setSelectedCategory] = useState("all");
 
     const dateRef = useRef();
     const optionsRef = useRef();
 
     const { dispatch } = useContext(SearchContext);
     const navigate = useNavigate();
+
+    // Stay categories with icons and descriptions
+    const stayCategories = [
+        {
+            id: "hotel",
+            name: "Hotels",
+            icon: faHotel,
+            description: "Luxury and comfort in the heart of the city",
+            color: "#4a6cf7"
+        },
+        {
+            id: "resort",
+            name: "Resorts",
+            icon: faBuilding,
+            description: "Relaxing getaways with premium amenities",
+            color: "#10b981"
+        },
+        {
+            id: "guesthouse",
+            name: "Guesthouses",
+            icon: faHome,
+            description: "Cozy local accommodations with personal touch",
+            color: "#f59e0b"
+        },
+        {
+            id: "homestay",
+            name: "Homestays",
+            icon: faHome,
+            description: "Authentic local living experience",
+            color: "#ef4444"
+        },
+        {
+            id: "apartment",
+            name: "Apartments",
+            icon: faBuilding,
+            description: "Spacious accommodations for longer stays",
+            color: "#8b5cf6"
+        },
+        {
+            id: "villa",
+            name: "Villas",
+            icon: faHome,
+            description: "Private luxury accommodations",
+            color: "#06b6d4"
+        }
+    ];
 
     // Fetch featured properties
     const { data: featuredData, loading: featuredLoading } = useFetch(
@@ -105,6 +152,22 @@ const Stays = () => {
         if (e.key === "Enter") {
             handleSearch();
         }
+    };
+
+    const handleCategoryClick = (categoryId) => {
+        setSelectedCategory(categoryId);
+        
+        // Navigate to hotels page with category filter
+        navigate("/hotels", {
+            state: {
+                destination: "",
+                dates: dates,
+                options: options,
+                min: min,
+                max: max,
+                category: categoryId
+            }
+        });
     };
 
     return (
@@ -209,8 +272,32 @@ const Stays = () => {
             <div className="stayContainer">
                 <h1 className="sectionTitle">Browse by Cities</h1>
                 <Feature />
+                
                 <h1 className="sectionTitle">Browse by property type</h1>
                 <PropertyList propertyList={propertyListData} />
+                
+                {/* New Categories Section */}
+                <h1 className="sectionTitle">Explore by category</h1>
+                <div className="categoriesSection">
+                    <div className="categoriesGrid">
+                        {stayCategories.map((category) => (
+                            <div 
+                                key={category.id}
+                                className={`categoryCard ${selectedCategory === category.id ? 'active' : ''}`}
+                                onClick={() => handleCategoryClick(category.id)}
+                                style={{ '--category-color': category.color }}
+                            >
+                                <div className="categoryIcon">
+                                    <FontAwesomeIcon icon={category.icon} />
+                                </div>
+                                <h3 className="categoryName">{category.name}</h3>
+                                <p className="categoryDescription">{category.description}</p>
+                                <div className="categoryArrow">→</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                
                 <h1 className="sectionTitle">Homes guests love</h1>
                 <FeaturedProperties featuredProperties={featuredData} loading={featuredLoading} />
                 <MailList />

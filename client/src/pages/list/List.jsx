@@ -21,7 +21,8 @@ import {
   RefreshCw,
   XCircle,
   ArrowRight,
-  Map
+  Map,
+  X
 } from "lucide-react"
 import "react-date-range/dist/styles.css"
 import "react-date-range/dist/theme/default.css"
@@ -50,16 +51,30 @@ const StarRating = ({ rating, size = 16, showEmpty = false }) => {
 const List = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const [destination, setDestination] = useState(location.state.destination)
-  const [dates, setDates] = useState(location.state.dates)
+  const [destination, setDestination] = useState(location.state?.destination || "")
+  const [dates, setDates] = useState(location.state?.dates || [])
   const [openDate, setOpenDate] = useState(false)
-  const [options] = useState(location.state.options)
-  const [min, setMin] = useState(undefined)
-  const [max, setMax] = useState(undefined)
+  const [options] = useState(location.state?.options || {})
+  const [min, setMin] = useState(location.state?.min || undefined)
+  const [max, setMax] = useState(location.state?.max || undefined)
+  const [category, setCategory] = useState(location.state?.category || undefined)
   const [favorites, setFavorites] = useState(new Set())
   const [hotelReviews, setHotelReviews] = useState({})
 
-  const [url, setUrl] = useState(`${BASE_URL}/api/hotels?city=${destination}&min=${min || 1000}&max=${max || 50000}`)
+  // Build URL with all filters including category
+  const buildUrl = () => {
+    let url = `${BASE_URL}/api/hotels?`;
+    const params = new URLSearchParams();
+    
+    if (destination) params.append("city", destination);
+    if (min) params.append("min", min);
+    if (max) params.append("max", max);
+    if (category) params.append("type", category);
+    
+    return url + params.toString();
+  };
+
+  const [url, setUrl] = useState(buildUrl())
 
   const { data, loading, error } = useFetch(url)
 
@@ -98,8 +113,13 @@ const List = () => {
     fetchReviews();
   }, []);
 
+  // Update URL when filters change
+  useEffect(() => {
+    setUrl(buildUrl());
+  }, [destination, min, max, category]);
+
   const handleClick = () => {
-    setUrl(`${BASE_URL}/api/hotels?city=${destination}&min=${min || 1000}&max=${max || 50000}`)
+    setUrl(buildUrl())
   }
   
   const toggleFavorite = (id) => {
@@ -131,6 +151,18 @@ const List = () => {
           <div className="searchHeader">
             <h1>Refine your search</h1>
             <p>Find the perfect accommodation for your trip</p>
+            {category && (
+              <div className="activeFilter">
+                <Home size={16} />
+                <span>Showing: {category.charAt(0).toUpperCase() + category.slice(1)}s</span>
+                <button 
+                  onClick={() => setCategory(undefined)}
+                  className="clearFilter"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="searchFilters">
@@ -194,6 +226,26 @@ const List = () => {
                   className="modernInput"
                 />
               </div>
+            </div>
+
+            <div className="filterGroup">
+              <label>
+                <Home size={18} className="filterIcon" />
+                Property Type
+              </label>
+              <select
+                value={category || ""}
+                onChange={(e) => setCategory(e.target.value || undefined)}
+                className="modernInput"
+              >
+                <option value="">All Types</option>
+                <option value="hotel">Hotels</option>
+                <option value="resort">Resorts</option>
+                <option value="guesthouse">Guesthouses</option>
+                <option value="homestay">Homestays</option>
+                <option value="apartment">Apartments</option>
+                <option value="villa">Villas</option>
+              </select>
             </div>
 
             <div className="filterGroup">

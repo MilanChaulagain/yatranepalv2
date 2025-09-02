@@ -1,122 +1,214 @@
+@import "../../style/variables";
+
 .sidebar {
-  // position: fixed;
-  flex: 1;
-  border-right: 0.5px solid rgb(230, 227, 227);
-  top: 0;               // stick to the top
-  left: 0;              // stick to the left
-  height: 100vh;        // full viewport height
-  width: 200px;  
-  background-color: white;
-  overflow-y: auto;
-  z-index: 100; 
+  width: $sidebar-width;
+  height: 100vh;
+  background: linear-gradient(180deg, rgba($primary-dark, 0.03) 0%, rgba($primary-dark, 0) 100%), $background-paper;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: $z-index-sidebar;
+  transition: all $transition-normal;
+  border-right: 1px solid rgba($text-muted, 0.08);
+  display: flex;
+  flex-direction: column;
+  box-shadow: $shadow-lg;
+  backdrop-filter: blur(20px) saturate(180%);
+  
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
+    pointer-events: none;
+  } // Prevents sidebar from scrolling as a whole
 
   .top {
-    
-    height: 50px;
+    height: 70px;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: $spacing-unit * 2;
+    border-bottom: 1px solid rgba($text-muted, 0.1);
 
-    .logo {
-      font-size: 20px;
-      font-weight: bold;
-      color: #6439ff;
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: $spacing-unit * 1.5;
+
+      .logo-img {
+        width: 42px;
+        height: 42px;
+        object-fit: contain;
+        transition: $transition-quick;
+      }
+
+      .logo {
+        font-size: 1.5rem;
+        font-weight: 800;
+        background: $gradient-primary;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: 0.5px;
+      }
     }
   }
 
-  hr {
-    height: 0;
-    border: 0.5px solid rgb(230, 227, 227);
-  }
-
-
   .center {
-    padding-left: 10px;
+    padding: $spacing-unit * 2;
+    flex: 1;
+    overflow-y: auto;
+    height: calc(100vh - 130px); // Subtracting top and bottom sections
+    
+    // Subtle scrollbar styling
+    &::-webkit-scrollbar {
+      width: 5px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background-color: rgba($text-muted, 0.2);
+      border-radius: 20px;
+      
+      &:hover {
+        background-color: rgba($text-muted, 0.3);
+      }
+    }
+
+    .title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: $text-muted;
+      margin: $spacing-unit * 2 0 $spacing-unit;
+      padding-left: $spacing-unit;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
 
     ul {
       list-style: none;
       margin: 0;
       padding: 0;
 
-      .title {
-        font-size: 10px;
-        font-weight: bold;
-        color: #999;
-        margin-top: 15px;
-        margin-bottom: 5px;
-      }
-
       li {
         display: flex;
         align-items: center;
-        padding: 5px;
+        padding: $spacing-unit * 1.5 $spacing-unit;
+        margin: $spacing-unit 0;
         cursor: pointer;
+        border-radius: $border-radius-lg;
+        transition: all $transition-quick;
+        color: $text-secondary;
 
         &:hover {
-          background-color: #ece8ff;
+          background: rgba($primary-color, 0.08);
+          color: $primary-color;
+          transform: translateX(4px);
+
+          .icon {
+            color: $primary-color;
+          }
+        }
+
+        &.active {
+          background: $gradient-primary;
+          color: white;
+          box-shadow: $shadow-sm;
+
+          .icon {
+            color: white;
+          }
         }
 
         .icon {
-          font-size: 18px;
-          color: #7451f8;
+          font-size: 20px;
+          color: $text-secondary;
+          margin-right: $spacing-unit * 1.5;
+          transition: $transition-quick;
         }
 
-        span{
-            font-size: 13px;
-            font-weight: 600;
-            color: #888;
-            margin-left: 10px;
+        span {
+          font-weight: 500;
+          font-size: 0.95rem;
         }
       }
     }
   }
 
-  .bottom{
-      display: flex;
-      align-items: center;
-      margin: 10px;
+  .bottom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: $spacing-unit;
+    margin-top: auto;
+    background: rgba($background-paper, 0.5);
 
-      .colorOption{
-          width: 20px;
-          height: 20px;
-          border-radius: 5px;
-          border: 1px solid #7451f8;
-          cursor: pointer;
-          margin: 5px;
+    .colorOption {
+      width: 16px;
+      height: 16px;
+      border-radius: $border-radius-sm;
+      border: 1px solid rgba($text-muted, 0.15);
+      cursor: pointer;
+      transition: $transition-quick;
+      position: relative;
+      overflow: hidden;
 
-          &:nth-child(1){
-              background-color: whitesmoke;
-          }
-          &:nth-child(2){
-              background-color: #333;
-          }
-          &:nth-child(3){
-              background-color: darkblue;
-          }
+      &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        opacity: 0;
+        transition: $transition-quick;
       }
+
+      &:hover {
+        transform: scale(1.15);
+        border-color: $primary-color;
+        box-shadow: 0 0 3px rgba($primary-color, 0.3);
+      }
+
+      &.active {
+        border: 1.5px solid $primary-color;
+        box-shadow: 0 0 4px rgba($primary-color, 0.4);
+      }
+
+      &:nth-child(1) {
+        background: #ffffff;
+      }
+
+      &:nth-child(2) {
+        background: #1a1c1e;
+      }
+    }
   }
 }
 
-.logo-container {
-  display: flex;
-  align-items: center;
-}
+// Responsive styles
+@media screen and (max-width: $breakpoint-md) {
+  .sidebar {
+    flex: 0 0 80px;
+    
+    .logo-container .logo,
+    .center ul li span,
+    .title {
+      display: none;
+    }
 
-.logo-img {
-  height: 40px;
-}
+    .center ul li {
+      padding: $spacing-unit;
+      justify-content: center;
 
-.logo {
-  font-weight: bold;
-  font-size: 20px;
-  color: #555;
-}
-
-.sidebar::-webkit-scrollbar {
-  display: none;               /* Chrome, Safari */
-}
-
-.main {
-  margin-left: 250px; // same as sidebar width
-  padding: 20px;      // spacing inside
+      .icon {
+        margin: 0;
+        font-size: 24px;
+      }
+    }
+  }
 }

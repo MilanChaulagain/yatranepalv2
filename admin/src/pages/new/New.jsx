@@ -23,12 +23,24 @@ const New = ({ inputs, title }) => {
     if (file) {
       const data = new FormData();
       data.append("file", file);
-      data.append("", ""); // Add any other required Cloudinary parameters here
+     data.append("upload_preset", process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET);
+ // Add any other required Cloudinary parameters here
 
       try {
         const uploadRes = await axios.post(
-          // Make sure Cloudinary URL matches your setup!
-          data
+          `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        data,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          onUploadProgress: (progressEvent) => {
+            const percentCompleted = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            console.log(`Upload progress: ${percentCompleted}%`);
+          },
+        }
         );
         imageUrl = uploadRes.data.url;
       } catch (err) {

@@ -3,6 +3,7 @@ import {
     createPlace,
     deletePlace,
     getAllCategories,
+    getAllCities,
     getAllPlaces,
     getPlaceById,
     getPlacesByCategory,
@@ -31,5 +32,8 @@ router.get('/category/:category', getPlacesByCategory);
 
 // Get all available categories
 router.get('/categories/all', getAllCategories);
+
+// Get all available cities
+router.get('/cities', getAllCities);
 
 export default router;

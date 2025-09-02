@@ -7,10 +7,24 @@ import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNone
 import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
 import ListOutlinedIcon from "@mui/icons-material/ListOutlined";
 import { DarkModeContext } from "../../context/darkModeContext";
-import { useContext } from "react";
+import { useContext, useState, useEffect, useRef } from "react";
+import UserDropdown from "./UserDropdown";
 
 const Navbar = () => {
   const { dispatch } = useContext(DarkModeContext);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <div className="navbar">
@@ -46,11 +60,17 @@ const Navbar = () => {
           <div className="item">
             <ListOutlinedIcon className="icon" />
           </div>
-          <div className="item">
-            <img
-              src="https://documents.bcci.tv/resizedimageskirti/164_compress.png"
-              alt=""
-              className="avatar"
+          <div className="item" ref={dropdownRef}>
+            <div onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
+              <img
+                src="https://documents.bcci.tv/resizedimageskirti/164_compress.png"
+                alt=""
+                className="avatar"
+              />
+            </div>
+            <UserDropdown 
+              isOpen={isDropdownOpen} 
+              onClose={() => setIsDropdownOpen(false)} 
             />
           </div>
         </div>

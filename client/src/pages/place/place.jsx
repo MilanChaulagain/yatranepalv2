@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate, useLocation as useRouterLocation } from "react-router-dom";
 import {
   Landmark, Palette, Castle, MapPin, Star, Info,
@@ -11,7 +11,7 @@ import Header from "../../components/header/Header";
 import Footer from "../../components/footer/Footer";
 import "./place.css";
 
-// City data
+// City data - Dynamic cities will be fetched from database
 const cityData = {
   kathmandu: {
     name: "Kathmandu",
@@ -30,6 +30,60 @@ const cityData = {
     icon: <Castle size={20} />,
     color: "#059669",
     description: "Preserved medieval city known for pottery and traditional architecture",
+  },
+  pokhara: {
+    name: "Pokhara",
+    icon: <Mountain size={20} />,
+    color: "#0891b2",
+    description: "Lakeside city with stunning mountain views and adventure activities",
+  },
+  janakpur: {
+    name: "Janakpur",
+    icon: <MdTempleHindu size={20} />,
+    color: "#dc2626",
+    description: "Ancient city known for its religious significance and cultural heritage",
+  },
+  chitwan: {
+    name: "Chitwan",
+    icon: <TreePine size={20} />,
+    color: "#059669",
+    description: "Gateway to Chitwan National Park with wildlife and nature experiences",
+  },
+  lumbini: {
+    name: "Lumbini",
+    icon: <MdTempleHindu size={20} />,
+    color: "#7c3aed",
+    description: "Birthplace of Lord Buddha and UNESCO World Heritage Site",
+  },
+  nagarkot: {
+    name: "Nagarkot",
+    icon: <Mountain size={20} />,
+    color: "#0891b2",
+    description: "Mountain resort town with panoramic Himalayan views",
+  },
+  bandipur: {
+    name: "Bandipur",
+    icon: <Castle size={20} />,
+    color: "#dc2626",
+    description: "Well-preserved hilltop town with traditional Newari architecture",
+  },
+  gorkha: {
+    name: "Gorkha",
+    icon: <Landmark size={20} />,
+    color: "#c41e3a",
+    description: "Historic town with Gorkha Durbar and birthplace of Prithvi Narayan Shah",
+  },
+  mustang: {
+    name: "Mustang",
+    icon: <Mountain size={20} />,
+    color: "#0891b2",
+    description: "Remote Himalayan region with ancient Tibetan culture and stunning landscapes",
+  },
+  everest: {
+    name: "Everest Region",
+    icon: <Mountain size={20} />,
+    color: "#dc2626",
+    description: "Home to Mount Everest and world-famous trekking routes",
   },
 };
 
@@ -95,7 +149,7 @@ const localExperiences = [
 const BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8800";
 
 const getImageUrl = (imagePath) => {
-  if (!imagePath) return "/placeholder.jpg";
+  if (!imagePath) return "/images/placeholder.jpg";
   if (imagePath.startsWith("http")) return imagePath;
   return `${BASE_URL}${imagePath.startsWith('/') ? imagePath : '/' + imagePath}`;
 };
@@ -240,7 +294,14 @@ const Places = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [placesWithDistances, setPlacesWithDistances] = useState([]);
   const [radius, setRadius] = useState(10);
+  const [availableCities, setAvailableCities] = useState([]);
 
+  // Refs to track state and prevent infinite loops
+  const locationRequested = useRef(false);
+  const prevFilters = useRef({});
+  const isInitialMount = useRef(true);
+
+  // Initial scroll effects
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }, [location.pathname]); 
@@ -249,7 +310,82 @@ const Places = () => {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
   }, []);
 
+  // Fetch available cities from database
   useEffect(() => {
+    const fetchAvailableCities = async () => {
+      try {
+        const response = await fetch(`${BASE_URL}/api/place/cities`);
+        if (response.ok) {
+          const data = await response.json();
+          console.log("Cities API response:", data);
+          if (data.success && data.data) {
+            // Combine database cities with default cities, ensuring no duplicates
+            const dbCities = data.data.map(city => city.toLowerCase());
+            console.log("Database cities:", dbCities);
+            const defaultCities = ['kathmandu', 'lalitpur', 'bhaktapur', 'pokhara', 'janakpur', 'chitwan', 'lumbini', 'nagarkot', 'bandipur', 'gorkha', 'mustang', 'everest'];
+            const allCities = [...new Set([...defaultCities, ...dbCities])];
+            console.log("All available cities:", allCities);
+            setAvailableCities(allCities);
+          } else {
+            // If API response is invalid, use default cities
+            console.log("Using default cities due to invalid API response");
+            setAvailableCities(['kathmandu', 'lalitpur', 'bhaktapur', 'pokhara', 'janakpur', 'chitwan', 'lumbini', 'nagarkot', 'bandipur', 'gorkha', 'mustang', 'everest']);
+          }
+        } else {
+          // If API call fails, use default cities
+          console.log("Using default cities due to API failure");
+          setAvailableCities(['kathmandu', 'lalitpur', 'bhaktapur', 'pokhara', 'janakpur', 'chitwan', 'lumbini', 'nagarkot', 'bandipur', 'gorkha', 'mustang', 'everest']);
+        }
+      } catch (error) {
+        console.error("Error fetching cities:", error);
+        // Fallback to default cities if API fails
+        setAvailableCities(['kathmandu', 'lalitpur', 'bhaktapur', 'pokhara', 'janakpur', 'chitwan', 'lumbini', 'nagarkot', 'bandipur', 'gorkha', 'mustang', 'everest']);
+      }
+    };
+
+    fetchAvailableCities();
+  }, []);
+
+  // Main useEffect for fetching places - FIXED
+  useEffect(() => {
+    // Always fetch places on initial mount to show all places
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      // Fetch all places initially
+      const fetchInitialPlaces = async () => {
+        setLoading(true);
+        try {
+          const res = await fetch(`${BASE_URL}/api/place`);
+          if (res.ok) {
+            const data = await res.json();
+            setPlaces(data.data || []);
+          }
+        } catch (err) {
+          console.error("Initial fetch error:", err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchInitialPlaces();
+      return;
+    }
+
+    // Don't fetch if we're using location but don't have coordinates yet
+    if (useLocation && !userLocation) return;
+
+    console.log(userLocation);
+
+    // Check if filters have actually changed
+    const currentFilters = { searchQuery, selectedCity, selectedCategory, useLocation, radius };
+    const filtersChanged = JSON.stringify(currentFilters) !== JSON.stringify(prevFilters.current);
+    
+    if (!filtersChanged && !isInitialMount.current) {
+      return;
+    }
+
+    prevFilters.current = currentFilters;
+    isInitialMount.current = false;
+
     const fetchPlaces = async () => {
       setLoading(true);
       setError("");
@@ -259,8 +395,15 @@ const Places = () => {
         const params = new URLSearchParams();
 
         if (searchQuery) params.append("search", searchQuery);
-        if (selectedCity !== "all") params.append("city", selectedCity);
+        if (selectedCity !== "all") {
+          // Get the proper city name from cityData or capitalize the city key
+          const cityName = cityData[selectedCity]?.name || selectedCity.charAt(0).toUpperCase() + selectedCity.slice(1);
+          params.append("city", cityName);
+          console.log("Adding city filter:", selectedCity, "->", cityName);
+        }
         if (selectedCategory !== "all") params.append("category", selectedCategory);
+        
+        // Only add location if explicitly using it and we have coordinates
         if (useLocation && userLocation) {
           params.append("lat", userLocation.lat);
           params.append("lng", userLocation.lng);
@@ -268,11 +411,16 @@ const Places = () => {
         }
 
         url += params.toString();
+        console.log("Fetching places from:", url);
+        console.log("Selected city:", selectedCity);
+        console.log("Params:", params.toString());
 
         const res = await fetch(url);
         if (!res.ok) throw new Error(`Failed to fetch: ${res.status} ${res.statusText}`);
 
         const data = await res.json();
+        console.log("Places API response:", data);
+        console.log("Places found:", data.data?.length || 0);
         setPlaces(data.data || []);
       } catch (err) {
         setError("Failed to load places. Please try again later.");
@@ -282,37 +430,81 @@ const Places = () => {
       }
     };
 
-    fetchPlaces();
-  }, [selectedCity, searchQuery, selectedCategory, useLocation, userLocation, radius]);
+    // Use a timeout to debounce rapid changes
+    const timer = setTimeout(() => {
+      fetchPlaces();
+    }, 300);
 
+    return () => clearTimeout(timer);
+  }, [searchQuery, selectedCity, selectedCategory, useLocation, userLocation, radius]);
+
+  // Handle location separately - FIXED VERSION
   useEffect(() => {
-    if (useLocation) {
+    if (useLocation && !locationRequested.current) {
+      locationRequested.current = true;
+      
       if (navigator.geolocation) {
+        console.log("Requesting user location...");
         navigator.geolocation.getCurrentPosition(
           (position) => {
+            // THIS IS THE LINE THAT ACTUALLY FETCHES THE USER'S LOCATION
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+            
+            console.log("Location fetched successfully:", { userLat, userLng });
+            
             setUserLocation({
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
+              lat: userLat,
+              lng: userLng,
             });
           },
           (err) => {
             console.error("Geolocation error:", err);
-            alert("Location access denied or unavailable.");
+            let errorMessage = "Location access denied or unavailable.";
+            
+            // Provide more specific error messages
+            switch(err.code) {
+              case err.PERMISSION_DENIED:
+                errorMessage = "Location access was denied. Please enable location permissions and try again.";
+                break;
+              case err.POSITION_UNAVAILABLE:
+                errorMessage = "Location information is unavailable. Please try again.";
+                break;
+              case err.TIMEOUT:
+                errorMessage = "Location request timed out. Please try again.";
+                break;
+              default:
+                errorMessage = "An unknown error occurred while fetching location.";
+                break;
+            }
+            
+            alert(errorMessage);
             setUseLocation(false);
+            locationRequested.current = false;
           },
-          { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+          { 
+            enableHighAccuracy: true, 
+            timeout: 15000, // Increased timeout
+            maximumAge: 300000 // Allow cached location up to 5 minutes
+          }
         );
       } else {
         alert("Geolocation is not supported by your browser.");
         setUseLocation(false);
+        locationRequested.current = false;
       }
-    } else {
+    }
+    
+    // Reset location requested when turning off location
+    if (!useLocation) {
+      locationRequested.current = false;
       setUserLocation(null);
     }
   }, [useLocation]);
 
+  // Calculate distances
   useEffect(() => {
-    if (userLocation && useLocation) {
+    if (userLocation && useLocation && places.length > 0) {
       const placesWithDist = places.map((place) => {
         if (!place.location?.coordinates || place.location.coordinates.length !== 2) {
           return { ...place, distance: null, isWithinRadius: false };
@@ -346,6 +538,7 @@ const Places = () => {
   }, [places, placesWithDistances, useLocation, userLocation]);
 
   const handleCityClick = (city) => {
+    console.log("City clicked:", city);
     setSelectedCity(city);
     setUseLocation(false);
     setSearchQuery("");
@@ -431,30 +624,27 @@ const Places = () => {
               >
                 All Cities
               </button>
-              <button
-                className={`places-city-btn ${selectedCity === "kathmandu" ? "active" : ""}`}
-                onClick={() => handleCityClick("kathmandu")}
-              >
-                <Landmark size={16} /> Kathmandu
-              </button>
-              <button
-                className={`places-city-btn ${selectedCity === "lalitpur" ? "active" : ""}`}
-                onClick={() => handleCityClick("lalitpur")}
-              >
-                <Palette size={16} /> Lalitpur
-              </button>
-              <button
-                className={`places-city-btn ${selectedCity === "bhaktapur" ? "active" : ""}`}
-                onClick={() => handleCityClick("bhaktapur")}
-              >
-                <Castle size={16} /> Bhaktapur
-              </button>
+              {availableCities.map((cityKey) => (
+                <button
+                  key={cityKey}
+                  className={`places-city-btn ${selectedCity === cityKey ? "active" : ""}`}
+                  onClick={() => handleCityClick(cityKey)}
+                >
+                  {cityData[cityKey]?.icon || <Landmark size={16} />} 
+                  {cityData[cityKey]?.name || cityKey.charAt(0).toUpperCase() + cityKey.slice(1)}
+                </button>
+              ))}
               <button
                 className={`places-city-btn ${useLocation ? "active" : ""}`}
                 onClick={toggleLocation}
               >
                 <MapPin size={16} /> Near Me
               </button>
+            </div>
+            
+            {/* Debug info - remove in production */}
+            <div style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}>
+              Available cities: {availableCities.join(', ')} | Selected: {selectedCity}
             </div>
 
             {useLocation && userLocation && (
@@ -463,7 +653,7 @@ const Places = () => {
                 <input
                   type="range"
                   min="1"
-                  max="50"
+                  max="500"
                   value={radius}
                   onChange={(e) => setRadius(Number(e.target.value))}
                 />
@@ -496,6 +686,13 @@ const Places = () => {
         </div>
 
         <div className="places-content">
+          {loading && (
+            <div className="loading-container">
+              <div className="loader"></div>
+              <p>Loading places...</p>
+            </div>
+          )}
+          
           {error && (
             <div className="error-message">
               <Info size={24} />
@@ -566,7 +763,7 @@ const Places = () => {
                           className="place-image"
                           onError={(e) => {
                             e.target.onerror = null;
-                            e.target.src = "/placeholder.jpg";
+                            e.target.src = "/images/placeholder.jpg";
                           }}
                         />
                         <button

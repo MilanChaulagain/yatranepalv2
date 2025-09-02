@@ -1,7 +1,19 @@
+
 .list {
   display: flex;
-  width: 100%;
+  width: 100vw;
+  min-height: 100vh;
+  background: #f8fafc;
+  position: relative;
+
   .listContainer {
-    flex: 6;
+    flex: 1 1 0%;
+    width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    padding-left: 0;
+    padding-right: 0;
+    background: transparent;
+    z-index: 1;
   }
 }

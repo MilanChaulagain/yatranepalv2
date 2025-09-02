@@ -1,15 +1,33 @@
+@import "../../style/variables";
+
 .navbar {
-  height: 60px;
+  height: $navbar-height;
   display: flex;
   align-items: center;
-  background-color: #fff; /* White background */
-  color: #555;
-  border-bottom: 1px solid #e0e0e0; /* Lighter border */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+  background: rgba($background-paper, 0.85);
+  color: $text-secondary;
+  border-bottom: 1px solid rgba($text-muted, 0.08);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: $sidebar-width;
+  z-index: $z-index-navbar;
+  backdrop-filter: blur(12px) saturate(180%);
+  transition: all $transition-normal;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 100%);
+    pointer-events: none;
+  }
 
   .wrapper {
     width: 100%;
-    padding: 0 30px; /* Increased padding */
+    height: 80%;
+    padding: 0 $spacing-unit * 4;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -17,26 +35,49 @@
     .left {
       display: flex;
       align-items: center;
+      gap: $spacing-unit * 3;
+      height: 100%;
+
       .search {
         display: flex;
         align-items: center;
-        border: 1px solid #ccc; /* Slightly darker border */
-        border-radius: 20px; /* Rounded corners */
-        padding: 5px 10px;
-        background-color: #f9f9f9; /* Light background for search */
+        border: 1px solid rgba($text-muted, 0.15);
+        border-radius: $border-radius-lg;
+        padding: $spacing-unit * 1.25 $spacing-unit * 2;
+        background: rgba($background-secondary, 0.2);
+        transition: all $transition-normal;
+        height: 44px;
+        
+        &:hover {
+          background: rgba($background-secondary, 0.35);
+          border-color: rgba($text-muted, 0.25);
+        }
+
+        &:focus-within {
+          border-color: $primary-color;
+          box-shadow: 0 0 0 3px rgba($primary-color, 0.12);
+          background: $background-paper;
+        }
         
         input {
           border: none;
           outline: none;
           background: transparent;
-          font-size: 14px; /* Increased font size */
+          font-size: 0.9375rem;
+          width: 220px;
+          height: 100%;
+          color: $text-primary;
+          
           &::placeholder {
-            color: #aaa; /* Lighter placeholder color */
+            color: rgba($text-muted, 0.8);
+            font-size: 0.875rem;
           }
         }
+        
         .search-icon {
-            color: #aaa; /* Lighter icon color */
-            margin-left: 5px;
+          color: $text-muted;
+          margin-right: $spacing-unit;
+          font-size: 20px;
         }
       }
     }
@@ -44,44 +85,64 @@
     .right {
       display: flex;
       align-items: center;
+      gap: $spacing-unit * 3;
 
       .item {
         display: flex;
         align-items: center;
-        margin-left: 25px; /* Increased margin */
         position: relative;
-        cursor: pointer; /* Indicate clickable items */
-        color: #333; /* Darker text color */
+        cursor: pointer;
+        color: $text-primary;
+        transition: $transition-quick;
+
+        &:hover {
+          color: $primary-color;
+          transform: translateY(-1px);
+        }
 
         .icon {
-          font-size: 22px; /* Slightly larger icons */
-          color: #555; /* Icon color */
+          font-size: 24px;
+          color: inherit;
+          transition: $transition-quick;
         }
 
         .avatar {
-          width: 36px; /* Slightly larger avatar */
-          height: 36px;
+          width: 40px;
+          height: 40px;
           border-radius: 50%;
-          margin-left: 10px; /* Space between icon and avatar */
+          margin-left: $spacing-unit;
+          border: 2px solid rgba($primary-color, 0.2);
+          transition: $transition-quick;
+          cursor: pointer;
+
+          &:hover {
+            border-color: $primary-color;
+            transform: translateY(-1px);
+          }
+        }
+
+        &:last-child {
+          position: relative;
+          margin-left: $spacing-unit;
         }
 
         .counter {
           width: 18px;
           height: 18px;
-          background-color: #d9534f; /* Red color for counter */
+          background: $gradient-primary;
           border-radius: 50%;
-          color: white;
+          color: #fff;
           display: flex;
           align-items: center;
           justify-content: center;
           font-size: 10px;
           font-weight: bold;
           position: absolute;
-          top: -8px; /* Adjusted position */
-          right: -8px; /* Adjusted position */
+          top: -6px;
+          right: -6px;
+          box-shadow: $shadow-sm;
         }
       }
     }
   }
 }
-

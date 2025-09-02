@@ -39,6 +39,10 @@ const Login = () => {
       );
 
       if (res.data.isAdmin) {
+        // Store token in localStorage for authenticated requests
+        if (res.data.token) {
+          localStorage.setItem("token", res.data.token);
+        }
         dispatch({ type: "LOGIN_SUCCESS", payload: res.data.details });
         navigate("/");
       } else {

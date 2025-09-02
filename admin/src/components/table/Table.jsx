@@ -1,13 +1,21 @@
+import { useState } from "react";
 import "./table.scss";
-import Table from "@mui/material/Table";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableHead from "@mui/material/TableHead";
-import TableRow from "@mui/material/TableRow";
-import Paper from "@mui/material/Paper";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Box,
+  Typography,
+  Chip,
+  LinearProgress
+} from "@mui/material";
 
 const List = () => {
+  const [loading, setLoading] = useState(false); // Add loading state if needed
   const rows = [
     {
       id: 102938,
@@ -62,41 +70,84 @@ const List = () => {
   ];
 
   return (
-    <TableContainer component={Paper} className="table">
-      <Table sx={{ minWidth: 650 }} aria-label="tour bookings table">
-        <TableHead>
-          <TableRow>
-            <TableCell className="tableCell">Booking ID</TableCell>
-            <TableCell className="tableCell">Tour Package</TableCell>
-            <TableCell className="tableCell">Customer</TableCell>
-            <TableCell className="tableCell">Date</TableCell>
-            <TableCell className="tableCell">Amount ($)</TableCell>
-            <TableCell className="tableCell">Payment Method</TableCell>
-            <TableCell className="tableCell">Status</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row.id}>
-              <TableCell className="tableCell">{row.id}</TableCell>
-              <TableCell className="tableCell">
-                <div className="cellWrapper">
-                  <img src={row.img} alt={row.service} className="image" />
-                  {row.service}
-                </div>
-              </TableCell>
-              <TableCell className="tableCell">{row.customer}</TableCell>
-              <TableCell className="tableCell">{row.date}</TableCell>
-              <TableCell className="tableCell">{row.amount}</TableCell>
-              <TableCell className="tableCell">{row.method}</TableCell>
-              <TableCell className="tableCell">
-                <span className={`status ${row.status}`}>{row.status}</span>
-              </TableCell>
+    <Box className="table-wrapper">
+      <Box className="table-header">
+        <Typography variant="h6" className="table-title">
+          Recent Bookings
+        </Typography>
+      </Box>
+      
+      <TableContainer 
+        component={Paper} 
+        className="table"
+        elevation={0}
+      >
+        {loading && <LinearProgress />}
+        <Table sx={{ minWidth: 650 }} aria-label="tour bookings table">
+          <TableHead>
+            <TableRow>
+              <TableCell className="tableCell header">Booking ID</TableCell>
+              <TableCell className="tableCell header">Tour Package</TableCell>
+              <TableCell className="tableCell header">Customer</TableCell>
+              <TableCell className="tableCell header">Date</TableCell>
+              <TableCell className="tableCell header">Amount ($)</TableCell>
+              <TableCell className="tableCell header">Payment Method</TableCell>
+              <TableCell className="tableCell header">Status</TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          </TableHead>
+          <TableBody>
+            {rows.map((row) => (
+              <TableRow 
+                key={row.id}
+                className="table-row"
+                hover
+              >
+                <TableCell className="tableCell">
+                  <Typography variant="body2" className="id-cell">
+                    #{row.id}
+                  </Typography>
+                </TableCell>
+                <TableCell className="tableCell">
+                  <div className="cellWrapper">
+                    <img src={row.img} alt={row.service} className="image" />
+                    <Typography variant="body2" className="service-name">
+                      {row.service}
+                    </Typography>
+                  </div>
+                </TableCell>
+                <TableCell className="tableCell">
+                  <Typography variant="body2">
+                    {row.customer}
+                  </Typography>
+                </TableCell>
+                <TableCell className="tableCell">
+                  <Typography variant="body2" className="date-cell">
+                    {row.date}
+                  </Typography>
+                </TableCell>
+                <TableCell className="tableCell">
+                  <Typography variant="body2" className="amount-cell">
+                    ${row.amount}
+                  </Typography>
+                </TableCell>
+                <TableCell className="tableCell">
+                  <Typography variant="body2" className="method-cell">
+                    {row.method}
+                  </Typography>
+                </TableCell>
+                <TableCell className="tableCell">
+                  <Chip
+                    label={row.status}
+                    className={`status-chip ${row.status.toLowerCase()}`}
+                    size="small"
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
   );
 };
 

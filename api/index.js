@@ -144,6 +144,9 @@ const startServer = async () => {
 
 startServer();
 
-mongoose.connection.on("disconnected", () => {
+const dbConnect =()=> {
+    mongoose.connection.on("disconnected", () => {
     console.log("MongoDB disconnected!");
 });
+}
+

@@ -1,109 +1,341 @@
-.datatable {
-  flex: 1;
-  height: calc(100vh - 100px); 
-  padding: 20px;
-  box-sizing: border-box;
 
-  .datatableTitle {
-    width: 100%;
-    font-size: 24px;
-    color: gray;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+// Import design system variables
+@import "../../style/variables.scss";
 
-    .link {
-      text-decoration: none;
-      color: green;
-      font-size: 16px;
-      font-weight: 500;
-      border: 1px solid green;
-      padding: 6px 10px;
-      border-radius: 6px;
-      cursor: pointer;
+// Outer wrapper for background
+.datatable-outer {
+  min-height: 100vh;
+  background: var(--background-gradient);
+  padding: calc(#{$navbar-height} + #{$spacing-unit * 3}) $spacing-md $spacing-lg;
+  transition: background-color 0.3s ease;
+}
+
+.datatable-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  border-radius: $border-radius-lg;
+  box-shadow: var(--card-shadow);
+  background: var(--surface-color);
+  padding: $spacing-xl $spacing-lg;
+  position: relative;
+  animation: slideUp 0.5s ease-out;
+}
+
+.datatable-header-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-xl;
+  gap: $spacing-md;
+  
+  @media (max-width: $breakpoint-md) {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+.datatable-title {
+  font-weight: $font-weight-bold;
+  font-size: $font-size-xxl;
+  letter-spacing: 0.5px;
+  color: var(--text-primary);
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: var(--primary-gradient);
+    border-radius: $border-radius-sm;
+    
+    @media (max-width: $breakpoint-md) {
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+}
+
+.refresh-button {
+  background: linear-gradient(135deg, #5e35b1 0%, #039be5 100%);
+  color: #fff;
+  border-radius: 8px;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(94, 53, 177, 0.08);
+  &:hover {
+    background: linear-gradient(135deg, #039be5 0%, #5e35b1 100%);
+    transform: rotate(180deg);
+  }
+  &:disabled {
+    background: #bdbdbd;
+    color: #fff;
+  }
+}
+
+.add-button {
+  background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
+  color: #fff;
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 10px 28px;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 15px rgba(0, 176, 155, 0.18);
+  text-transform: none;
+  transition: all 0.3s;
+  &:hover {
+    background: linear-gradient(135deg, #96c93d 0%, #00b09b 100%);
+    box-shadow: 0 8px 24px rgba(0, 176, 155, 0.22);
+    transform: translateY(-2px);
+  }
+}
+
+.datatable-grid-container {
+  background: var(--surface-color);
+  border-radius: $border-radius-lg;
+  overflow: hidden;
+  box-shadow: var(--table-shadow);
+  min-height: 400px;
+  height: calc(100vh - #{$navbar-height} - #{$spacing-unit * 12});
+  margin-bottom: $spacing-sm;
+  border: 1px solid var(--border-color);
+  
+  .datatable-header {
+    background: var(--primary-gradient);
+    color: var(--text-on-primary);
+    font-weight: $font-weight-bold;
+    font-size: $font-size-base;
+    padding: $spacing-md;
+    backdrop-filter: blur(10px);
+  }
+  
+  .datatable-cell {
+    padding: $spacing-md;
+    font-size: $font-size-base;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s ease;
+    
+    &:hover {
+      background-color: var(--hover-color);
+    }
+  }
+  .MuiDataGrid-root {
+    border: none;
+    font-family: $font-family-base;
+    font-size: $font-size-base;
+    
+    .MuiDataGrid-columnHeaders {
+      background: var(--primary-gradient);
+      color: var(--text-on-primary);
+      font-weight: $font-weight-bold;
+      font-size: $font-size-md;
+      border-top-left-radius: $border-radius-lg;
+      border-top-right-radius: $border-radius-lg;
       transition: all 0.3s ease;
-
+      
       &:hover {
-        background-color: green;
-        color: white;
+        background: var(--primary-gradient-hover);
       }
     }
-  }
-
-  .datagrid {
-    height: 100%; 
-    background-color: white;
-    border-radius: 10px;
-    padding: 10px;
-  }
-
-  .cellWithImg {
-    display: flex;
-    align-items: center;
-
-    .cellImg {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      object-fit: cover;
-      margin-right: 10px;
+    
+    .MuiDataGrid-cell {
+      border-bottom: 1px solid var(--border-color);
+      font-size: $font-size-base;
+      padding: $spacing-md $spacing-sm;
+      color: var(--text-primary);
     }
-  }
-
-  .cellWithStatus {
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-weight: 500;
-    text-transform: capitalize;
-    width: fit-content;
-
-    &.active {
-      background-color: rgba(0, 128, 0, 0.1);
-      color: green;
-    }
-
-    &.pending {
-      background-color: rgba(255, 217, 0, 0.1);
-      color: goldenrod;
-    }
-
-    &.passive {
-      background-color: rgba(255, 0, 0, 0.1);
-      color: crimson;
-    }
-  }
-
-  .cellAction {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    .viewButton,
-    .deleteButton {
-      padding: 4px 8px;
-      font-size: 14px;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: 0.2s ease;
-    }
-
-    .viewButton {
-      color: darkblue;
-      border: 1px solid rgba(0, 0, 139, 0.6);
-
+    
+    .MuiDataGrid-row {
+      transition: all 0.2s ease-in-out;
+      
+      &:nth-of-type(even) {
+        background: var(--alternate-row-color);
+      }
+      
       &:hover {
-        background-color: rgba(0, 0, 139, 0.05);
+        background: var(--row-hover-color) !important;
+        transform: translateY(-1px);
+        box-shadow: var(--row-hover-shadow);
+      }
+      
+      &.Mui-selected {
+        background-color: var(--selected-row-color) !important;
       }
     }
-
-    .deleteButton {
-      color: crimson;
-      border: 1px solid rgba(220, 20, 60, 0.6);
-
-      &:hover {
-        background-color: rgba(220, 20, 60, 0.05);
-      }
+    .MuiCheckbox-root {
+      color: #5e35b1;
     }
+    .MuiDataGrid-selectedRowCount {
+      color: #5e35b1;
+    }
+    .MuiDataGrid-footerContainer {
+      background: #f8fafc;
+      border-bottom-left-radius: 12px;
+      border-bottom-right-radius: 12px;
+    }
+    .MuiDataGrid-toolbarContainer {
+      background: #f8fafc;
+    }
+  }
+}
+
+.datatable-footer {
+  margin-top: 18px;
+  padding: 18px;
+  background: #f8fafc;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 2px 12px rgba(94, 53, 177, 0.06);
+  font-size: 1rem;
+}
+
+// Status chips
+.status-chip {
+  font-weight: $font-weight-semibold;
+  text-transform: capitalize;
+  border-radius: $border-radius-pill;
+  padding: $spacing-xs $spacing-md;
+  font-size: $font-size-sm;
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
+  transition: all 0.3s ease;
+  
+  &::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+  
+  &.active {
+    background: var(--success-light);
+    color: var(--success-dark);
+    
+    &::before {
+      background: var(--success);
+    }
+    
+    &:hover {
+      background: var(--success-lighter);
+      transform: translateY(-1px);
+    }
+  }
+  
+  &.pending {
+    background: var(--warning-light);
+    color: var(--warning-dark);
+    
+    &::before {
+      background: var(--warning);
+    }
+    
+    &:hover {
+      background: var(--warning-lighter);
+      transform: translateY(-1px);
+    }
+  }
+  
+  &.inactive {
+    background: var(--error-light);
+    color: var(--error-dark);
+    
+    &::before {
+      background: var(--error);
+    }
+    
+    &:hover {
+      background: var(--error-lighter);
+      transform: translateY(-1px);
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 900px) {
+  .datatable-container {
+    padding: 18px 6px 8px 6px;
+  }
+  .datatable-title {
+    font-size: 1.5rem !important;
+  }
+  .datatable-header-container {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+  .datatable-grid-container {
+    height: calc(100vh - #{$navbar-height} - #{$spacing-unit * 16});
+    min-height: 320px;
+  }
+}
+
+// Animation classes
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Loading animations
+.loading-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--shimmer-start) 25%,
+    var(--shimmer-middle) 50%,
+    var(--shimmer-end) 75%
+  );
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: $border-radius-sm;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+// Empty state animation
+.empty-state {
+  text-align: center;
+  padding: $spacing-xxl;
+  color: var(--text-secondary);
+  
+  svg {
+    width: 120px;
+    height: 120px;
+    margin-bottom: $spacing-lg;
+    animation: float 3s ease-in-out infinite;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
   }
 }

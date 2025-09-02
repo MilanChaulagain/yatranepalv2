@@ -218,10 +218,112 @@
     border-radius: 2px;
 }
 
+/* Categories Section */
+.categoriesSection {
+    margin: 2rem 0;
+}
+
+.categoriesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.categoryCard {
+    background: white;
+    border-radius: 16px;
+    padding: 1.8rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.categoryCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--category-color);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.categoryCard:hover::before {
+    transform: scaleX(1);
+}
+
+.categoryCard:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    border-color: var(--category-color);
+}
+
+.categoryCard.active {
+    border-color: var(--category-color);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+.categoryIcon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--category-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.categoryCard:hover .categoryIcon {
+    transform: scale(1.1);
+}
+
+.categoryName {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 0.8rem;
+}
+
+.categoryDescription {
+    color: #6b7280;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+
+.categoryArrow {
+    position: absolute;
+    top: 1.8rem;
+    right: 1.8rem;
+    font-size: 1.5rem;
+    color: var(--category-color);
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.categoryCard:hover .categoryArrow {
+    transform: translateX(5px);
+}
+
 /* Responsive Design */
 @media (max-width: 900px) {
     .searchBar {
         grid-template-columns: 1fr 1fr;
+    }
+    
+    .categoriesGrid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
     }
 }
 

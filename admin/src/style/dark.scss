@@ -1,69 +1,81 @@
+@import 'variables';
+
 .app.dark {
-  background-color: #111;
-  color: rgb(156, 156, 156);
+  background-color: #1a1c1e;
+  color: #e0e0e0;
 
-  .chartGrid {
-    stroke: rgba(228, 228, 228, 0.219);
-  }
-
-  .table {
-    background-color: #111;
-
-    .tableCell {
-      color: gray;
-    }
-  }
-
+  .card,
+  .table-container,
+  .datatable-container,
+  .sidebar,
   .navbar {
-    color: #999;
-    border-color: #333;
-
-    .search {
-      border-color: gray;
-    }
+    background-color: #2a2d31;
+    border-color: #3a3f46;
   }
 
-  .sidebar {
-    background-color: #111;
-    border-color: #333;
+  .MuiDataGrid-root {
+    color: #e0e0e0;
+    border-color: #3a3f46;
 
-    .top {
-      .logo {
-        color: #999;
+    .MuiDataGrid-cell {
+      border-color: #3a3f46;
+    }
+
+    .MuiDataGrid-columnHeaders {
+      background: linear-gradient(90deg, #2a2d31 0%, #1a1c1e 100%);
+      border-color: #3a3f46;
+    }
+
+    .MuiDataGrid-row {
+      &:nth-of-type(even) {
+        background-color: rgba(255, 255, 255, 0.02);
       }
-    }
-    hr {
-      border-color: #333;
-    }
 
-    ul {
-      li {
-        &:hover {
-          background-color: #333;
-        }
-
-        .icon {
-          color: #999;
-        }
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.05) !important;
       }
     }
   }
 
-  .datatable {
-    .datagrid {
-      color: gray;
-      border: none;
+  input, select, textarea {
+    background-color: #2a2d31;
+    border-color: #3a3f46;
+    color: #e0e0e0;
 
-      .viewButton,
-      .deleteButton,
-      .cellWithStatus {
-        color: gray;
-        border: none;
-      }
+    &::placeholder {
+      color: #90a4ae;
     }
   }
 
-  input {
-    background-color: transparent;
+  .button-secondary {
+    background: rgba($secondary-color, 0.2);
   }
+
+  .badge {
+    &-success {
+      background: rgba($success-color, 0.2);
+    }
+    &-warning {
+      background: rgba($warning-color, 0.2);
+    }
+    &-error {
+      background: rgba($error-color, 0.2);
+    }
+  }
+
+  .loading::after {
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      rgba(255,255,255,0.1) 50%, 
+      transparent 100%);
+  }
+
+  hr {
+    border-color: #3a3f46;
+  }
+}
+
+// Dark mode transition
+.app {
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
