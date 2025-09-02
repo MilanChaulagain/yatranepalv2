@@ -5,6 +5,7 @@ import DriveFolderUploadOutlinedIcon from "@mui/icons-material/DriveFolderUpload
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const New = ({ inputs, title }) => {
   const [file, setFile] = useState(null);
@@ -44,7 +45,7 @@ const New = ({ inputs, title }) => {
         );
         imageUrl = uploadRes.data.url;
       } catch (err) {
-        alert("Image upload failed");
+        toast.error("Image upload failed");
         return;
       }
     }
@@ -55,12 +56,18 @@ const New = ({ inputs, title }) => {
     };
 
     try {
-      await axios.post("http://localhost:8800/api/auth/register", newUser);
-      alert("User created successfully!");
+      await toast.promise(
+        axios.post("http://localhost:8800/api/auth/register", newUser),
+        {
+          loading: 'Creating new item...',
+          success: 'Item created successfully!',
+          error: 'Failed to create item.',
+        }
+      );
       navigate("/users");
     } catch (err) {
-      console.error("User creation failed:", err.response?.data || err.message);
-      alert("Failed to create user: " + (err.response?.data?.message || err.message));
+      console.error("Item creation failed:", err.response?.data || err.message);
+      toast.error("Failed to create item: " + (err.response?.data?.message || err.message));
     }
   };
 

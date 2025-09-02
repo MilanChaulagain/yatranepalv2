@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./table.scss";
 import {
   Table,
@@ -15,59 +15,34 @@ import {
 } from "@mui/material";
 
 const List = () => {
-  const [loading, setLoading] = useState(false); // Add loading state if needed
-  const rows = [
-    {
-      id: 102938,
-      service: "Everest Base Camp Trek",
-      img: "https://www.earthtrekkers.com/wp-content/uploads/2020/05/Everest-Base-Camp-Trek-in-Photos.jpg",
-      customer: "Milan Chaulagain",
-      date: "21 May",
-      amount: 1200,
-      method: "Online Payment",
-      status: "Approved",
-    },
-    {
-      id: 394820,
-      service: "Pokhara Sightseeing Tour",
-      img: "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/28/88/53/b3/caption.jpg?w=500&h=400&s=1",
-      customer: "Ujwal Sapkota",
-      date: "20 May",
-      amount: 300,
-      method: "Cash on Arrival",
-      status: "Pending",
-    },
-    {
-      id: 483920,
-      service: "Chitwan Jungle Safari",
-      img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQBcabKMd-F7mBqCSaQ198deh_3PX96gFcoJw&s",
-      customer: "Emma Rai",
-      date: "18 May",
-      amount: 450,
-      method: "Online Payment",
-      status: "Approved",
-    },
-    {
-      id: 582394,
-      service: "Lumbini Pilgrimage Tour",
-      img: "https://hwwtreks.com/uploads/0000/1/2021/03/06/lmb0010.jpg",
-      customer: "John Lama",
-      date: "17 May",
-      amount: 250,
-      method: "Cash on Arrival",
-      status: "Pending",
-    },
-    {
-      id: 109283,
-      service: "Annapurna Circuit",
-      img: "https://www.shutterstock.com/image-photo/annapurna-circuit-trek-act-gurung-600nw-2506511357.jpg",
-      customer: "Aarav Sharma",
-      date: "15 May",
-      amount: 980,
-      method: "Online Payment",
-      status: "Approved",
-    },
-  ];
+  const [loading, setLoading] = useState(false);
+  const [rows, setRows] = useState([]);
+
+  useEffect(() => {
+    const fetchRecent = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch("http://localhost:8800/api/reservations");
+        const data = await res.json();
+        const list = (Array.isArray(data) ? data : []).slice(0, 10).map((r) => ({
+          id: r._id,
+          service: r.hotelId?.name || "Hotel",
+          img: (r.hotelId?.photos && r.hotelId.photos[0]) || "/images/placeholder.jpg",
+          customer: r.userId?.username || "User",
+          date: new Date(r.createdAt || r.updatedAt).toLocaleDateString(),
+          amount: r.totalPrice || 0,
+          method: r.paymentStatus || "pending",
+          status: (r.status || "pending").charAt(0).toUpperCase() + (r.status || "pending").slice(1),
+        }));
+        setRows(list);
+      } catch (e) {
+        setRows([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRecent();
+  }, []);
 
   return (
     <Box className="table-wrapper">
@@ -104,7 +79,7 @@ const List = () => {
               >
                 <TableCell className="tableCell">
                   <Typography variant="body2" className="id-cell">
-                    #{row.id}
+                    #{String(row.id).slice(-6)}
                   </Typography>
                 </TableCell>
                 <TableCell className="tableCell">

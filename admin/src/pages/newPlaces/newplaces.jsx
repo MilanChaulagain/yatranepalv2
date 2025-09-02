@@ -38,7 +38,7 @@ const NewPlace = () => {
 const handleSuggestLocation = async () => {
   const { name, city, address, location } = info;
   if (!name && !city && !address && !location) {
-    setError("Please fill in at least the place name, city, address, or location.");
+    toast.error("Please fill in at least the place name, city, address, or location.");
     return;
   }
 
@@ -66,7 +66,7 @@ const handleSuggestLocation = async () => {
     const data = await response.json();
 
     if (!data || data.length === 0) {
-      setError("No location suggestion found.");
+      toast.error("No location suggestion found.");
       return;
     }
 
@@ -91,9 +91,10 @@ const handleSuggestLocation = async () => {
     // Set for display
     setSuggestedLocations([best]);
     setShowSuggestions(true);
+    toast.success("Location suggested successfully!");
 
   } catch (err) {
-    setError("Failed to get location suggestion.");
+    toast.error("Failed to get location suggestion.");
   } finally {
     setLoadingLatLng(false);
   }
@@ -124,7 +125,7 @@ const handleSuggestLocation = async () => {
   const handleClick = async (e) => {
     e.preventDefault();
     if (!info.name || !info.address || !info.city || !info.category) {
-      setError("Please fill in all required fields.");
+      toast.error("Please fill in all required fields.");
       return;
     }
 
@@ -132,7 +133,7 @@ const handleSuggestLocation = async () => {
     const lng = parseFloat(info.longitude);
 
     if (isNaN(lat) || isNaN(lng)) {
-      setError("Please suggest/select valid latitude and longitude first.");
+      toast.error("Please suggest/select valid latitude and longitude first.");
       return;
     }
 
@@ -153,7 +154,7 @@ const handleSuggestLocation = async () => {
           })
         );
       } catch (err) {
-        setError("Image upload failed.");
+        toast.error("Image upload failed.");
         return;
       }
     }
@@ -171,11 +172,18 @@ const handleSuggestLocation = async () => {
     delete newPlace.longitude;
 
     try {
-      await axios.post("/place", newPlace);
-      toast.success("Place saved successfully");
+      await toast.promise(
+        axios.post("/place", newPlace),
+        {
+          loading: 'Creating new place...',
+          success: 'Place saved successfully!',
+          error: 'Failed to create place.',
+        }
+      );
       navigate("/place");
     } catch (err) {
-      setError("Failed to create place.");
+      console.error("Failed to create place.", err);
+      toast.error("Failed to create place.");
     }
   };
 

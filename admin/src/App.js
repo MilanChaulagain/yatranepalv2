@@ -42,7 +42,7 @@ import { AuthContext } from "./context/AuthContext";
 import toast, { Toaster } from "react-hot-toast";
 
 function App() {
-  const { darkMode } = useContext(DarkModeContext);
+  const { darkMode, sidebarCollapsed } = useContext(DarkModeContext);
 
   const ProtectedRoute = ({ children }) => {
     const { user } = useContext(AuthContext);
@@ -51,7 +51,7 @@ function App() {
   };
 
   return (
-    <div className={`app ${darkMode ? 'dark' : ''} fade-in main-layout`}>
+    <div className={`app ${darkMode ? 'dark' : ''} fade-in main-layout`} style={{"--sidebar-width": sidebarCollapsed ? "80px" : "280px"}}>
       <Toaster position="top-right" reverseOrder={false} />
       <BrowserRouter basename="/admin">
         <Routes>

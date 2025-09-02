@@ -378,12 +378,12 @@ const PlaceDetails = () => {
 
                 <div className="place-image-container">
                     <img
-                        src={place.img || '/placeholder.jpg'}
+                        src={place.img || '/images/placeholder.jpg'}
                         alt={place.name}
                         className="place-main-image"
                         onError={(e) => {
                             e.target.onerror = null;
-                            e.target.src = '/placeholder.jpg';
+                            e.target.src = '/images/placeholder.jpg';
                         }}
                         loading="lazy"
                     />

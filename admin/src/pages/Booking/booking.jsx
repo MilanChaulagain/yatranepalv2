@@ -18,6 +18,7 @@ import {
 import "./booking.css";
 import Navbar from "../../components/navbar/Navbar";
 import Sidebar from "../../components/sidebar/Sidebar";
+import toast from "react-hot-toast";
 
 const API_BASE_URL = "http://localhost:8800/api";
 
@@ -33,27 +34,10 @@ const AdminBookings = () => {
     fetchBookings();
   }, [filter]);
 
-  // const fetchBookings = async () => {
-  //   try {
-  //     setLoading(true);
-  //     const params = filter !== "all" ? { status: filter } : {};
-  //     const { data } = await axios.get(`${API_BASE_URL}/reservations`, {
-  //       params,
-  //       withCredentials: true
-  //     });
-  //     setBookings(data);
-  //   } catch (err) {
-  //     setError(err.response?.data?.message || "Failed to load bookings");
-  //     setBookings([]);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  const fetchBookings = async () => {
+    const fetchBookings = async () => {
   try {
     setLoading(true);
-    const token = localStorage.getItem("authToken");  // Assuming token is stored in localStorage
+      const token = localStorage.getItem("token");  // Using the correct token key
 
     const params = filter !== "all" ? { status: filter } : {};
     
@@ -68,6 +52,7 @@ const AdminBookings = () => {
     setBookings(data);
   } catch (err) {
     setError(err.response?.data?.message || "Failed to load bookings");
+    toast.error(err.response?.data?.message || "Failed to load bookings");
     setBookings([]);
   } finally {
     setLoading(false);
@@ -79,14 +64,22 @@ const AdminBookings = () => {
     try {
       setActionLoading(true);
       const endpoint = action === "approve-cancel" ? "approve-cancel" : "reject-cancel";
-      await axios.put(
-        `${API_BASE_URL}/reservations/${bookingId}/${endpoint}`,
-        {},
-        { withCredentials: true }
+      await toast.promise(
+        axios.put(
+          `${API_BASE_URL}/reservations/${bookingId}/${endpoint}`,
+          {},
+          { withCredentials: true }
+        ),
+        {
+          loading: 'Updating booking status...',
+          success: 'Booking status updated successfully!',
+          error: 'Failed to update booking status.',
+        }
       );
       fetchBookings();
     } catch (err) {
-      alert(err.response?.data?.message || "Operation failed");
+      console.error(err.response?.data?.message || "Operation failed");
+      toast.error(err.response?.data?.message || "Operation failed");
     } finally {
       setActionLoading(false);
       setExpandedId(null);

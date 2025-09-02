@@ -4,12 +4,39 @@ import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import MonetizationOnOutlinedIcon from "@mui/icons-material/MonetizationOnOutlined";
+import { useEffect, useMemo, useState } from "react";
+import axios from "axios";
 
 const Widget = ({ type }) => {
   let data;
+  const [amount, setAmount] = useState(0);
+  const [diff, setDiff] = useState(0);
 
-  const amount = 100;
-  const diff = 20;
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        if (type === "user") {
+          const res = await axios.get("http://localhost:8800/api/users");
+          setAmount(Array.isArray(res.data) ? res.data.length : 0);
+        } else if (type === "order") {
+          const res = await axios.get("http://localhost:8800/api/reservations");
+          setAmount(Array.isArray(res.data) ? res.data.length : 0);
+        } else if (type === "earning") {
+          const res = await axios.get("http://localhost:8800/api/reservations");
+          const total = (Array.isArray(res.data) ? res.data : []).reduce((sum, r) => sum + (r.totalPrice || 0), 0);
+          setAmount(total);
+        } else if (type === "balance") {
+          const res = await axios.get("http://localhost:8800/api/place");
+          const data = res.data?.data || res.data || [];
+          setAmount(Array.isArray(data) ? data.length : 0);
+        }
+        // Optional: compute diff based on last 7 days vs previous 7 days if needed
+      } catch (e) {
+        setAmount(0);
+      }
+    };
+    fetchStats();
+  }, [type]);
 
   switch (type) {
     case "user":

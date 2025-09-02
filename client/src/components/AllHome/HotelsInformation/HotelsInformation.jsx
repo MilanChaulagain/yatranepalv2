@@ -152,7 +152,7 @@ function NepalHotelCarousel() {
                         <div key={hotel._id || hotel.id} className="hotel-item">
                             <div className="hotel-image-section">
                                 <img
-                                    src={hotel.photos?.[0] || hotel.image || "/placeholder.svg"}
+                                    src={hotel.photos?.[0] || hotel.image || "/images/placeholder.jpg"}
                                     alt={hotel.name}
                                     className="hotel-photo"
                                     onError={(e) => {

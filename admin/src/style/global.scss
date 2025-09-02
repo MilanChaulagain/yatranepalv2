@@ -31,12 +31,12 @@ body {
       left: 0;
       top: 0;
       bottom: 0;
-      width: $sidebar-width;
+      width: var(--sidebar-width, #{$sidebar-width});
       z-index: $z-index-sidebar;
     }
     
     .home {
-      margin-left: $sidebar-width;
+      margin-left: var(--sidebar-width, #{$sidebar-width});
       flex: 1;
       min-width: 0;
       background: var(--background-gradient);
@@ -52,10 +52,10 @@ body {
 
 // Layout wrapper for all pages with navbar and sidebar
 .page-with-nav {
-  margin-left: $sidebar-width;
+  margin-left: var(--sidebar-width, #{$sidebar-width});
   padding-top: $navbar-height;
   min-height: 100vh;
-  width: calc(100% - #{$sidebar-width});
+  width: calc(100% - var(--sidebar-width, #{$sidebar-width}));
   
   .page-content {
     padding: $spacing-unit * 3;

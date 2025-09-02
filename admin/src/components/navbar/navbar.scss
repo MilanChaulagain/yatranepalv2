@@ -4,14 +4,14 @@
   height: $navbar-height;
   display: flex;
   align-items: center;
-  background: rgba($background-paper, 0.85);
+  background: linear-gradient(180deg, rgba($background-paper, 0.85) 0%, rgba($background-paper, 0.7) 100%);
   color: $text-secondary;
   border-bottom: 1px solid rgba($text-muted, 0.08);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
   position: fixed;
   top: 0;
   right: 0;
-  left: $sidebar-width;
+  left: var(--sidebar-width, #{$sidebar-width});
   z-index: $z-index-navbar;
   backdrop-filter: blur(12px) saturate(180%);
   transition: all $transition-normal;
@@ -26,27 +26,33 @@
 
   .wrapper {
     width: 100%;
-    height: 80%;
-    padding: 0 $spacing-unit * 4;
+    height: 76%;
+    padding: 0 $spacing-unit * 3;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: $spacing-unit * 1.5;
 
     .left {
       display: flex;
       align-items: center;
-      gap: $spacing-unit * 3;
+      gap: $spacing-unit * 1.5;
       height: 100%;
+      flex: 1;
+      min-width: 0; // allow shrink to prevent overlap
 
       .search {
         display: flex;
         align-items: center;
-        border: 1px solid rgba($text-muted, 0.15);
+        border: 1px solid rgba($text-muted, 0.12);
         border-radius: $border-radius-lg;
-        padding: $spacing-unit * 1.25 $spacing-unit * 2;
-        background: rgba($background-secondary, 0.2);
+        padding: $spacing-unit * 1.1 $spacing-unit * 1.6;
+        background: rgba($background-secondary, 0.18);
         transition: all $transition-normal;
-        height: 44px;
+        height: 36px;
+        flex: 1;
+        max-width: 520px;
+        min-width: 160px;
         
         &:hover {
           background: rgba($background-secondary, 0.35);
@@ -63,8 +69,8 @@
           border: none;
           outline: none;
           background: transparent;
-          font-size: 0.9375rem;
-          width: 220px;
+          font-size: 0.875rem;
+          width: 100%;
           height: 100%;
           color: $text-primary;
           
@@ -85,7 +91,8 @@
     .right {
       display: flex;
       align-items: center;
-      gap: $spacing-unit * 3;
+      gap: $spacing-unit * 1.25;
+      flex: 0 0 auto;
 
       .item {
         display: flex;
@@ -101,14 +108,14 @@
         }
 
         .icon {
-          font-size: 24px;
+          font-size: 20px;
           color: inherit;
           transition: $transition-quick;
         }
 
         .avatar {
-          width: 40px;
-          height: 40px;
+          width: 34px;
+          height: 34px;
           border-radius: 50%;
           margin-left: $spacing-unit;
           border: 2px solid rgba($primary-color, 0.2);
@@ -127,20 +134,53 @@
         }
 
         .counter {
-          width: 18px;
-          height: 18px;
+          width: 16px;
+          height: 16px;
           background: $gradient-primary;
           border-radius: 50%;
           color: #fff;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 10px;
+          font-size: 9px;
           font-weight: bold;
           position: absolute;
           top: -6px;
           right: -6px;
           box-shadow: $shadow-sm;
+        }
+      }
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: $breakpoint-md) {
+  .navbar {
+    .wrapper {
+      padding: 0 $spacing-unit * 2;
+      .left {
+        .search {
+          max-width: 360px;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: $breakpoint-sm) {
+  .navbar {
+    .wrapper {
+      .left {
+        .search {
+          min-width: 120px;
+          .search-icon { display: none; }
+        }
+      }
+      .right {
+        gap: $spacing-unit;
+        .item { 
+          .counter { top: -4px; right: -4px; }
         }
       }
     }
