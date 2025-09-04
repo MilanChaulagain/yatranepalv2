@@ -69,10 +69,11 @@
         gap: $spacing-unit * 2;
 
         .refresh-button {
+          margin-bottom: 20px;
           display: flex;
           align-items: center;
           gap: $spacing-unit;
-          padding: $spacing-unit * 1.25 $spacing-unit * 2;
+          padding: $spacing-unit * 1.25 $spacing-unit * 3;
           background: rgba($primary-color, 0.1);
           border: 1px solid rgba($primary-color, 0.2);
           border-radius: $border-radius-lg;
@@ -340,7 +341,7 @@
                   }
                 }
                 &.delete {
-                  margin-bottom: 10px;
+                  margin-top: 0px;
                   background: rgba(#ef4444, 0.1);
                   color: #ef4444;
                   border: 1px solid rgba(#ef4444, 0.2);
