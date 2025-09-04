@@ -32,14 +32,36 @@
     border-bottom: 1px solid rgba($text-muted, 0.1);
 
     .top-inner {
+      margin-left: 5px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: $spacing-unit * 1.5;
       width: 100%;
     }
+    .hamburger-btn {
+      margin-left: -5px;
+      margin-bottom: 15px;
+      width: 36px;
+      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: $border-radius-lg;
+      border: 1px solid rgba($text-muted, 0.15);
+      background: rgba($background-secondary, 0.2);
+      color: $text-primary;
+      cursor: pointer;
+      transition: $transition-quick;
+
+      &:hover { background: rgba($background-secondary, 0.35); transform: translateY(-1px); }
+
+      .icon { font-size: 18px; }
+    }
 
     .sidebar-btn {
+      margin-left: 10px;
+      margin-bottom: 15px;
       width: 36px;
       height: 36px;
       display: inline-flex;
@@ -58,6 +80,7 @@
     }
 
     .logo-container {
+      margin-left: 10px;
       display: flex;
       align-items: center;
       gap: $spacing-unit * 1.5;
@@ -69,7 +92,8 @@
         transition: $transition-quick;
       }
 
-      .logo {
+      .logo-text {
+        margin-left: -5px;
         font-size: 1.5rem;
         font-weight: 800;
         background: $gradient-primary;

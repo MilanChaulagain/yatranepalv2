@@ -3,7 +3,6 @@ import Sidebar from "../../components/sidebar/Sidebar";
 import Navbar from "../../components/navbar/Navbar";
 import DriveFolderUploadOutlinedIcon from "@mui/icons-material/DriveFolderUploadOutlined";
 import { useState } from "react";
-import { hotelInputs } from "../../formSource";
 import useFetch from "../../hooks/useFetch";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -39,20 +38,13 @@ const NewHotel = () => {
             data.append("upload_preset", process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET);
 
             const res = await axios.post(
-               // Replace with your Cloudinary upload preset and cloud name
-        `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_CLOUD_NAME}/image/upload`,
-        data,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-          onUploadProgress: (progressEvent) => {
-            const percentCompleted = Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total
-            );
-            console.log(`Upload progress: ${percentCompleted}%`);
-          },
-        }
+              `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_CLOUD_NAME}/image/upload`,
+              data,
+              {
+                headers: {
+                  "Content-Type": "multipart/form-data",
+                },
+              }
             );
             return res.data.url;
           })
@@ -73,9 +65,7 @@ const NewHotel = () => {
     try {
       const token = localStorage.getItem("token");
       await axios.post("/hotels", newHotel, {
-        headers: {
-      Authorization: `Bearer ${token}`,
-    },
+        headers: { Authorization: `Bearer ${token}` },
         withCredentials: true,
       });
       alert("Hotel created successfully!");
@@ -107,6 +97,7 @@ const NewHotel = () => {
           </div>
           <div className="right">
             <form>
+              {/* File Upload */}
               <div className="formInput">
                 <label htmlFor="file">
                   Images: <DriveFolderUploadOutlinedIcon className="icon" />
@@ -120,18 +111,45 @@ const NewHotel = () => {
                 />
               </div>
 
-              {hotelInputs.map((input) => (
-                <div className="formInput" key={input.id}>
-                  <label>{input.label}</label>
-                  <input
-                    id={input.id}
-                    type={input.type}
-                    placeholder={input.placeholder}
-                    onChange={handleChange}
-                  />
-                </div>
-              ))}
+              {/* Schema required fields */}
+              <div className="formInput">
+                <label>Name</label>
+                <input id="name" type="text" placeholder="Hotel Name" onChange={handleChange} required />
+              </div>
+              <div className="formInput">
+                <label>Type</label>
+                <input id="type" type="text" placeholder="hotel/apartment/resort" onChange={handleChange} required />
+              </div>
+              <div className="formInput">
+                <label>City</label>
+                <input id="city" type="text" placeholder="City" onChange={handleChange} required />
+              </div>
+              <div className="formInput">
+                <label>Address</label>
+                <input id="address" type="text" placeholder="123 Main St" onChange={handleChange} required />
+              </div>
+              <div className="formInput">
+                <label>Distance (from center)</label>
+                <input id="distance" type="text" placeholder="500m" onChange={handleChange} required />
+              </div>
+              <div className="formInput">
+                <label>Title</label>
+                <input id="title" type="text" placeholder="Hotel title" onChange={handleChange} required />
+              </div>
+              <div className="formInput">
+                <label>Description</label>
+                <textarea id="desc" placeholder="Hotel description" onChange={handleChange} required />
+              </div>
+              <div className="formInput">
+                <label>Cheapest Price</label>
+                <input id="cheapestPrice" type="number" placeholder="100" onChange={handleChange} required />
+              </div>
 
+              {/* Optional fields */}
+              <div className="formInput">
+                <label>Rating (0-5)</label>
+                <input id="rating" type="number" min="0" max="5" step="0.1" placeholder="4.5" onChange={handleChange} />
+              </div>
               <div className="formInput">
                 <label>Featured</label>
                 <select id="featured" onChange={handleChange}>
@@ -140,16 +158,17 @@ const NewHotel = () => {
                 </select>
               </div>
 
+              {/* Room selection */}
               <div className="selectRooms">
                 <label>Choose Rooms</label>
                 <select id="rooms" multiple onChange={handleSelect}>
                   {loading
                     ? "Loading..."
                     : data && data.map((room) => (
-                      <option key={room._id} value={room._id}>
-                        {room.title}
-                      </option>
-                    ))}
+                        <option key={room._id} value={room._id}>
+                          {room.title}
+                        </option>
+                      ))}
                 </select>
               </div>
 

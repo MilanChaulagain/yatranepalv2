@@ -41,13 +41,13 @@ const Sidebar = () => {
     <div className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''}`} style={sidebarStyle}>
       <div className="top">
         <div className="top-inner">
-          <button className="sidebar-btn" aria-label="Toggle sidebar" onClick={() => dispatch({ type: 'SIDEBAR_TOGGLE' })}>
+          <button className="hamburger-btn" aria-label="Toggle sidebar" onClick={() => dispatch({ type: 'SIDEBAR_TOGGLE' })}>
             <MenuIcon className="icon" />
           </button>
           <Link to="/" style={{ textDecoration: "none" }}>
             <div className="logo-container">
               <img src={logo} alt="Logo" className="logo-img" />
-              <span className="logo">yatraNepal</span>
+              <span className="logo-text">yatraNepal</span>
             </div>
           </Link>
           <button className="sidebar-btn" aria-label="Back" onClick={() => navigate(-1)}>

@@ -70,7 +70,7 @@ const Navbar = () => {
     <div className="navbar">
       <div className="wrapper">
         <div className="left">
-          <form className="search" onSubmit={handleSearchSubmit}>
+          {/* <form className="search" onSubmit={handleSearchSubmit}>
             <input
               type="text"
               placeholder="Search users, hotels, places..."
@@ -80,7 +80,7 @@ const Navbar = () => {
             <button type="submit" style={{ display: 'contents' }} aria-label="Search">
               <SearchOutlinedIcon className="search-icon"/>
             </button>
-          </form>
+          </form> */}
         </div>
         <div className="right">
           <div className="item">
