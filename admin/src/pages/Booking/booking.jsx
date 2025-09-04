@@ -68,7 +68,12 @@ const AdminBookings = () => {
         axios.put(
           `${API_BASE_URL}/reservations/${bookingId}/${endpoint}`,
           {},
-          { withCredentials: true }
+          {
+            withCredentials: true,
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`
+            }
+          }
         ),
         {
           loading: 'Updating booking status...',

@@ -2,12 +2,22 @@ import "./single.scss";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Navbar from "../../components/navbar/Navbar";
 import Chart from "../../components/chart/Chart";
-import List from "../../components/table/Table";
 import { useEffect, useState } from "react";
 import { useParams, useLocation, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import toast from "react-hot-toast";
+import {
+  MapPin,
+  Calendar,
+  Edit,
+  Trash2,
+  ArrowLeft,
+  Phone,
+  Mail,
+  Building,
+  Copy,
+  ExternalLink
+} from "lucide-react";
 
 const Single = () => {
   const { id } = useParams();
@@ -16,6 +26,8 @@ const Single = () => {
   const [data, setData] = useState(null);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -66,23 +78,86 @@ const Single = () => {
     );
   }
 
+  const resolveCloudinaryUrl = (maybePublicIdOrUrl) => {
+    if (!maybePublicIdOrUrl) return null;
+    const value = maybePublicIdOrUrl.toString();
+    if (value.startsWith('http://') || value.startsWith('https://')) return value;
+    const cloudName = process.env.REACT_APP_CLOUDINARY_CLOUD_NAME;
+    if (!cloudName) return null;
+    return `https://res.cloudinary.com/${cloudName}/image/upload/${value}`;
+  };
+
+  const fallbackNoImage = "/assets/images/no-image-icon-0.jpg";
+  const mainImage =
+    resolveCloudinaryUrl(
+      data.img || data.photo || data.profilePic || data.profileImage || data.avatar || data.image
+    ) ||
+    fallbackNoImage;
+
   const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this item?')) {
-      try {
-        await toast.promise(
-          axios.delete(`http://localhost:8800/api/${path}/${id}`, { withCredentials: true }),
-          {
-            loading: 'Deleting item...',
-            success: 'Item deleted successfully!',
-            error: 'Failed to delete item.',
-          }
-        );
-        navigate(`/${path}`);
-      } catch (e) {
-        console.error('Failed to delete:', e);
-        toast.error('Failed to delete item.');
-      }
+    setConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      setDeleting(true);
+      await toast.promise(
+        axios.delete(`http://localhost:8800/api/${path}/${id}`, { withCredentials: true }),
+        {
+          loading: 'Deleting item...',
+          success: 'Item deleted successfully!',
+          error: 'Failed to delete item.',
+        }
+      );
+      navigate(`/${path}`);
+    } catch (e) {
+      console.error('Failed to delete:', e);
+      toast.error('Failed to delete item.');
+    } finally {
+      setDeleting(false);
+      setConfirmOpen(false);
     }
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    toast.success('Copied to clipboard!');
+  };
+
+  const getCategoryIcon = (category) => {
+    switch (category?.toLowerCase()) {
+      case 'cultural': return '🏛️';
+      case 'natural': return '🌿';
+      case 'historical': return '🏺';
+      case 'adventure': return '⛰️';
+      case 'religious': return '🕉️';
+      case 'food destinations': return '🍽️';
+      case 'photography': return '📸';
+      default: return '📍';
+    }
+  };
+
+  const getCategoryColor = (category) => {
+    switch (category?.toLowerCase()) {
+      case 'cultural': return '#8B5CF6';
+      case 'natural': return '#10B981';
+      case 'historical': return '#F59E0B';
+      case 'adventure': return '#EF4444';
+      case 'religious': return '#3B82F6';
+      case 'food destinations': return '#F97316';
+      case 'photography': return '#EC4899';
+      default: return '#6B7280';
+    }
+  };
+
+  const formatCoordinates = (coordinates) => {
+    if (!coordinates || !Array.isArray(coordinates) || coordinates.length < 2) return null;
+    return `${coordinates[1].toFixed(6)}, ${coordinates[0].toFixed(6)}`;
+  };
+
+  const getGoogleMapsUrl = (coordinates) => {
+    if (!coordinates || !Array.isArray(coordinates) || coordinates.length < 2) return null;
+    return `https://www.google.com/maps?q=${coordinates[1]},${coordinates[0]}`;
   };
 
   return (
@@ -90,78 +165,254 @@ const Single = () => {
       <Sidebar />
       <div className="singleContainer">
         <Navbar />
-        <div className="top">
-          <div className="left">
-            <Link to={`/${path}/${id}/edit`} className="editButton">Edit</Link>
-            <button
-              className="deleteButton"
-              onClick={handleDelete}
-            >
-              <DeleteOutlineIcon style={{ fontSize: 18, marginRight: 6 }} /> Delete
-            </button>
-            <h1 className="title">Information</h1>
-            <div className="item">
+        
+        {/* Header Section */}
+        <div className="header-section">
+          <div className="header-content">
+            <Link to={`/${path}`} className="back-button">
+              <ArrowLeft size={20} />
+              Back to {path === 'users' ? 'Users' : path === 'place' ? 'Places' : 'List'}
+            </Link>
+            <div className="header-actions">
+              <Link to={`/${path}/${id}/edit`} className="action-btn edit-btn">
+                <Edit size={18} />
+                Edit
+              </Link>
+              <button
+                className="action-btn delete-btn"
+                onClick={handleDelete}
+                disabled={deleting}
+              >
+                <Trash2 size={18} />
+                {deleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="main-content">
+          {/* Hero Section */}
+          <div className="hero-section">
+            <div className="hero-image">
               <img
-                src={data.img || data.photo || "https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=750&w=1260"}
-                alt=""
-                className="itemImg"
+                src={mainImage}
+                alt={data.name || data.title || data.username || "Item"}
+                onError={(e) => {
+                  if (e.currentTarget.src !== fallbackNoImage) {
+                    e.currentTarget.src = fallbackNoImage;
+                  }
+                }}
               />
-              <div className="details">
-                <h1 className="itemTitle">{data.name || data.title || data.username || "Unknown"}</h1>
+              {data.category && (
+                <div 
+                  className="category-badge"
+                  style={{ backgroundColor: getCategoryColor(data.category) }}
+                >
+                  <span className="category-icon">{getCategoryIcon(data.category)}</span>
+                  {data.category}
+                </div>
+              )}
+            </div>
+            
+            <div className="hero-info">
+              <div className="title-section">
+                <h1 className="main-title">
+                  {data.name || data.title || data.username || "Unknown"}
+                </h1>
                 {data.email && (
-                  <div className="detailItem">
-                    <span className="itemKey">Email:</span>
-                    <span className="itemValue">{data.email}</span>
+                  <div className="subtitle">
+                    <Mail size={16} />
+                    {data.email}
+                  </div>
+                )}
+              </div>
+
+              {/* Quick Stats */}
+              <div className="quick-stats">
+                {data.city && (
+                  <div className="stat-item">
+                    <MapPin size={16} />
+                    <span>{data.city}</span>
                   </div>
                 )}
                 {data.phone && (
-                  <div className="detailItem">
-                    <span className="itemKey">Phone:</span>
-                    <span className="itemValue">{data.phone}</span>
-                  </div>
-                )}
-                {data.address && (
-                  <div className="detailItem">
-                    <span className="itemKey">Address:</span>
-                    <span className="itemValue">{data.address}</span>
-                  </div>
-                )}
-                {data.city && (
-                  <div className="detailItem">
-                    <span className="itemKey">City:</span>
-                    <span className="itemValue">{data.city}</span>
-                  </div>
-                )}
-                {data.category && (
-                  <div className="detailItem">
-                    <span className="itemKey">Category:</span>
-                    <span className="itemValue">{data.category}</span>
+                  <div className="stat-item">
+                    <Phone size={16} />
+                    <span>{data.phone}</span>
                   </div>
                 )}
                 {data.type && (
-                  <div className="detailItem">
-                    <span className="itemKey">Type:</span>
-                    <span className="itemValue">{data.type}</span>
+                  <div className="stat-item">
+                    <Building size={16} />
+                    <span>{data.type}</span>
                   </div>
                 )}
-                {data.description && (
-                  <div className="detailItem">
-                    <span className="itemKey">Description:</span>
-                    <span className="itemValue">{data.description}</span>
+                {data.createdAt && (
+                  <div className="stat-item">
+                    <Calendar size={16} />
+                    <span>Created {new Date(data.createdAt).toLocaleDateString()}</span>
                   </div>
                 )}
               </div>
             </div>
           </div>
-          <div className="right">
+
+          {/* Details Grid */}
+          <div className="details-grid">
+            {/* Basic Information */}
+            <div className="detail-card">
+              <div className="card-header">
+                <h3>Basic Information</h3>
+              </div>
+              <div className="card-content">
+                {data.description && (
+                  <div className="detail-row">
+                    <label>Description</label>
+                    <p className="description-text">{data.description}</p>
+                  </div>
+                )}
+                {data.address && (
+                  <div className="detail-row">
+                    <label>Address</label>
+                    <div className="address-container">
+                      <span>{data.address}</span>
+                      <button 
+                        className="copy-btn"
+                        onClick={() => copyToClipboard(data.address)}
+                        title="Copy address"
+                      >
+                        <Copy size={14} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {data.category && (
+                  <div className="detail-row">
+                    <label>Category</label>
+                    <div 
+                      className="category-tag"
+                      style={{ backgroundColor: getCategoryColor(data.category) }}
+                    >
+                      <span className="category-icon">{getCategoryIcon(data.category)}</span>
+                      {data.category}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Location Information */}
+            {data.location?.coordinates && (
+              <div className="detail-card">
+                <div className="card-header">
+                  <h3>Location</h3>
+                </div>
+                <div className="card-content">
+                  <div className="detail-row">
+                    <label>Coordinates</label>
+                    <div className="coordinates-container">
+                      <span className="coordinates">
+                        {formatCoordinates(data.location.coordinates)}
+                      </span>
+                      <button 
+                        className="copy-btn"
+                        onClick={() => copyToClipboard(formatCoordinates(data.location.coordinates))}
+                        title="Copy coordinates"
+                      >
+                        <Copy size={14} />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="detail-row">
+                    <label>View on Map</label>
+                    <a 
+                      href={getGoogleMapsUrl(data.location.coordinates)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="map-link"
+                    >
+                      <ExternalLink size={16} />
+                      Open in Google Maps
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Additional Information */}
+            <div className="detail-card">
+              <div className="card-header">
+                <h3>Additional Details</h3>
+              </div>
+              <div className="card-content">
+                {data._id && (
+                  <div className="detail-row">
+                    <label>ID</label>
+                    <div className="id-container">
+                      <span className="id-text">{data._id}</span>
+                      <button 
+                        className="copy-btn"
+                        onClick={() => copyToClipboard(data._id)}
+                        title="Copy ID"
+                      >
+                        <Copy size={14} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {data.updatedAt && (
+                  <div className="detail-row">
+                    <label>Last Updated</label>
+                    <span>{new Date(data.updatedAt).toLocaleString()}</span>
+                  </div>
+                )}
+                {data.createdAt && (
+                  <div className="detail-row">
+                    <label>Created</label>
+                    <span>{new Date(data.createdAt).toLocaleString()}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Analytics Section */}
+          <div className="analytics-section">
             <Chart aspect={3 / 1} title="Analytics" />
           </div>
         </div>
-        <div className="bottom">
-          <h1 className="title">Related Information</h1>
-          <List/>
-        </div>
       </div>
+
+      {/* Confirmation Modal */}
+      {confirmOpen && (
+        <div className="confirm-modal-overlay">
+          <div className="confirm-modal">
+            <div className="modal-header">
+              <h3>Delete {path === 'users' ? 'User' : path === 'place' ? 'Place' : 'Item'}</h3>
+            </div>
+            <div className="modal-content">
+              <p>Are you sure you want to delete this {path === 'users' ? 'user' : path === 'place' ? 'place' : 'item'}? This action cannot be undone.</p>
+              <div className="modal-actions">
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setConfirmOpen(false)}
+                  disabled={deleting}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="btn btn-danger"
+                  onClick={confirmDelete}
+                  disabled={deleting}
+                >
+                  {deleting ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

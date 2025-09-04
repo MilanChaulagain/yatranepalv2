@@ -47,6 +47,7 @@ const RegisterPage = () => {
         if (!imageFile) return "";
         
         console.log("Image upload functionality not configured yet");
+
         // Return empty string for now - user will be registered without image
         return "";
     }
@@ -70,7 +71,9 @@ const RegisterPage = () => {
 
         try {
             console.log("Starting registration process...")
-            
+            // Clear old token from localStorage
+            // localStorage.removeItem("token");
+            // localStorage.removeItem("user");
             let imageUrl = ""
             if (imageFile) {
                 console.log("Uploading image...")

@@ -50,6 +50,7 @@
             font-weight: 700;
             background: $gradient-primary;
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
             margin: 0;
           }
@@ -288,44 +289,74 @@
               gap: $spacing-unit/2;
 
               .action-btn {
-                width: 28px;
-                height: 28px;
-                border-radius: $border-radius-sm;
+                width: 32px;
+                height: 32px;
+                border-radius: $border-radius-lg;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 border: none;
                 cursor: pointer;
-                transition: all $transition-quick;
+                transition: all $transition-normal;
                 text-decoration: none;
+                position: relative;
+                overflow: hidden;
+                font-size: 0.875rem;
+                font-weight: 500;
+                
+                // Ensure icons are properly centered
+                svg {
+                  display: block;
+                  flex-shrink: 0;
+                }
+                
+                &:active { 
+                  transform: scale(0.96); 
+                }
 
                 &.view {
                   background: rgba($primary-color, 0.1);
                   color: $primary-color;
+                  border: 1px solid rgba($primary-color, 0.2);
 
                   &:hover {
-                    background: $primary-color;
-                    color: white;
+                    background: rgba($primary-color, 0.2);
+                    color: $primary-color;
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 12px rgba($primary-color, 0.2);
                   }
                 }
 
                 &.edit {
                   background: rgba($warning-color, 0.1);
                   color: $warning-color;
+                  border: 1px solid rgba($warning-color, 0.2);
 
                   &:hover {
-                    background: $warning-color;
-                    color: white;
+                    background: rgba($warning-color, 0.2);
+                    color: $warning-color;
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 12px rgba($warning-color, 0.2);
                   }
                 }
-
                 &.delete {
-                  background: rgba($danger-color, 0.1);
-                  color: $danger-color;
+                  margin-bottom: 10px;
+                  background: rgba(#ef4444, 0.1);
+                  color: #ef4444;
+                  border: 1px solid rgba(#ef4444, 0.2);
 
-                  &:hover {
-                    background: $danger-color;
-                    color: white;
+                  &:hover:not(:disabled) {
+                    background: rgba(#ef4444, 0.2);
+                    color: #ef4444;
+                    transform: translateY(-1px);
+                    box-shadow: 0 4px 12px rgba(#ef4444, 0.2);
+                  }
+                  
+                  &:disabled {
+                    opacity: 0.6;
+                    cursor: not-allowed;
+                    transform: none;
+                    box-shadow: none;
                   }
                 }
               }
@@ -377,6 +408,24 @@
               margin-bottom: $spacing-unit * 1.5;
               border: 1px solid rgba($text-muted, 0.08);
               background: #f6f7f9;
+
+              img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+              }
+            }
+
+            // Circular avatar style for users list
+            .thumbnail.avatar {
+              width: 96px;
+              height: 96px;
+              border-radius: 50%;
+              margin-bottom: $spacing-unit * 1.5;
+              border: 2px solid rgba($text-muted, 0.12);
+              background: #f6f7f9;
+              overflow: hidden;
 
               img {
                 width: 100%;
@@ -446,6 +495,75 @@
     p {
       color: $text-secondary;
       font-size: 1.1rem;
+    }
+  }
+
+  // Confirm modal
+  .confirm-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+
+    .confirm-content {
+      width: 100%;
+      max-width: 420px;
+      background: linear-gradient(145deg, rgba($background-paper, 0.98) 0%, rgba($background-paper, 0.95) 100%);
+      border: 1px solid rgba($text-muted, 0.08);
+      border-radius: $border-radius-xl;
+      box-shadow: $shadow-lg;
+      padding: $spacing-unit * 3;
+      backdrop-filter: blur(8px);
+      -webkit-background-clip: padding-box;
+      background-clip: padding-box;
+
+      h3 {
+        margin: 0 0 $spacing-unit 0;
+        font-size: 1.25rem;
+        color: $text-primary;
+      }
+
+      p {
+        color: $text-secondary;
+        margin: 0 0 $spacing-unit * 2 0;
+      }
+
+      .confirm-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: $spacing-unit;
+
+        .btn {
+          padding: $spacing-unit * 1.25 $spacing-unit * 2;
+          border-radius: $border-radius-lg;
+          border: 1px solid transparent;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all $transition-normal;
+
+          &.secondary {
+            background: rgba($text-muted, 0.08);
+            color: $text-primary;
+            border-color: rgba($text-muted, 0.15);
+            &:hover { background: rgba($text-muted, 0.12); }
+          }
+
+          &.danger {
+            background: rgba($danger-color, 0.12);
+            color: $danger-color;
+            border-color: rgba($danger-color, 0.25);
+            &:hover { background: $danger-color; color: white; }
+          }
+
+          &:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+          }
+        }
+      }
     }
   }
 }

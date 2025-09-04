@@ -7,8 +7,11 @@ const api = axios.create({
 
 api.interceptors.request.use((config) => {
     try {
+        // Prefer the dedicated token key saved on login
+        const storedToken = localStorage.getItem("token");
+        // Fallback to token possibly embedded in the stored user object
         const user = JSON.parse(localStorage.getItem("user"));
-        const token = user?.token;
+        const token = storedToken || user?.token;
         if (token && !config.headers.Authorization) {
             config.headers.Authorization = `Bearer ${token}`;
         }

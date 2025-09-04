@@ -32,6 +32,7 @@ import bookingRoute from "./routes/booking.js";
 import imageSliderRoute from "./routes/imageSlider.js";
 import reservationRoute from "./routes/reservations.js";
 import paymentRoute from "./routes/payment.js";
+import uploadRoute from "./routes/upload.js";
 
 dotenv.config();
 
@@ -105,6 +106,7 @@ app.use("/api", bookingRoute);
 app.use("/api/imageSlider", imageSliderRoute);
 app.use('/api/reservations', reservationRoute);
 app.use('/api/payment', paymentRoute);
+app.use('/api/upload', uploadRoute);
 // Health check endpoint
 app.get("/api/health", (req, res) => {
     res.json({ status: "ok" });

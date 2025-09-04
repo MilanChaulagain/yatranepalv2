@@ -11,6 +11,7 @@ import NewChadparba from "./pages/newChadparba/newChadparba";
 import AdminBookings from "./pages/Booking/booking";
 import NewImageSlider from "./pages/ImageSlider/imageSlider";
 import EditEntity from "./pages/Edit/EditEntity";
+import Single from "./pages/single/Single";
 
 import {
   chadParbaInputs,
@@ -35,11 +36,12 @@ import {
 import "./style/dark.scss";
 import "./style/global.scss";
 
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { DarkModeContext } from "./context/darkModeContext";
 import { AuthContext } from "./context/AuthContext";
 import toast, { Toaster } from "react-hot-toast";
+import axios from "axios";
 
 function App() {
   const { darkMode, sidebarCollapsed } = useContext(DarkModeContext);
@@ -49,6 +51,37 @@ function App() {
     if (!user) return <Navigate to="/login" />;
     return children;
   };
+
+  // Attach auth token to every axios request
+  // Ensures delete and other protected endpoints include the Bearer token
+  useEffect(() => {
+    const requestInterceptor = axios.interceptors.request.use((config) => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        config.headers = config.headers || {};
+        config.headers["Authorization"] = `Bearer ${token}`;
+      }
+      return config;
+    });
+
+    const responseInterceptor = axios.interceptors.response.use(
+      (res) => res,
+      (error) => {
+        if (error?.response?.status === 401) {
+          // Optionally redirect to login on unauthorized
+          // and/or clear token
+          // localStorage.removeItem("token");
+          toast.error("Session expired. Please log in again.");
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      axios.interceptors.request.eject(requestInterceptor);
+      axios.interceptors.response.eject(responseInterceptor);
+    };
+  }, []);
 
   return (
     <div className={`app ${darkMode ? 'dark' : ''} fade-in main-layout`} style={{"--sidebar-width": sidebarCollapsed ? "80px" : "280px"}}>
@@ -73,6 +106,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <List columns={userColumns} />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path=":id"
+                element={
+                  <ProtectedRoute>
+                    <Single />
                   </ProtectedRoute>
                 }
               />
@@ -220,6 +261,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <List columns={placeColumns} />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path=":id"
+                element={
+                  <ProtectedRoute>
+                    <Single />
                   </ProtectedRoute>
                 }
               />

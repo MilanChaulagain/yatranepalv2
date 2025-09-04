@@ -7,6 +7,8 @@ import { useState, useEffect } from "react";
 import { placeInputs } from "../../formSource";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { testCloudinaryConfig, testCloudinaryUpload } from "../../utils/cloudinaryTest";
 
 const categoryOptions = [
   { label: "Cultural", value: "Cultural" },
@@ -243,34 +245,28 @@ const NewPlace = () => {
 
     let photoUrls = [];
     if (files && files.length > 0) {
+      // Test Cloudinary configuration first
+      if (!testCloudinaryConfig()) {
+        setError("Cloudinary configuration is missing. Please check your environment variables.");
+        return;
+      }
+
       try {
         photoUrls = await Promise.all(
           Array.from(files).map(async (file) => {
-            const data = new FormData();
-            data.append("file", file);
-            data.append("upload_preset", process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET);
-
-            const res = await axios.post(
-              `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_CLOUD_NAME}/image/upload`,
-              data,
-              {
-                headers: {
-                  "Content-Type": "multipart/form-data",
-                },
-                onUploadProgress: (progressEvent) => {
-                  const percentCompleted = Math.round(
-                    (progressEvent.loaded * 100) / progressEvent.total
-                  );
-                  console.log(`Upload progress: ${percentCompleted}%`);
-                },
-              }
-            );
-            return res.data.url;
+            try {
+              const uploadRes = await testCloudinaryUpload(file);
+              return uploadRes.url;
+            } catch (uploadErr) {
+              console.error("Upload error for file:", file.name, uploadErr);
+              throw uploadErr;
+            }
           })
         );
+        toast.success("Images uploaded successfully!");
       } catch (err) {
         console.error("Image upload failed:", err);
-        setError("One or more image uploads failed!");
+        setError("One or more image uploads failed: " + err.message);
         return;
       }
     }
@@ -289,7 +285,7 @@ const NewPlace = () => {
 
     try {
       await axios.post("/place", newPlace);
-      alert("Place created successfully!");
+      toast.success("Place created successfully!");
       navigate("/place");
     } catch (err) {
       console.error("Place creation failed:", err.response?.data || err.message);

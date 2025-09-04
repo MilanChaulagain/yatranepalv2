@@ -6,6 +6,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { testCloudinaryConfig, testCloudinaryUpload } from "../../utils/cloudinaryTest";
 
 const New = ({ inputs, title }) => {
   const [file, setFile] = useState(null);
@@ -22,30 +23,20 @@ const New = ({ inputs, title }) => {
     let imageUrl = "";
 
     if (file) {
-      const data = new FormData();
-      data.append("file", file);
-     data.append("upload_preset", process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET);
- // Add any other required Cloudinary parameters here
+      // Test Cloudinary configuration first
+      if (!testCloudinaryConfig()) {
+        toast.error("Cloudinary configuration is missing. Please check your environment variables.");
+        return;
+      }
 
       try {
-        const uploadRes = await axios.post(
-          `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_CLOUD_NAME}/image/upload`,
-        data,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-          onUploadProgress: (progressEvent) => {
-            const percentCompleted = Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total
-            );
-            console.log(`Upload progress: ${percentCompleted}%`);
-          },
-        }
-        );
-        imageUrl = uploadRes.data.url;
+        // Use the test function for better debugging
+        const uploadRes = await testCloudinaryUpload(file);
+        imageUrl = uploadRes.url;
+        toast.success("Image uploaded successfully!");
       } catch (err) {
-        toast.error("Image upload failed");
+        console.error("Upload error:", err);
+        toast.error("Image upload failed: " + err.message);
         return;
       }
     }

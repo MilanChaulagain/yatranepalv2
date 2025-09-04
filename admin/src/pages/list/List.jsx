@@ -6,13 +6,10 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Plus,
   Search,
-  Filter,
   Edit,
   Trash2,
   Eye,
-  MoreVertical,
   RefreshCw,
-  Download,
   Calendar,
   User,
   Building2,
@@ -34,10 +31,7 @@ const List = ({ columns }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedItems, setSelectedItems] = useState([]);
-
-  useEffect(() => {
-    fetchData();
-  }, [path]);
+  const [confirmState, setConfirmState] = useState({ open: false, title: "", message: "", onConfirm: null, confirming: false });
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -68,41 +62,70 @@ const List = ({ columns }) => {
     }
   }, [path]);
 
-  const handleDelete = useCallback(async (id) => {
-    toast.promise(
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  const performDelete = useCallback(async (id) => {
+    return toast.promise(
       axios.delete(`http://localhost:8800/api/${path}/${id}`),
       {
         loading: 'Deleting item...',
         success: () => {
-          setData(data.filter(item => item._id !== id));
+          setData(prev => prev.filter(item => item._id !== id));
           return 'Item deleted successfully!';
         },
         error: 'Failed to delete item.',
       }
     ).catch(error => console.error('Delete promise failed:', error));
-  }, [path, data]);
+  }, [path]);
 
-  const handleBulkDelete = useCallback(async () => {
+  const handleDelete = useCallback((id) => {
+    setConfirmState({
+      open: true,
+      title: 'Delete Item',
+      message: 'Are you sure you want to delete this item? This action cannot be undone.',
+      confirming: false,
+      onConfirm: async () => {
+        try {
+          setConfirmState(prev => ({ ...prev, confirming: true }));
+          await performDelete(id);
+        } finally {
+          setConfirmState({ open: false, title: '', message: '', onConfirm: null, confirming: false });
+        }
+      }
+    });
+  }, [performDelete]);
+
+  const handleBulkDelete = useCallback(() => {
     if (selectedItems.length === 0) {
       toast.error('Please select items to delete');
       return;
     }
-
-    toast.promise(
-      Promise.all(
-        selectedItems.map(id => axios.delete(`http://localhost:8800/api/${path}/${id}`))
-      ),
-      {
-        loading: `Deleting ${selectedItems.length} items...`,
-        success: () => {
-          setData(data.filter(item => !selectedItems.includes(item._id)));
+    setConfirmState({
+      open: true,
+      title: `Delete ${selectedItems.length} item(s)`,
+      message: 'Are you sure you want to delete the selected items? This action cannot be undone.',
+      confirming: false,
+      onConfirm: async () => {
+        try {
+          setConfirmState(prev => ({ ...prev, confirming: true }));
+          await toast.promise(
+            Promise.all(selectedItems.map(id => axios.delete(`http://localhost:8800/api/${path}/${id}`))),
+            {
+              loading: `Deleting ${selectedItems.length} items...`,
+              success: () => `${selectedItems.length} items deleted successfully!`,
+              error: 'Failed to delete some items.',
+            }
+          );
+          setData(prev => prev.filter(item => !selectedItems.includes(item._id)));
           setSelectedItems([]);
-          return `${selectedItems.length} items deleted successfully!`;
-        },
-        error: 'Failed to delete some items.',
+        } finally {
+          setConfirmState({ open: false, title: '', message: '', onConfirm: null, confirming: false });
+        }
       }
-    ).catch(error => console.error('Bulk delete promise failed:', error));
-  }, [path, data, selectedItems]);
+    });
+  }, [path, selectedItems]);
 
   const getIconForPath = () => {
     switch (path) {
@@ -137,6 +160,29 @@ const List = ({ columns }) => {
     const matchesFilter = filterStatus === "all" || item.status === filterStatus;
     return matchesSearch && matchesFilter;
   });
+
+  const resolveCloudinaryUrl = (maybePublicIdOrUrl) => {
+    if (!maybePublicIdOrUrl) return null;
+    const value = maybePublicIdOrUrl.toString();
+    if (value.startsWith('http://') || value.startsWith('https://')) return value;
+    const cloudName = process.env.REACT_APP_CLOUDINARY_CLOUD_NAME;
+    if (!cloudName) return null;
+    // Construct a basic delivery URL for a public_id stored in DB
+    return `https://res.cloudinary.com/${cloudName}/image/upload/${value}`;
+  };
+
+  const getThumbnailUrl = (item) => {
+    if (path === 'users') {
+      const candidate = item.img || item.photo || item.profilePic || item.profileImage || item.avatar || item.image;
+      const url = resolveCloudinaryUrl(candidate);
+      return url || '/images/no-image-icon-0.jpg';
+    }
+    if (path === 'hotels') {
+      if (Array.isArray(item.photos) && item.photos.length > 0) return item.photos[0];
+      return item.img || item.photo || '/images/no-image-icon-0.jpg';
+    }
+    return item.img || item.photo || '/images/no-image-icon-0.jpg';
+  };
 
   if (loading) {
     return (
@@ -243,23 +289,24 @@ const List = ({ columns }) => {
                       </div>
                       <div className="card-actions">
                         <Link to={`/${path}/${item._id}`} className="action-btn view">
-                          <Eye className="w-4 h-4" />
+                          <Eye size={16} />
                         </Link>
                         <Link to={`/${path}/${item._id}/edit`} className="action-btn edit">
-                          <Edit className="w-4 h-4" />
+                          <Edit size={16} />
                         </Link>
-                        <button 
-                          onClick={() => handleDelete(item._id)} 
+                        <button
+                          onClick={() => handleDelete(item._id)}
                           className="action-btn delete"
+                          title="Delete"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 size={16}  />
                         </button>
                       </div>
                     </div>
                     <div className="card-content">
-                      {(item.img || item.photo) && (
-                        <div className="thumbnail">
-                          <img src={item.img || item.photo} alt="thumb" />
+                      {getThumbnailUrl(item) && (
+                        <div className={`thumbnail ${path === 'users' ? 'avatar' : ''}`}>
+                          <img src={getThumbnailUrl(item)} alt={item.username || item.name || 'thumb'} />
                         </div>
                       )}
                       {item.email && <p><strong>Email:</strong> {item.email}</p>}
@@ -300,6 +347,31 @@ const List = ({ columns }) => {
               <span className="stat-value">{selectedItems.length}</span>
             </div>
           </div>
+          {/* Confirm Modal */}
+          {confirmState.open && (
+            <div className="confirm-modal">
+              <div className="confirm-content">
+                <h3>{confirmState.title}</h3>
+                <p>{confirmState.message}</p>
+                <div className="confirm-actions">
+                  <button
+                    className="btn secondary"
+                    onClick={() => setConfirmState({ open: false, title: '', message: '', onConfirm: null, confirming: false })}
+                    disabled={confirmState.confirming}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="btn danger"
+                    onClick={confirmState.onConfirm}
+                    disabled={confirmState.confirming}
+                  >
+                    {confirmState.confirming ? 'Deleting...' : 'Delete'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
