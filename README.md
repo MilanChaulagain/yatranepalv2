@@ -46,7 +46,7 @@ Installation
 
 Clone the repository
 
-git clone https://github.com/your-username/yatranepal.git
+git clone https://github.com/MilanChaulagain/yatranepalv2.git
 cd yatranepal
 
 
@@ -118,6 +118,6 @@ This project is licensed under the MIT License.
 
 👥 Team
 
-👨‍💻 Developer: Your Name(s)
+👨‍💻 Developer: Milan Chaulagain
 
 🌏 Project: YatraNepal
