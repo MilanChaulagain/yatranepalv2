@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import logo from "../../assets/logo.png";
 import { IoMenu } from "react-icons/io5";
+import {toast} from "react-hot-toast"
 
 const Navbar = () => {
   const { user, dispatch } = useContext(AuthContext);
@@ -28,6 +29,7 @@ const Navbar = () => {
     dispatch({ type: "LOGOUT" });
     localStorage.removeItem("user");
     localStorage.removeItem("token");
+    toast.success("Logged out successfully");
     navigate("/");
     setProfileMenuOpen(false);
   };

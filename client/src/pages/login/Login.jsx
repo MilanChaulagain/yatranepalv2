@@ -5,10 +5,11 @@ import axios from "axios";
 import { AuthContext } from "../../context/AuthContext";
 import "./login.css";
 import Navbar from "../../components/navbar/Navbar";
+import {toast} from "react-hot-toast"
 
 const Login = () => {
     const [credentials, setCredentials] = useState({
-        username: "",
+        identifier: "", // This will hold either username or email
         password: "",
     });
 
@@ -31,11 +32,26 @@ const Login = () => {
 
         try {
             // Clear old token from localStorage
-        // localStorage.removeItem("token");
-        // localStorage.removeItem("user");
+            // localStorage.removeItem("token");
+            // localStorage.removeItem("user");
             console.log("Trying to login");
-            const res = await axios.post("http://localhost:8800/api/auth/login", credentials, {
+            // Determine if identifier is email or username
+            const isEmail = credentials.identifier.includes('@');
+            
+            const loginData = {
+                [isEmail ? 'email' : 'username']: credentials.identifier,
+                password: credentials.password
+            };
+
+            // Get token from localStorage if it exists
+            const token = localStorage.getItem("token");
+            
+            const res = await axios.post("http://localhost:8800/api/auth/login", loginData, {
                 withCredentials: true,
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                }
             });
 
             console.log("Login response", res.data)
@@ -47,9 +63,12 @@ const Login = () => {
             }
 
             dispatch({ type: "LOGIN_SUCCESS", payload: res.data.details });
+            toast.success("Logged in successfully");
+            toast.success(`Welcome ${res.data.details.username}`)
             navigate("/");
         } catch (err) {
-            console.log("Login failed")
+            console.log("Login failed");
+            toast.error("Login failed");
             dispatch({
                 type: "LOGIN_FAILURE",
                 payload: err.response?.data || { message: "Login failed." },
@@ -81,13 +100,13 @@ const Login = () => {
 
                         <form onSubmit={handleClick} className="login-form">
                             <div className="form-group">
-                                <label htmlFor="username">Username</label>
+                                <label htmlFor="identifier">Username or Email</label>
                                 <input
-                                    id="username"
+                                    id="identifier"
                                     type="text"
-                                    value={credentials.username}
+                                    value={credentials.identifier}
                                     onChange={handleChange}
-                                    placeholder="Enter your username"
+                                    placeholder="Enter your username or email"
                                     required
                                 />
                             </div>

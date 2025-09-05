@@ -1,23 +1,26 @@
 import "./navbar.scss";
-import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import LanguageOutlinedIcon from "@mui/icons-material/LanguageOutlined";
 import DarkModeOutlinedIcon from "@mui/icons-material/DarkModeOutlined";
 import FullscreenExitOutlinedIcon from "@mui/icons-material/FullscreenExitOutlined";
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import ChatBubbleOutlineOutlinedIcon from "@mui/icons-material/ChatBubbleOutlineOutlined";
 import { DarkModeContext } from "../../context/darkModeContext";
+import { AuthContext } from "../../context/AuthContext";
 import { useContext, useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import UserDropdown from "./UserDropdown";
-import toast from "react-hot-toast";
+import { User } from "lucide-react";
 
 const Navbar = () => {
   const { dispatch } = useContext(DarkModeContext);
+  const { user } = useContext(AuthContext);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const [search, setSearch] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
+
+  const defaultAvatar = "https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-High-Quality-Image.png";
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -106,15 +109,26 @@ const Navbar = () => {
           </div>
           <div className="item" ref={dropdownRef}>
             <div onClick={() => setIsDropdownOpen(!isDropdownOpen)}>
-              <img
-                src="https://documents.bcci.tv/resizedimageskirti/164_compress.png"
-                alt=""
-                className="avatar"
-              />
+              {user?.img ? (
+                <img
+                  src={user.img}
+                  alt={user.username}
+                  className="avatar"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = defaultAvatar;
+                  }}
+                />
+              ) : (
+                <div className="avatar-placeholder">
+                  <User className="user-icon" />
+                </div>
+              )}
             </div>
             <UserDropdown 
               isOpen={isDropdownOpen} 
-              onClose={() => setIsDropdownOpen(false)} 
+              onClose={() => setIsDropdownOpen(false)}
+              user={user}
             />
           </div>
         </div>

@@ -113,7 +113,8 @@
           transition: $transition-quick;
         }
 
-        .avatar {
+        .avatar,
+        .avatar-placeholder {
           width: 34px;
           height: 34px;
           border-radius: 50%;
@@ -121,11 +122,25 @@
           border: 2px solid rgba($primary-color, 0.2);
           transition: $transition-quick;
           cursor: pointer;
+          background: rgba($background-secondary, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
 
           &:hover {
             border-color: $primary-color;
             transform: translateY(-1px);
           }
+
+          .user-icon {
+            width: 20px;
+            height: 20px;
+            color: $text-muted;
+          }
+        }
+
+        .avatar {
+          object-fit: cover;
         }
 
         &:last-child {

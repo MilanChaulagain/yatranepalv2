@@ -13,29 +13,38 @@ const Featured = () => {
   const [lastMonth, setLastMonth] = useState(0);
 
   useEffect(() => {
-    const fetchBookings = async () => {
+    const fetchRevenue = async () => {
       try {
         const res = await axios.get("http://localhost:8800/api/reservations");
-        const items = Array.isArray(res.data) ? res.data : [];
+        const bookings = Array.isArray(res.data) ? res.data : [];
         const now = new Date();
         const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const startOfWeek = new Date(now);
         startOfWeek.setDate(now.getDate() - 7);
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-        let t = 0, w = 0, m = 0;
-        items.forEach((b) => {
+        let todayRev = 0, weekRev = 0, monthRev = 0;
+        bookings.forEach((b) => {
           const created = new Date(b.createdAt || b.updatedAt || now);
-          if (created >= startOfToday) t += 1;
-          if (created >= startOfWeek) w += 1;
-          if (created >= startOfMonth) m += 1;
+          const amount = b.totalPrice || 0;
+          if (created >= startOfToday) todayRev += amount;
+          if (created >= startOfWeek) weekRev += amount;
+          if (created >= startOfMonth) monthRev += amount;
         });
-        setToday(t); setLastWeek(w); setLastMonth(m);
+        setToday(todayRev);
+        setLastWeek(weekRev);
+        setLastMonth(monthRev);
       } catch (e) {
-        setToday(0); setLastWeek(0); setLastMonth(0);
+        console.error("Error fetching revenue:", e);
+        setToday(0);
+        setLastWeek(0);
+        setLastMonth(0);
       }
     };
-    fetchBookings();
+    fetchRevenue();
+    // Set up interval for real-time updates
+    const interval = setInterval(fetchRevenue, 60000); // Update every minute
+    return () => clearInterval(interval);
   }, []);
 
   const pct = lastMonth ? Math.min(100, Math.round((today / lastMonth) * 100)) : (today ? 100 : 0);
@@ -43,38 +52,50 @@ const Featured = () => {
   return (
     <div className="featured">
       <div className="top">
-        <h1 className="title">Total Bookings</h1>
+        <h1 className="title">Total Revenue</h1>
         <MoreVertIcon fontSize="small" />
       </div>
       <div className="bottom">
         <div className="featuredChart">
-          <CircularProgressbar value={pct} text={`${pct}%`} strokeWidth={5} />
+          <CircularProgressbar 
+            value={pct} 
+            text={`${pct}%`} 
+            strokeWidth={5}
+            styles={{
+              path: { stroke: '#22c55e' },
+              text: { fill: '#22c55e', fontSize: '1.5rem' },
+            }}
+          />
         </div>
-        <p className="title">Bookings made today</p>
-        <p className="amount">{today}</p>
+        <p className="title">Revenue today</p>
+        <p className="amount">${today.toFixed(2)}</p>
         <p className="desc">
-          Booking data is being updated in real-time. Pending bookings may not be reflected yet.
+          Revenue data is updated in real-time. Previous transactions and pending payments may affect these values.
         </p>
         <div className="summary">
           <div className="item">
-            <div className="itemTitle">Target</div>
-            <div className="itemResult negative">
-              <KeyboardArrowDownIcon fontSize="small" />
-              <div className="resultAmount">{Math.max(0, lastMonth - lastWeek)}</div>
+            <div className="itemTitle">Monthly Target</div>
+            <div className={`itemResult ${lastMonth >= 10000 ? "positive" : "negative"}`}>
+              {lastMonth >= 10000 ? (
+                <KeyboardArrowUpOutlinedIcon fontSize="small" />
+              ) : (
+                <KeyboardArrowDownIcon fontSize="small" />
+              )}
+              <div className="resultAmount">${(10000 - lastMonth).toFixed(2)}</div>
             </div>
           </div>
           <div className="item">
             <div className="itemTitle">Last Week</div>
             <div className="itemResult positive">
               <KeyboardArrowUpOutlinedIcon fontSize="small" />
-              <div className="resultAmount">{lastWeek}</div>
+              <div className="resultAmount">${lastWeek.toFixed(2)}</div>
             </div>
           </div>
           <div className="item">
-            <div className="itemTitle">Last Month</div>
+            <div className="itemTitle">This Month</div>
             <div className="itemResult positive">
               <KeyboardArrowUpOutlinedIcon fontSize="small" />
-              <div className="resultAmount">{lastMonth}</div>
+              <div className="resultAmount">${lastMonth.toFixed(2)}</div>
             </div>
           </div>
         </div>

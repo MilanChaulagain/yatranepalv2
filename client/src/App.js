@@ -1,5 +1,8 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import LoadingBar from 'react-top-loading-bar';
+import { LoadingProvider, useLoading } from "./context/LoadingContext";
+import { useLoadingRoutes } from "./hooks/useLoadingRoutes";
 
 import Home from "./pages/home/Home";
 import Hotel from "./pages/hotel/Hotel";
@@ -33,11 +36,41 @@ import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
 import NepaliCalendar from "./pages/calender/calender";
 import PaymentSuccess from "./pages/Payment/PaymentSuccess";
 import PaymentFailure from "./pages/Payment/PaymentFailure";
+import { Toaster } from "react-hot-toast";
 
-function App() {
+const AppContent = () => {
+  const { progress } = useLoading();
+  useLoadingRoutes(); // Add this line to handle route changes
+
   return (
-    <BrowserRouter>
-      <Routes>
+    <div>
+      <LoadingBar
+        color='#2998ff'
+        progress={progress}
+        height={3}
+        shadow={true}
+        className="loading-bar"
+        loaderSpeed={300}
+        transitionTime={400}
+        waitingTime={500}
+      />
+      <Toaster 
+      position="top-right"
+      reverseOrder={false}
+      gutter={8}
+      containerStyle={{
+        top: 80, // Position below navbar (navbar height + some spacing)
+        left: 20,
+      }}
+      toastOptions={{
+        duration: 3000,
+        style: {
+          background: '#363636',
+          color: '#fff',
+        },
+      }}
+    />
+    <Routes>
         {/* Public and user-facing routes */}
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<LoginPage />} />
@@ -72,6 +105,16 @@ function App() {
         <Route path="/payment-success" element={<PaymentSuccess />} />
         <Route path="/payment-failure" element={<PaymentFailure />} />
       </Routes>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <LoadingProvider>
+        <AppContent />
+      </LoadingProvider>
     </BrowserRouter>
   );
 }

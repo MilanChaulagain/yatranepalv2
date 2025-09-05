@@ -7,6 +7,7 @@ import axios from "axios"
 import "./register.css"
 import { AuthContext } from "../../context/AuthContext"
 import Navbar from "../../components/navbar/Navbar"
+import toast from "react-hot-toast"
 
 const RegisterPage = () => {
     const [formData, setFormData] = useState({
@@ -101,10 +102,12 @@ const RegisterPage = () => {
                     }
                 }
             )
-
+            localStorage.setItem("token", registerResponse.data.token)
             console.log("Registration successful:", registerResponse.data)
 
             // Auto-login after registration
+
+            const token = localStorage.getItem("token");
             console.log("Attempting auto-login...")
             const loginRes = await axios.post(
                 "http://localhost:8800/api/auth/login", 
@@ -115,7 +118,8 @@ const RegisterPage = () => {
                 {
                     withCredentials: true,
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
                     }
                 }
             )
@@ -133,7 +137,8 @@ const RegisterPage = () => {
             // Update auth context
             dispatch({ type: "LOGIN_SUCCESS", payload: loginRes.data.details })
             
-            alert("Registration and login successful!")
+            toast.success("Registered successfully");
+            toast.success(`Welcome, ${loginRes.data.username}`)
             navigate("/")
             
         } catch (err) {

@@ -128,7 +128,7 @@ const NewPlace = () => {
 
       // Add more specific queries if we have a name
       if (name) {
-        searchQueries.push(`${name}, Kathmandu Valley, Nepal`);
+        searchQueries.push(`${name},  Nepal`);
         searchQueries.push(`${name}, Kathmandu, Nepal`);
       }
 
