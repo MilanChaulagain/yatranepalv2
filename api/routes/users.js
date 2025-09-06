@@ -5,7 +5,7 @@ import { deleteUser, getUser, getUserRole, getUsers, updateUser } from '../contr
 
 const router = express.Router();
 
-router.get('/', getUsers);
+router.get('/', verifyAdmin, getUsers);
 router.get('/:id', verifyUser, getUser);
 router.put('/update/:id', verifyUser, updateUser);
 router.delete('/:id', verifyAdmin, deleteUser);
