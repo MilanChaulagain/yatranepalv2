@@ -6,6 +6,7 @@ import { roomInputs } from "../../formSource";
 import useFetch from "../../hooks/useFetch";
 import axios from "axios";
 import { useNavigate } from "react-router-dom"; 
+import toast from "react-hot-toast";
 
 const NewRoom = () => {
   const [info, setInfo] = useState({});
@@ -36,12 +37,12 @@ const NewRoom = () => {
 
     try {
       await axios.post(`/rooms/${hotelId}`, { ...info, roomNumbers });
-      alert("Room created successfully!");
+      toast.success("New room created successfully");
             navigate("/rooms");
 
     } catch (err) {
       console.error("Error creating room:", err.response?.data || err.message);
-      alert("Failed to create room: " + (err.response?.data?.message || err.message));
+      toast.error("Room creation failed");
     }
   };
 

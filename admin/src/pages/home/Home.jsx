@@ -28,14 +28,28 @@ const Home = () => {
   useEffect(() => {
     const load = async () => {
       try {
+        // Get the token from localStorage
+        const token = localStorage.getItem("token");
+        // console.log("Fetched token: ", token);
+        if (!token) {
+          throw new Error("No authentication token found");
+        }
+
+        // Create headers with the token
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        };
+
         const [usersRes, hotelsRes, roomsRes, placesRes, guidesRes, reservationsRes, reviewsRes] = await Promise.all([
-          axios.get("http://localhost:8800/api/users"),
-          axios.get("http://localhost:8800/api/hotels"),
-          axios.get("http://localhost:8800/api/rooms"),
-          axios.get("http://localhost:8800/api/place"),
-          axios.get("http://localhost:8800/api/touristguide/getAllTouristGuides"),
-          axios.get("http://localhost:8800/api/reservations"),
-          axios.get("http://localhost:8800/api/review"),
+          axios.get("http://localhost:8800/api/users", config),
+          axios.get("http://localhost:8800/api/hotels", config),
+          axios.get("http://localhost:8800/api/rooms", config),
+          axios.get("http://localhost:8800/api/place", config),
+          axios.get("http://localhost:8800/api/touristguide/getAllTouristGuides", config),
+          axios.get("http://localhost:8800/api/reservations", config),
+          axios.get("http://localhost:8800/api/review", config),
         ]);
         setStats({
           users: Array.isArray(usersRes.data) ? usersRes.data.length : 0,
@@ -51,7 +65,7 @@ const Home = () => {
         setReviews(Array.isArray(reviewsRes.data) ? reviewsRes.data : (reviewsRes.data?.data || []));
         setUsers(Array.isArray(usersRes.data) ? usersRes.data : []);
       } catch (e) {
-        // ignore
+        console.error("Loading data error", e);
       }
     };
     load();

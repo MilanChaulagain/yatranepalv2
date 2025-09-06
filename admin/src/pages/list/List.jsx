@@ -42,16 +42,36 @@ const List = ({ columns }) => {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:8800/api/${path}`);
+      
+      // Get token from localStorage
+      const token = localStorage.getItem("token");
+      console.log("Auth Token:", token);
+      
+      const config = {
+        headers: { 
+          Authorization: token ? `Bearer ${token}` : undefined
+        }
+      };
+      console.log("Request Config:", config);
+      console.log("Current path:", path);
+      
+      const response = await axios.get(`http://localhost:8800/api/${path}`, config);
+      console.log("Full API Response:", response);
+      
       // Handle different response formats
       const responseData = response.data;
+      console.log("Response Data:", responseData);
+      
       if (responseData.data && Array.isArray(responseData.data)) {
         // Places format: { success: true, data: [...], count: ... }
+        console.log("Setting data from responseData.data array");
         setData(responseData.data);
       } else if (Array.isArray(responseData)) {
         // Users format: [...]
+        console.log("Setting data from direct array response");
         setData(responseData);
       } else {
+        console.log("No valid data format found, setting empty array");
         setData([]);
       }
     } catch (error) {
@@ -67,8 +87,15 @@ const List = ({ columns }) => {
   }, [fetchData]);
 
   const performDelete = useCallback(async (id) => {
+    const token = localStorage.getItem("token");
+    const config = {
+      headers: { 
+        Authorization: token ? `Bearer ${token}` : undefined
+      }
+    };
+    
     return toast.promise(
-      axios.delete(`http://localhost:8800/api/${path}/${id}`),
+      axios.delete(`http://localhost:8800/api/${path}/${id}`, config),
       {
         loading: 'Deleting item...',
         success: () => {
