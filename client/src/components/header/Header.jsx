@@ -156,7 +156,7 @@ const Header = () => {
     let route = "";
     switch(item.reviewedModel) {
       case "Place":
-        route = `/place/${item._id}`;
+        route = `/placedetails/${item._id}`;
         break;
       case "Hotel":
         route = `/stays/${item._id}`;

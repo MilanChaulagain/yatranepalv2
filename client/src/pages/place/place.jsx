@@ -189,7 +189,6 @@ const StarRating = ({ rating, size = 16 }) => {
 
 // Review Component
 const ReviewSection = ({ placeId }) => {
-  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [averageRating, setAverageRating] = useState(null);
 
@@ -199,12 +198,10 @@ const ReviewSection = ({ placeId }) => {
       
       setLoading(true);
       try {
-        // Get all reviews and filter for this place
         const reviewsResponse = await fetch(`${BASE_URL}/api/review/`);
         if (reviewsResponse.ok) {
           const reviewsData = await reviewsResponse.json();
           
-          // Handle different response structures
           let allReviews = [];
           if (Array.isArray(reviewsData)) {
             allReviews = reviewsData;
@@ -212,24 +209,18 @@ const ReviewSection = ({ placeId }) => {
             allReviews = reviewsData.data;
           }
           
-          // Filter reviews for this specific place
           const placeReviews = allReviews.filter(review => 
             review.reviewedItem && 
             review.reviewedItem._id === placeId && 
             review.reviewedModel === "Place"
           );
           
-          setReviews(placeReviews);
-          
-          // Calculate average rating
           if (placeReviews.length > 0) {
             const totalRating = placeReviews.reduce((sum, review) => sum + review.rating, 0);
             setAverageRating(totalRating / placeReviews.length);
           } else {
             setAverageRating(null);
           }
-        } else {
-          console.error("Failed to fetch reviews:", reviewsResponse.status);
         }
       } catch (error) {
         console.error("Error fetching review data:", error);
@@ -241,39 +232,20 @@ const ReviewSection = ({ placeId }) => {
     fetchReviewData();
   }, [placeId]);
 
-  if (loading) return <div className="reviews-loading">Loading reviews...</div>;
+  if (loading) return null;
   
   return (
     <div className="reviews-section">
       <div className="reviews-header">
-        <h4>Rating</h4>
         {averageRating !== null ? (
           <div className="average-rating">
-            <StarRating rating={averageRating} size={14} />
-            <span>{reviews.length} review{reviews.length !== 1 ? 's' : ''}</span>
+            <StarRating rating={averageRating} size={12} />
+            <span className="rating-text">({averageRating.toFixed(1)})</span>
           </div>
         ) : (
           <div className="no-reviews-text">N/A</div>
         )}
       </div>
-      
-      {reviews.length > 0 && (
-        <div className="reviews-list">
-          {reviews.slice(0, 2).map((review) => (
-            <div key={review._id} className="review-item">
-              <div className="review-header">
-                <StarRating rating={review.rating} size={14} />
-                <span className="review-date">
-                  {new Date(review.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-              {review.comment && (
-                <p className="review-comment">{review.comment}</p>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
     </div>
   );
 };
@@ -561,12 +533,19 @@ const Places = () => {
   const handleSearch = (e) => e.preventDefault();
 
   const handleViewMap = (lat, lng) => {
+    if (!lat || !lng) {
+      alert("Location coordinates not available for this place.");
+      return;
+    }
+
     if (userLocation) {
-      const url = `https://www.google.com/maps/dir/?api=1&origin=${userLocation.lat},${userLocation.lng}&destination=${lat},${lng}&travelmode=driving`;
-      window.open(url, "_blank");
+      // If user location is available, show directions
+      const url = `https://www.google.com/maps/dir/?api=1&origin=${userLocation.lat},${userLocation.lng}&destination=${lat},${lng}&travelmode=driving&zoom=15`;
+      window.open(url, "_blank", "noopener,noreferrer");
     } else {
-      const url = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
-      window.open(url, "_blank");
+      // If no user location, show the place directly with a marker
+      const url = `https://www.google.com/maps/place/${lat},${lng}/@${lat},${lng},15z`;
+      window.open(url, "_blank", "noopener,noreferrer");
     }
   };
 
@@ -582,9 +561,10 @@ const Places = () => {
     <div className="places-page">
       <Navbar />
       <Header />
-        <div className="places-container">
-        <div className="places-header">
-          <div className="places-header-top">
+      <div className="places-container">
+        {/* Sidebar with Search and Filters */}
+        <div className="places-sidebar">
+          <div className="places-header">
             <div className="places-title">
               <h1>Explore Kathmandu Valley</h1>
               <p>Discover heritage sites, cultural experiences, and hidden gems</p>
@@ -641,11 +621,6 @@ const Places = () => {
                 <MapPin size={16} /> Near Me
               </button>
             </div>
-            
-            {/* Debug info - remove in production */}
-            <div style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}>
-              Available cities: {availableCities.join(', ')} | Selected: {selectedCity}
-            </div>
 
             {useLocation && userLocation && (
               <div className="radius-control">
@@ -659,33 +634,34 @@ const Places = () => {
                 />
               </div>
             )}
-          </div>
 
-          <div className="category-filters">
-            <button
-              className="filter-toggle"
-              onClick={() => setShowFilters(!showFilters)}
-            >
-              <Filter size={16} /> {showFilters ? "Hide Filters" : "Show Filters"}
-            </button>
+            <div className="category-filters">
+              <button
+                className="filter-toggle"
+                onClick={() => setShowFilters(!showFilters)}
+              >
+                <Filter size={16} /> {showFilters ? "Hide Filters" : "Show Filters"}
+              </button>
 
-            {showFilters && (
-              <div className="category-buttons">
-                {categories.map((category) => (
-                  <button
-                    key={category.id}
-                    className={`category-btn ${selectedCategory === category.id ? "active" : ""}`}
-                    onClick={() => setSelectedCategory(category.id)}
-                  >
-                    {category.icon} {category.name}
-                  </button>
-                ))}
-              </div>
-            )}
+              {showFilters && (
+                <div className="category-buttons">
+                  {categories.map((category) => (
+                    <button
+                      key={category.id}
+                      className={`category-btn ${selectedCategory === category.id ? "active" : ""}`}
+                      onClick={() => setSelectedCategory(category.id)}
+                    >
+                      {category.icon} {category.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="places-content">
+        {/* Main Content Area */}
+        <div className="places-main-content">
           {loading && (
             <div className="loading-container">
               <div className="loader"></div>
@@ -870,28 +846,68 @@ const Places = () => {
             </>
           )}
         </div>
+      </div>
 
-        <div className="places-footer">
-          <div className="footer-content">
-            <div className="disclaimer">
-              <h4><Info size={20} /> Visiting Tips:</h4>
-              <ul>
-                <li>Respect local customs - remove shoes before temples</li>
-                <li>Dress modestly at religious sites</li>
-                <li>Hire licensed guides at heritage sites</li>
-              </ul>
+      {/* Travel Guide and Tips Section */}
+      <div className="travel-guide-container">
+        <div className="container-inner">
+          <div className="travel-guide">
+            <h2><MapPin size={24} /> Kathmandu Valley Travel Guide</h2>
+
+            <div className="guide-section">
+              <h3><Landmark size={20} /> UNESCO World Heritage Sites</h3>
+              <div className="heritage-grid">
+                {heritageSites.map((site) => (
+                  <div key={site.name} className="heritage-card">
+                    <h4>{site.name}</h4>
+                    <p>{site.city}</p>
+                    <p><strong>Significance:</strong> {site.significance}</p>
+                    <p><strong>Feature:</strong> {site.feature}</p>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <div className="emergency-info">
-              <h4><Info size={20} /> Essential Contacts:</h4>
-              <p><strong>Tourist Police:</strong> 1144</p>
-              <p><strong>Archaeology Dept:</strong> +977-1-4250683</p>
-              <p><strong>Emergency Ambulance:</strong> 102</p>
+            <div className="guide-section">
+              <h3><Utensils size={20} /> Local Experiences</h3>
+              <div className="experiences-grid">
+                {localExperiences.map((experience) => (
+                  <div key={experience.title} className="experience-card">
+                    <h4>{experience.title}</h4>
+                    <p>{experience.description}</p>
+                    <p><strong>Where:</strong> {experience.location}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
+
+          <div className="visiting-tips">
+            <div className="tips-content">
+              <div className="disclaimer">
+                <h4><Info size={20} /> Visiting Tips:</h4>
+                <ul>
+                  <li>Respect local customs - remove shoes before temples</li>
+                  <li>Dress modestly at religious sites</li>
+                  <li>Hire licensed guides at heritage sites</li>
+                </ul>
+              </div>
+
+              <div className="emergency-info">
+                <h4><Info size={20} /> Essential Contacts:</h4>
+                <p><strong>Tourist Police:</strong> 1144</p>
+                <p><strong>Archaeology Dept:</strong> +977-1-4250683</p>
+                <p><strong>Emergency Ambulance:</strong> 102</p>
+              </div>
+            </div>
+          </div>
+          {/* New Footer section */}
+          <div>
+        <Footer />
+      </div>
         </div>
       </div>
-      <Footer />
+      {/* Previous footer section */}
     </div>
   );
 };

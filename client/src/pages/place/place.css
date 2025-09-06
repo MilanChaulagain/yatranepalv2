@@ -40,31 +40,62 @@
 .places-page {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
     background-color: #f5f7ff;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     color: #333;
     line-height: 1.6;
+    min-height: 100%;
+    padding-bottom: 2rem;
 }
 
 .places-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 2rem;
+    max-width: 100%;
+    margin: 0;
     width: 100%;
+    display: flex;
+    gap: 2rem;
+    padding: 0 2rem;
+    position: relative;
+}
+
+.places-sidebar {
+    width: 320px;
+    flex-shrink: 0;
+    background: white;
+    position: fixed;
+    top: 100px; /* Adjust based on your header height */
+    left: 2rem;
+    height: calc(100vh - 120px); /* Adjust based on your header height */
+    padding: 1.5rem;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain; /* Prevents scroll chaining */
+    isolation: isolate; /* Creates a new stacking context */
+}
+
+.places-main-content {
+    flex: 1;
+    padding: 2rem 0;
+    min-height: 500px;
+    margin-left: 340px; /* width of sidebar + gap */
 }
 
 /* Modern Header with Glass Morphism */
 .places-header {
-    padding: 2rem 0;
+    padding: 1.5rem;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    border-radius: 0 0 30px 30px;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
     box-shadow: var(--shadow);
     position: relative;
     overflow: hidden;
     z-index: 1;
+    border-radius: 12px;
 }
 
 .places-header::before {
@@ -137,25 +168,24 @@
 .places-controls {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 1.2rem;
 }
 
 .places-search-form {
     position: relative;
-    max-width: 850px;
     width: 100%;
+    margin-bottom: 0.5rem;
 }
 
 .search-input-container {
     display: flex;
     align-items: center;
     background: white;
-    border-radius: 50px;
-    padding: 0 1.5rem;
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    padding: 0 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     transition: var(--transition);
-    border: 2px solid transparent;
-    backdrop-filter: blur(5px);
+    border: 1px solid #eee;
 }
 
 .search-input-container:focus-within {
@@ -204,25 +234,26 @@
 /* Modern City Selector Buttons */
 .places-city-selector {
     display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
 }
 
 .places-city-btn {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 0.8rem 1.4rem;
-    border-radius: 50px;
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    background: #f8f9fa;
+    color: #333;
+    border: 1px solid #eee;
     font-weight: 500;
     cursor: pointer;
     transition: var(--transition);
-    backdrop-filter: blur(12px);
     font-size: 0.9rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    text-align: left;
+    width: 100%;
 }
 
 .places-city-btn:hover {
@@ -245,7 +276,8 @@
     flex-direction: column;
     gap: 0.5rem;
     margin-top: 1rem;
-    background: var(--glass);
+    /* background: var(--glass); */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     padding: 1.2rem;
     border-radius: 16px;
     backdrop-filter: blur(8px);
@@ -253,7 +285,7 @@
 }
 
 .radius-control label {
-    color: white;
+    color: rgb(255, 255, 255);
     font-weight: 500;
     display: flex;
     justify-content: space-between;
@@ -267,7 +299,7 @@
     width: 100%;
     height: 10px;
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(242, 241, 241, 0.2);
     outline: none;
     margin: 0.5rem 0;
     cursor: pointer;
@@ -298,7 +330,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+     background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
     color: white;
     border: none;
     padding: 0.8rem 1.6rem;
@@ -504,14 +536,15 @@
 /* Modern Place Cards - Compact Design */
 .places-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1.5rem;
-    margin: 3rem 0;
+    margin: 0;
+    padding-bottom: 2rem;
 }
 
 .place-card {
     background: white;
-    border-radius: 16px;
+    border-radius: 12px;
     overflow: hidden;
     box-shadow: var(--shadow);
     transition: var(--card-transition);
@@ -520,13 +553,13 @@
 }
 
 .place-card:hover {
-    transform: translateY(-6px);
+    transform: translateY(-4px);
     box-shadow: var(--shadow-hover);
     border-color: var(--primary);
 }
 
 .image-container {
-    height: 160px;
+    height: 140px;
     position: relative;
     overflow: hidden;
 }
@@ -544,10 +577,10 @@
 
 .favorite-btn {
     position: absolute;
-    top: 12px;
-    right: 12px;
-    width: 36px;
-    height: 36px;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     background: white;
     display: flex;
@@ -616,21 +649,21 @@
 }
 
 .place-info {
-    padding: 1.2rem;
+    padding: 0.8rem;
 }
 
 .place-info h3 {
-    font-size: 1.1rem;
-    margin-bottom: 0.6rem;
+    font-size: 1rem;
+    margin-bottom: 0.4rem;
     color: var(--dark);
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.3;
 }
 
 .place-meta {
     display: flex;
-    gap: 0.6rem;
-    margin-bottom: 0.8rem;
+    gap: 0.4rem;
+    margin-bottom: 0.6rem;
     flex-wrap: wrap;
 }
 
@@ -639,9 +672,9 @@
 .distance {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.85rem;
-    padding: 0.4rem 0.8rem;
+    gap: 4px;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.6rem;
     border-radius: 50px;
     font-weight: 500;
     transition: var(--transition);
@@ -664,10 +697,14 @@
 
 .description {
     color: var(--gray);
-    line-height: 1.5;
-    margin-bottom: 1rem;
-    min-height: 40px;
-    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-bottom: 0.6rem;
+    min-height: 32px;
+    font-size: 0.8rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .hover-details {
@@ -727,12 +764,25 @@
 }
 
 /* Modern Travel Guide Section - Compact */
+.travel-guide-container {
+    background: #f8f9fa;
+    padding: 4rem 2rem;
+    margin-top: 2rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    margin-left: 340px; /* Same as places-main-content margin-left */
+    width: calc(100% - 340px); /* Adjust width to account for sidebar */
+}
+
+.container-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
 .travel-guide {
     background: white;
     border-radius: 20px;
-    padding: 2rem;
+    padding: 2.5rem;
     box-shadow: var(--shadow);
-    margin: 3rem 0;
     position: relative;
     overflow: hidden;
 }
@@ -837,17 +887,19 @@
 }
 
 /* Modern Footer */
-.places-footer {
+.visiting-tips {
     background: linear-gradient(135deg, var(--dark) 0%, var(--darker) 100%);
     color: white;
-    border-radius: 40px 40px 0 0;
-    padding: 4rem 0;
-    margin-top: 4rem;
+    border-radius: 20px;
+    padding: 2.5rem;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
     position: relative;
     overflow: hidden;
+    box-shadow: var(--shadow);
 }
 
-.places-footer::before {
+.visiting-tips::before {
     content: '';
     position: absolute;
     top: 0;
@@ -856,6 +908,14 @@
     height: 100%;
     background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234a6de5' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
     opacity: 0.3;
+}
+
+.tips-content {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
 }
 
 .footer-content {
@@ -1002,49 +1062,42 @@
 
 /* Reviews Section */
 .reviews-section {
-    margin: 10px 0;
-    padding-top: 10px;
-    border-top: 1px solid #eee;
+    margin: 4px 0;
 }
 
 .reviews-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
 }
 
 .reviews-header h4 {
-    margin: 0;
-    font-size: 14px;
-    color: #333;
-    font-weight: 600;
+    display: none;
 }
 
 .average-rating {
     display: flex;
     align-items: center;
-    gap: 5px;
-    font-size: 12px;
-    color: #666;
+    gap: 2px;
+    font-size: 11px;
+    color: #888;
 }
 
 .no-reviews-text {
-    font-size: 12px;
+    font-size: 11px;
     color: #999;
 }
 
 .star-rating {
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: 1px;
 }
 
 .rating-text {
-    margin-left: 5px;
-    font-size: 12px;
-    color: #666;
-    font-weight: 500;
+    margin-left: 3px;
+    font-size: 11px;
+    color: #888;
+    font-weight: 400;
 }
 
 .reviews-loading {
@@ -1057,12 +1110,12 @@
 .reviews-list {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 6px;
 }
 
 .review-item {
-    background: #f9f9f9;
-    padding: 8px;
+    background: #f8f8f8;
+    padding: 6px;
     border-radius: 4px;
 }
 
@@ -1070,63 +1123,109 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 5px;
+    margin-bottom: 3px;
 }
 
 .review-date {
-    font-size: 11px;
-    color: #888;
+    font-size: 10px;
+    color: #999;
 }
 
 .review-comment {
     margin: 0;
-    font-size: 12px;
-    line-height: 1.4;
-    color: #555;
+    font-size: 11px;
+    line-height: 1.3;
+    color: #666;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 /* Modern Responsive Design */
 @media (max-width: 1024px) {
-    .places-header {
-        border-radius: 0 0 30px 30px;
+    .places-container {
+        gap: 1.5rem;
     }
 
-    .places-title h1 {
-        font-size: 2.4rem;
+    .places-sidebar {
+        width: 280px;
     }
 
     .places-grid {
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    }
-}
-
-@media (max-width: 768px) {
-    .places-container {
-        padding: 0 1.5rem;
-    }
-
-    .places-header {
-        padding: 2rem 0;
-        border-radius: 0 0 25px 25px;
-    }
-
-    .places-header-top {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1.5rem;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     }
 
     .places-title h1 {
         font-size: 1.8rem;
     }
+}
 
-    .places-title p {
-        font-size: 1rem;
+@media (max-width: 1024px) {
+    .places-sidebar {
+        width: 280px;
+        left: 1.5rem;
+    }
+    
+    .places-main-content {
+        margin-left: 300px;
+    }
+
+    .travel-guide-container {
+        margin-left: 300px;
+        width: calc(100% - 300px);
+    }
+}
+
+@media (max-width: 768px) {
+    .places-container {
+        flex-direction: column;
+        padding: 0 1rem;
+    }
+
+    .places-sidebar {
+        width: calc(100% - 2rem);
+        position: relative;
+        top: 0;
+        left: 0;
+        height: auto;
+        margin: 1rem 0;
+        padding: 1rem;
+    }
+
+    .places-main-content {
+        margin-left: 0;
+        padding: 1rem 0;
+    }
+
+    .travel-guide-container {
+        margin-left: 0;
+        width: 100%;
+        padding: 2rem 1rem;
+    }
+
+    .travel-guide {
+        padding: 1.5rem;
+    }
+
+    .tips-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .places-header {
+        padding: 1.5rem;
+        border-radius: 8px;
+    }
+
+    .places-title h1 {
+        font-size: 1.5rem;
     }
 
     .places-grid {
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        gap: 1.2rem;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
     }
 
     .city-grid,
