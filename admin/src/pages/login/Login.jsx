@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import "./login.scss";
 import { Lock, User } from "lucide-react";
+import {toast} from "react-hot-toast";
 
 const Login = () => {
   const [credentials, setCredentials] = useState({
@@ -45,6 +46,7 @@ const Login = () => {
           localStorage.setItem("token", res.data.token);
         }
         dispatch({ type: "LOGIN_SUCCESS", payload: res.data.details });
+        toast.success("Logged in successfully");
         navigate("/");
       } else {
         dispatch({
@@ -119,8 +121,6 @@ const Login = () => {
               'Login to Dashboard'
             )}
           </button>
-
-
         </form>
       </div>
     </div>

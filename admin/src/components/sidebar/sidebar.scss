@@ -14,6 +14,8 @@
   flex-direction: column;
   box-shadow: $shadow-lg;
   backdrop-filter: blur(20px) saturate(180%);
+  overscroll-behavior: contain; /* Prevents scroll chaining */
+  isolation: isolate; /* Creates a new stacking context */
   
   &::before {
     content: '';
@@ -243,6 +245,8 @@
 // Responsive styles
 @media screen and (max-width: $breakpoint-md) {
   .sidebar {
+      // Prevent scroll chaining to main content
+  overscroll-behavior: contain;
     flex: 0 0 80px;
     
     .logo-container .logo,
@@ -261,6 +265,7 @@
       }
     }
   }
+
 }
 
 // Collapsed state

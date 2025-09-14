@@ -16,7 +16,7 @@ const EditEntity = () => {
 
     const [formData, setFormData] = useState({});
     const [loading, setLoading] = useState(true);
-    const [file, setFile] = useState(null);
+    const [files, setFiles] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -48,49 +48,46 @@ const EditEntity = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            let imageUrl = formData.img || formData.photo || "";
-            
-            if (file) {
-                // Test Cloudinary configuration first
+            let photos = formData.photos || [];
+            // If files are selected, upload to Cloudinary
+            if (files && files.length > 0) {
                 if (!testCloudinaryConfig()) {
                     toast.error("Cloudinary configuration is missing. Please check your environment variables.");
                     return;
                 }
-
                 try {
-                    // Use the test function for better debugging
-                    const uploadRes = await testCloudinaryUpload(file);
-                    imageUrl = uploadRes.url;
-                    toast.success("Image uploaded successfully!");
+                    const uploadedUrls = await Promise.all(
+                        files.map(async (file) => {
+                            const uploadRes = await testCloudinaryUpload(file);
+                            return uploadRes.url;
+                        })
+                    );
+                    photos = uploadedUrls;
+                    toast.success("Images uploaded successfully!");
                 } catch (uploadErr) {
-                    console.error("Upload error:", uploadErr);
                     toast.error("Image upload failed: " + uploadErr.message);
                     return;
                 }
             }
 
             const payload = { ...formData };
-            
+            // For hotels, update photos array
+            if (path === 'hotels') {
+                payload.photos = photos;
+            }
             // Handle role validation for users
             if (path === 'users' && payload.role) {
                 const validRoles = ['user', 'tourist guide'];
                 if (!validRoles.includes(payload.role)) {
-                    // If role is invalid, remove it from payload to keep existing role
                     delete payload.role;
                 }
             }
-            
             // Remove fields that shouldn't be updated
             delete payload._id;
             delete payload.__v;
             delete payload.createdAt;
             delete payload.updatedAt;
-            delete payload.password; // Never update password through this form
-            
-            if (imageUrl) {
-              if (payload.img !== undefined) payload.img = imageUrl;
-              if (payload.photo !== undefined) payload.photo = imageUrl;
-            }
+            delete payload.password;
 
             // Use the correct endpoint for users
             const updateUrl = path === 'users' 
@@ -107,7 +104,6 @@ const EditEntity = () => {
             );
             navigate(`/${path}`);
         } catch (err) {
-            console.error("Update error:", err);
             toast.error("Update failed: " + (err.response?.data?.message || err.message));
         }
     };
@@ -128,28 +124,36 @@ const EditEntity = () => {
                           <h2>Edit {path.slice(0, -1)}</h2>
                         </div>
                         <div className="editBody">
-                          <div className="leftPreview">
-                            <img
-                              src={
-                                file
-                                  ? URL.createObjectURL(file)
-                                  : formData.img || formData.photo || "/assets/images/no-image-icon-0.jpg"
-                              }
-                              alt="preview"
-                            />
-                          </div>
-                          <form onSubmit={handleSubmit} className="rightForm">
-                            <div className="formInput">
-                              <label htmlFor="file">Image: <DriveFolderUploadOutlinedIcon className="icon" /></label>
-                              <input type="file" id="file" onChange={(e) => setFile(e.target.files[0])} />
-                            </div>
+                                                    <div className="leftPreview">
+                                                        {/* Show first photo for hotels, else fallback */}
+                                                        <img
+                                                            src={
+                                                                files.length > 0
+                                                                    ? URL.createObjectURL(files[0])
+                                                                    : (Array.isArray(formData.photos) && formData.photos.length > 0)
+                                                                        ? formData.photos[0]
+                                                                        : formData.img || formData.photo || "/assets/images/no-image-icon-0.jpg"
+                                                            }
+                                                            alt="preview"
+                                                        />
+                                                    </div>
+                                                    <form onSubmit={handleSubmit} className="rightForm">
+                                                        {/* For hotels, allow multiple image upload */}
+                                                        {path === 'hotels' ? (
+                                                            <div className="formInput">
+                                                                <label htmlFor="file">Images: <DriveFolderUploadOutlinedIcon className="icon" /></label>
+                                                                <input type="file" id="file" multiple onChange={(e) => setFiles(Array.from(e.target.files))} />
+                                                            </div>
+                                                        ) : (
+                                                            <div className="formInput">
+                                                                <label htmlFor="file">Image: <DriveFolderUploadOutlinedIcon className="icon" /></label>
+                                                                <input type="file" id="file" onChange={(e) => setFiles([e.target.files[0]])} />
+                                                            </div>
+                                                        )}
                             {Object.keys(formData).map((key) => {
-                                // Skip system fields
                                 if (key === "_id" || key === "__v" || key === "createdAt" || key === "updatedAt" || key === "password") {
                                     return null;
                                 }
-                                
-                                // Special handling for role field in users
                                 if (path === 'users' && key === 'role') {
                                     return (
                                         <div key={key} className="form-group">
@@ -165,8 +169,6 @@ const EditEntity = () => {
                                         </div>
                                     );
                                 }
-                                
-                                // Special handling for boolean fields
                                 if (typeof formData[key] === 'boolean') {
                                     return (
                                         <div key={key} className="form-group">
@@ -187,8 +189,19 @@ const EditEntity = () => {
                                         </div>
                                     );
                                 }
-                                
-                                // Default text input
+                                // For hotels, show all images in preview
+                                if (path === 'hotels' && key === 'photos' && Array.isArray(formData.photos)) {
+                                  return (
+                                    <div key={key} className="form-group">
+                                      <label>Current Images</label>
+                                      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                        {formData.photos.map((url, idx) => (
+                                          <img key={idx} src={url} alt={`Hotel ${idx + 1}`} style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px' }} />
+                                        ))}
+                                      </div>
+                                    </div>
+                                  );
+                                }
                                 return (
                                     <div key={key} className="form-group">
                                         <input

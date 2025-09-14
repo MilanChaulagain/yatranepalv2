@@ -8,6 +8,8 @@
     width: calc(100% - var(--sidebar-width, 280px));
     overflow-x: hidden; /* prevent horizontal scroll */
     transition: margin-left 0.3s ease, width 0.3s ease;
+      // Prevent scroll chaining to main content
+  overscroll-behavior: contain;
 
     .widgets,
     .charts {
