@@ -29,10 +29,11 @@ router.get('/countByCity', countByCity);
 // Count by Type
 router.get('/countByType', countByType);
 
-// GET one
-router.get('/:id', getHotel);
 // GET all
 router.get('/', getHotels);
+// GET one
+router.get('/:id', getHotel);
+
 
 // Get hotel rooms
 router.get('/rooms/:id', getHotelRooms);
