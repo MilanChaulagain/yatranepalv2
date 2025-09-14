@@ -553,13 +553,14 @@
 }
 
 .place-card:hover {
+    cursor: pointer;
     transform: translateY(-4px);
     box-shadow: var(--shadow-hover);
     border-color: var(--primary);
 }
 
 .image-container {
-    height: 140px;
+    height: 180px;
     position: relative;
     overflow: hidden;
 }

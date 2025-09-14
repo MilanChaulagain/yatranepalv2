@@ -95,7 +95,7 @@ const Stays = () => {
     );
 
     // Fetch property list counts
-    const { data: propertyListData } = useFetch("  http://localhost:8800/api/hotels/countByType");
+    const { data: propertyListData } = useFetch("http://localhost:8800/api/hotels/countByType");
 
     useEffect(() => {
         const handleClickOutside = (e) => {

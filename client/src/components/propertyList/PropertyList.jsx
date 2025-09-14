@@ -1,5 +1,7 @@
+
 import React from 'react';
 import useFetch from '../../hooks/useFetch.js';
+import { useNavigate } from 'react-router-dom';
 import './propertyList.css';
 
 const propertyTypeData = [
@@ -30,8 +32,10 @@ const propertyTypeData = [
   }
 ];
 
+
 const PropertyList = () => {
   const { data, loading, error } = useFetch("http://localhost:8800/api/hotels/countByType");
+  const navigate = useNavigate();
 
   const countMap = {};
   if (data) {
@@ -39,6 +43,16 @@ const PropertyList = () => {
       countMap[item.type.toLowerCase()] = item.count;
     });
   }
+
+  // Handler for clicking a property type card
+  const handleTypeClick = (type) => {
+    // Navigate to /list page with state for filtering by type
+    navigate('/list', {
+      state: {
+        category: type.toLowerCase()
+      }
+    });
+  };
 
   return (
     <div className="pList">
@@ -52,7 +66,7 @@ const PropertyList = () => {
           const count = countMap[typeKey] || 0;
 
           return (
-            <div className="pListItem" key={i}>
+            <div className="pListItem" key={i} onClick={() => handleTypeClick(item.type)}>
               <img src={item.image} alt={item.type} className="pListImg" />
               <div className="pListTitles">
                 <h1>{item.type}</h1>

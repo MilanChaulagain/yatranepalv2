@@ -778,8 +778,8 @@ const Places = () => {
                           {truncateDescription(place.description, 100)}
                         </p>
 
-                        {/* Reviews Section */}
-                        <ReviewSection placeId={place._id} />
+                        {/* Reviews Section
+                        <ReviewSection placeId={place._id} /> */}
 
                         {place.description && place.description.length > 100 && (
                           <button
@@ -811,37 +811,6 @@ const Places = () => {
                     </div>
                   ))
                 )}
-              </div>
-
-              <div className="travel-guide">
-                <h2><MapPin size={24} /> Kathmandu Valley Travel Guide</h2>
-
-                <div className="guide-section">
-                  <h3><Landmark size={20} /> UNESCO World Heritage Sites</h3>
-                  <div className="heritage-grid">
-                    {heritageSites.map((site) => (
-                      <div key={site.name} className="heritage-card">
-                        <h4>{site.name}</h4>
-                        <p>{site.city}</p>
-                        <p><strong>Significance:</strong> {site.significance}</p>
-                        <p><strong>Feature:</strong> {site.feature}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="guide-section">
-                  <h3><Utensils size={20} /> Local Experiences</h3>
-                  <div className="experiences-grid">
-                    {localExperiences.map((experience) => (
-                      <div key={experience.title} className="experience-card">
-                        <h4>{experience.title}</h4>
-                        <p>{experience.description}</p>
-                        <p><strong>Where:</strong> {experience.location}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
               </div>
             </>
           )}

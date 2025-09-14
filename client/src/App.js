@@ -5,6 +5,7 @@ import { LoadingProvider, useLoading } from "./context/LoadingContext";
 import { useLoadingRoutes } from "./hooks/useLoadingRoutes";
 
 import Home from "./pages/home/Home";
+import HotelDetails from "./pages/hotelDetails/HotelDetails";
 import Hotel from "./pages/hotel/Hotel";
 import List from "./pages/list/List";
 import LoginPage from "./pages/login/Login";
@@ -77,6 +78,7 @@ const AppContent = () => {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/stays" element={<Stays />} />
+  <Route path="/stays/:id" element={<HotelDetails />} />
         <Route path="/flights" element={<Flights />} />
         <Route path="/money-exchange" element={<MoneyExchange />} />
         <Route path="/hotels" element={<List />} />

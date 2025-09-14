@@ -349,24 +349,41 @@ const PlaceDetails = () => {
                         </div>
                     </div>
 
-                    <div className="place-actions">
-                        <button
-                            className={`favorite-button ${isFavorite ? 'active' : ''}`}
-                            onClick={toggleFavorite}
-                            aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-                        >
-                            <Heart size={20} fill={isFavorite ? 'currentColor' : 'none'} />
-                            {isFavorite ? 'Saved' : 'Save'}
-                        </button>
-                        <button
-                            className="directions-button"
-                            onClick={handleGetDirections}
-                            disabled={!coordinates.lat || !coordinates.lng}
-                            aria-label="Get directions"
-                        >
-                            <Navigation size={20} /> Get Directions
-                        </button>
-                    </div>
+
+                                    <div className="place-actions">
+                                            <button
+                                                    className={`favorite-button ${isFavorite ? 'active' : ''}`}
+                                                    onClick={toggleFavorite}
+                                                    aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                                            >
+                                                    <Heart size={20} fill={isFavorite ? 'currentColor' : 'none'} />
+                                                    {isFavorite ? 'Saved' : 'Save'}
+                                            </button>
+                                            <button
+                                                    className="directions-button"
+                                                    onClick={handleGetDirections}
+                                                    disabled={!coordinates.lat || !coordinates.lng}
+                                                    aria-label="Get directions"
+                                            >
+                                                    <Navigation size={20} /> Get Directions
+                                            </button>
+                                    </div>
+
+                                    {/* Embedded Google Maps for place location */}
+                                    {coordinates.lat && coordinates.lng && (
+                                        <div style={{ width: "100%", height: "350px", marginBottom: "24px", borderRadius: "16px", overflow: "hidden", boxShadow: "0 4px 24px rgba(67, 97, 238, 0.08)" }}>
+                                            <iframe
+                                                title="Place Location Map"
+                                                width="100%"
+                                                height="100%"
+                                                style={{ border: 0 }}
+                                                loading="lazy"
+                                                allowFullScreen
+                                                referrerPolicy="no-referrer-when-downgrade"
+                                                src={`https://www.google.com/maps?q=${coordinates.lat},${coordinates.lng}&hl=en&z=15&output=embed`}
+                                            />
+                                        </div>
+                                    )}
                 </div>
 
                 {locationError && (
