@@ -49,9 +49,13 @@ const Bookings = () => {
     const fetchBookings = async () => {
         try {
             setLoading(true);
+            const token = localStorage.getItem("token");
             const res = await axios.get(
                 `http://localhost:8800/api/reservations/user`,
-                { withCredentials: true }
+                {
+                    withCredentials: true,
+                    headers: token ? { Authorization: `Bearer ${token}` } : {}
+                }
             );
             setBookings(Array.isArray(res.data) ? res.data : []);
             setError(null);
@@ -70,10 +74,14 @@ const Bookings = () => {
 
         setCancellingId(bookingId);
         try {
+            const token = localStorage.getItem("token");
             await axios.put(
                 `http://localhost:8800/api/reservations/${bookingId}/request-cancel`,
                 {},
-                { withCredentials: true }
+                {
+                    withCredentials: true,
+                    headers: token ? { Authorization: `Bearer ${token}` } : {}
+                }
             );
             await fetchBookings();
             alert("Cancellation request submitted. Waiting for admin approval.");

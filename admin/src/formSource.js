@@ -124,6 +124,13 @@ export const moneyexchangeInputs = [
     required: true,
   },
   {
+    id: "city",
+    label: "City",
+    type: "text",
+    placeholder: "Kathmandu",
+    required: true,
+  },
+  {
     id: "address",
     label: "Address",
     type: "text",

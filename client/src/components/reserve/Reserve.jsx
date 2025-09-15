@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";   // <-- added useEffect
+import React, { useContext, useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleXmark, faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 import "./Reserve.css";
@@ -19,8 +19,9 @@ const Reserve = ({ setOpen, hotelId }) => {
   const [showPayment, setShowPayment] = useState(false);
   const [reservationData, setReservationData] = useState(null);
 
-  const { data: rooms = [], loading, error } = useFetch(`  http://localhost:8800/api/hotels/rooms/${hotelId}`);
-  const { dates } = useContext(SearchContext);
+  const { data: rooms = [], loading, error } = useFetch(`http://localhost:8800/api/hotels/rooms/${hotelId}`);
+  const { dates, dispatch } = useContext(SearchContext);
+  const [localDates, setLocalDates] = useState({ startDate: "", endDate: "" });
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -36,7 +37,11 @@ const Reserve = ({ setOpen, hotelId }) => {
     return dates;
   };
 
-  const alldates = dates.length > 0 ? getDatesInRange(dates[0].startDate, dates[0].endDate) : [];
+  // Use localDates if set, otherwise context dates
+  const effectiveDates = (localDates.startDate && localDates.endDate)
+    ? [{ startDate: localDates.startDate, endDate: localDates.endDate }]
+    : (Array.isArray(dates) ? dates : []);
+  const alldates = effectiveDates.length > 0 ? getDatesInRange(effectiveDates[0].startDate, effectiveDates[0].endDate) : [];
 
   const isAvailable = (roomNumber) => {
     return !roomNumber.unavailableDates?.some(date =>
@@ -75,6 +80,7 @@ const Reserve = ({ setOpen, hotelId }) => {
     setErrorMessage("");
 
     try {
+      const token = localStorage.getItem("token");
       const reservationResponse = await axios.post(
         "http://localhost:8800/api/reservations",
         {
@@ -86,7 +92,10 @@ const Reserve = ({ setOpen, hotelId }) => {
           status: "pending",           
           paymentStatus: "pending"   
         },
-        { withCredentials: true }
+        {
+          withCredentials: true,
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        }
       );
 
       setReservationData(reservationResponse.data);  
@@ -175,6 +184,54 @@ const Reserve = ({ setOpen, hotelId }) => {
         <FontAwesomeIcon icon={faCircleXmark} className="rClose" onClick={() => setOpen(false)} />
         <h2>Select Rooms</h2>
 
+        {/* Date selection UI */}
+        <div className="date-selection" style={{ marginBottom: "20px" }}>
+          <label>
+            Check-in Date:
+            <input
+              type="date"
+              value={localDates.startDate}
+              onChange={e => setLocalDates(d => ({ ...d, startDate: e.target.value }))}
+              min={new Date().toISOString().split("T")[0]}
+            />
+          </label>
+          <label style={{ marginLeft: "15px" }}>
+            Check-out Date:
+            <input
+              type="date"
+              value={localDates.endDate}
+              onChange={e => setLocalDates(d => ({ ...d, endDate: e.target.value }))}
+              min={localDates.startDate || new Date().toISOString().split("T")[0]}
+            />
+          </label>
+          <button
+            style={{ marginLeft: "15px" }}
+            onClick={() => {
+              if (localDates.startDate && localDates.endDate && new Date(localDates.startDate) <= new Date(localDates.endDate)) {
+                dispatch({ type: "NEW_SEARCH", payload: [{ startDate: localDates.startDate, endDate: localDates.endDate }] });
+              }
+            }}
+            disabled={!(localDates.startDate && localDates.endDate && new Date(localDates.startDate) <= new Date(localDates.endDate))}
+          >
+            Set Dates
+          </button>
+        </div>
+        {/* Show selected dates or prompt to select */}
+        {alldates.length > 0 ? (
+          <div className="selected-dates">
+            <strong>Selected Dates:</strong>
+            <ul>
+              {alldates.map((d, i) => (
+                <li key={i}>{d.toLocaleDateString()}</li>
+              ))}
+            </ul>
+          </div>
+        ) : (
+          <div className="error-message">
+            Please select valid dates for your reservation above.
+          </div>
+        )}
+
         {errorMessage && <div className="error-message">{errorMessage}</div>}
 
         {loading ? (
@@ -235,7 +292,7 @@ const Reserve = ({ setOpen, hotelId }) => {
         <button
           onClick={handleClick}
           className={`rButton ${isBooking ? "loading" : ""}`}
-          disabled={selectedRooms.length === 0 || isBooking}
+          disabled={selectedRooms.length === 0 || isBooking || alldates.length === 0}
         >
           {isBooking ? (
             <>

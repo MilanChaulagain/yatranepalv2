@@ -8,7 +8,7 @@ import {
     getReservations,
     getReservationById
 } from "../controllers/reservation.js";
-import { verifyUser, verifyAdmin } from "../utils/verifyToken.js";
+import { verifyUser, verifyAdmin, verifyToken } from "../utils/verifyToken.js";
 
 const router = express.Router();
 
@@ -16,7 +16,7 @@ const router = express.Router();
 router.post("/", verifyUser, createReservation);
 router.get("/user", verifyUser, getUserReservations);
 router.get("/:reservationId", verifyUser, getReservationById); 
-router.put("/:id/request-cancel", verifyUser, requestCancelReservation);
+router.put("/:id/request-cancel", verifyToken, requestCancelReservation);
 
 // Admin routes
 router.get("/", verifyAdmin, getReservations);

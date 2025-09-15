@@ -1,3 +1,47 @@
+/* Date selection styles */
+.date-selection {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    background: #f5f8fa;
+    padding: 12px 18px;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+}
+.date-selection label {
+    font-weight: 500;
+    color: #2d5c7f;
+    margin-right: 8px;
+}
+.date-selection input[type="date"] {
+    padding: 6px 10px;
+    border: 1px solid #bfcad6;
+    border-radius: 4px;
+    font-size: 1rem;
+    background: #fff;
+    color: #2d5c7f;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.date-selection input[type="date"]:focus {
+    border-color: #2d5c7f;
+}
+.date-selection button {
+    padding: 7px 18px;
+    background: #2d5c7f;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.date-selection button:disabled {
+    background: #bfcad6;
+    cursor: not-allowed;
+}
 .reserve {
     position: fixed;
     top: 0;
