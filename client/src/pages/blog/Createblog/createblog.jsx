@@ -113,11 +113,13 @@ const CreateBlog = () => {
 
         const formData = new FormData();
         formData.append("file", imageFile);
-        formData.append("", "");
+        formData.append("upload_preset", `${process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET}`); // <-- Replace with your actual preset
 
         try {
             const res = await axios.post(
+                `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_CLOUD_NAME}/image/upload`,
                 formData
+                // No headers needed for unsigned upload
             );
             return res.data.secure_url;
         } catch (err) {
@@ -149,6 +151,7 @@ const CreateBlog = () => {
         }
 
         try {
+            const token = localStorage.getItem("token");
             const res = await axios.post(
                 "http://localhost:8800/api/blogs",
                 {
@@ -160,7 +163,9 @@ const CreateBlog = () => {
                     fontFamily,
                     fontSize,
                 },
-                { withCredentials: true }
+                { withCredentials: true,
+                    headers: token ? { Authorization: `Bearer ${token}` } : {}
+                 }
             );
 
             if (res.data.success) {

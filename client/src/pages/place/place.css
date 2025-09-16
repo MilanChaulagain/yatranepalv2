@@ -1289,3 +1289,16 @@
         height: 140px;
     }
 }
+
+.place-meta .category {
+    color: #fff !important;
+    fill: #fff !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+}
+
+.place-meta .category svg {
+    color: #fff !important;
+    fill: #fff !important;
+}

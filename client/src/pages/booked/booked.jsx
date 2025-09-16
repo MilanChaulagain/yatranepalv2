@@ -28,6 +28,10 @@ const Bookings = () => {
     const [error, setError] = useState(null);
     const [cancellingId, setCancellingId] = useState(null);
     const [filter, setFilter] = useState("all"); 
+    const [showCancelModal, setShowCancelModal] = useState(false);
+    const [cancelTargetId, setCancelTargetId] = useState(null);
+    const [cancelError, setCancelError] = useState("");
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -67,16 +71,25 @@ const Bookings = () => {
         }
     };
 
-    const handleCancel = async (bookingId) => {
-        if (!window.confirm("Are you sure you want to cancel this booking?")) {
-            return;
-        }
+    const openCancelModal = (bookingId) => {
+        setCancelTargetId(bookingId);
+        setShowCancelModal(true);
+        setCancelError("");
+    };
 
-        setCancellingId(bookingId);
+    const closeCancelModal = () => {
+        setShowCancelModal(false);
+        setCancelTargetId(null);
+        setCancelError("");
+    };
+
+    const confirmCancel = async () => {
+        setCancellingId(cancelTargetId);
+        setCancelError("");
         try {
             const token = localStorage.getItem("token");
             await axios.put(
-                `http://localhost:8800/api/reservations/${bookingId}/request-cancel`,
+                `http://localhost:8800/api/reservations/${cancelTargetId}/request-cancel`,
                 {},
                 {
                     withCredentials: true,
@@ -84,9 +97,10 @@ const Bookings = () => {
                 }
             );
             await fetchBookings();
-            alert("Cancellation request submitted. Waiting for admin approval.");
+            closeCancelModal();
+            setShowSuccessModal(true);
         } catch (err) {
-            alert(err.response?.data?.message || "Failed to cancel booking");
+            setCancelError(err.response?.data?.message || "Failed to cancel booking");
         } finally {
             setCancellingId(null);
         }
@@ -249,7 +263,7 @@ const Bookings = () => {
                                         )}
                                         <button
                                             className="cancel-btn"
-                                            onClick={() => handleCancel(booking._id)}
+                                            onClick={() => openCancelModal(booking._id)}
                                             disabled={isCancelDisabled || cancellingId === booking._id}
                                         >
                                             {cancellingId === booking._id ? (
@@ -268,6 +282,40 @@ const Bookings = () => {
                 )}
             </div>
             <Footer />
+
+            {/* Cancel Modal */}
+            {showCancelModal && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <h3>Confirm Cancellation</h3>
+                        <p>Are you sure you want to request cancellation for this booking?</p>
+                        {cancelError && <div className="error-message">{cancelError}</div>}
+                        <div className="modal-actions">
+                            <button className="cancel-btn" onClick={closeCancelModal} disabled={cancellingId === cancelTargetId}>
+                                No, Keep Booking
+                            </button>
+                            <button className="confirm-btn" onClick={confirmCancel} disabled={cancellingId === cancelTargetId}>
+                                Yes, Request Cancellation
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Success Modal */}
+            {showSuccessModal && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <h3>Cancellation Requested</h3>
+                        <p>Your cancellation request has been submitted.<br />Waiting for admin approval.</p>
+                        <div className="modal-actions">
+                            <button className="confirm-btn" onClick={() => setShowSuccessModal(false)}>
+                                OK
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 };
