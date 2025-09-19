@@ -112,6 +112,14 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="profile/edit"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Users */}
             <Route path="users">

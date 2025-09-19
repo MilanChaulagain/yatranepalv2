@@ -149,7 +149,7 @@ const EditTouristGuide = () => {
         <div className="bottom">
           <div className="left">
             <img
-              src={file ? URL.createObjectURL(file) : (info.img || "/images/no-image-icon-0.jpg")}
+              src={file ? URL.createObjectURL(file) : (info.img || `${process.env.PUBLIC_URL}/images/placeholder.jpg`)}
               alt="Preview"
             />
           </div>

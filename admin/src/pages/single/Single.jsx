@@ -83,7 +83,7 @@ const Single = () => {
     return `https://res.cloudinary.com/${cloudName}/image/upload/${value}`;
   };
 
-  const fallbackNoImage = "/images/no-image-icon-0.jpg";
+  const fallbackNoImage = `${process.env.PUBLIC_URL}/images/placeholder.jpg`;
   const mainImage = (() => {
     if (path === 'imageslider') {
       return resolveCloudinaryUrl(data.imagePath) || fallbackNoImage;

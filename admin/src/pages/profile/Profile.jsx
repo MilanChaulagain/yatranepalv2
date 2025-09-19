@@ -1,7 +1,7 @@
 import "./profile.scss";
 import { useState, useContext, useEffect } from "react";
 import { AuthContext } from "../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Navbar from "../../components/navbar/Navbar";
@@ -13,6 +13,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const location = useLocation();
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [formData, setFormData] = useState({
@@ -29,7 +30,11 @@ const Profile = () => {
     if (!user) {
       navigate("/login");
     }
-  }, [user, navigate]);
+    // Enter edit mode automatically when on /profile/edit
+    if (location.pathname.endsWith("/profile/edit")) {
+      setIsEditing(true);
+    }
+  }, [user, navigate, location.pathname]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -56,31 +61,38 @@ const Profile = () => {
       
       // Upload new image if changed
       if (imageFile) {
-        const formData = new FormData();
-        formData.append("file", imageFile);
-        formData.append("upload_preset", process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET);
-        
-        const uploadRes = await axios.post(
+        const data = new FormData();
+        data.append("file", imageFile);
+        data.append("upload_preset", process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET);
+
+        // Use a clean Axios instance to avoid global Authorization header
+        const cloud = axios.create();
+        cloud.interceptors.request.use((config) => {
+          if (config.headers) {
+            delete config.headers.Authorization;
+            delete config.headers.authorization;
+          }
+          return config;
+        });
+
+        const uploadRes = await cloud.post(
           `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_CLOUD_NAME}/image/upload`,
-              formData,
-              {
-                headers: {
-                  "Content-Type": "multipart/form-data",
-                },
-                onUploadProgress: (progressEvent) => {
-                  const percentCompleted = Math.round(
-                    (progressEvent.loaded * 100) / progressEvent.total
-                  );
-                  console.log(`Upload progress: ${percentCompleted}%`);
-                },
-              }
-            );
+          data,
+          {
+            headers: { "Content-Type": "multipart/form-data" },
+            onUploadProgress: (progressEvent) => {
+              const total = progressEvent.total || 1;
+              const percentCompleted = Math.round((progressEvent.loaded * 100) / total);
+              console.log(`Upload progress: ${percentCompleted}%`);
+            },
+          }
+        );
         imageUrl = uploadRes.data.secure_url;
       }
 
       // Update user profile
       const updateRes = await axios.put(
-        `http://localhost:8800/api/users/${user._id}`,
+        `http://localhost:8800/api/users/update/${user._id}`,
         {
           ...formData,
           img: imageUrl
@@ -88,13 +100,21 @@ const Profile = () => {
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`
-          }
+          },
+          withCredentials: true,
         }
       );
 
       if (updateRes.data) {
         toast.success("Profile updated successfully");
         setIsEditing(false);
+        // Update cached user for immediate UI reflection
+        const updatedUser = { ...user, ...updateRes.data };
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        // Navigate back to profile view route if we were on edit
+        if (location.pathname.endsWith("/profile/edit")) {
+          navigate("/profile");
+        }
       }
     } catch (err) {
       toast.error(err.response?.data?.message || "Error updating profile");

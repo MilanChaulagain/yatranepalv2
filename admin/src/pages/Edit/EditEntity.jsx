@@ -158,7 +158,7 @@ const EditEntity = () => {
                                                                     ? URL.createObjectURL(files[0])
                                                                     : (Array.isArray(formData.photos) && formData.photos.length > 0)
                                                                         ? formData.photos[0]
-                                                                        : formData.img || formData.photo || "/images/no-image-icon-0.jpg"
+                                                                        : formData.img || formData.photo || `${process.env.PUBLIC_URL}/images/placeholder.jpg`
                                                             }
                                                             alt="preview"
                                                         />

@@ -307,7 +307,7 @@ const NewPlace = () => {
               src={
                 files && files.length > 0
                   ? URL.createObjectURL(files[0])
-                  : "/images/no-image-icon-0.jpg"
+                  : `${process.env.PUBLIC_URL}/images/placeholder.jpg`
               }
               alt="Preview"
             />

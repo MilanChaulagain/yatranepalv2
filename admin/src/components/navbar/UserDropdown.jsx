@@ -18,8 +18,8 @@ const UserDropdown = ({ isOpen, onClose }) => {
     onClose();
   };
 
-  const handleSettings = () => {
-    navigate("/settings");
+  const handleEdit = () => {
+    navigate("/profile/edit");
     onClose();
   };
 
@@ -32,9 +32,9 @@ const UserDropdown = ({ isOpen, onClose }) => {
           <PersonOutline className="icon" />
           <span>Profile</span>
         </div>
-        <div className="dropdown-item" onClick={handleSettings}>
+        <div className="dropdown-item" onClick={handleEdit}>
           <Settings className="icon" />
-          <span>Settings</span>
+          <span>Edit</span>
         </div>
         <div className="divider"></div>
         <div className="dropdown-item logout" onClick={handleLogout}>

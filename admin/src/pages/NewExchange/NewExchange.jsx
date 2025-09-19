@@ -34,7 +34,7 @@ const NewExchange = ({ title }) => {
 
   const previewSrc = useMemo(() => {
     if (files.length > 0) return URL.createObjectURL(files[0]);
-    return "/images/no-image-icon-0.jpg";
+    return `${process.env.PUBLIC_URL}/images/placeholder.jpg`;
   }, [files]);
 
   const onChange = (e) => {

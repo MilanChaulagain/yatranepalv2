@@ -205,24 +205,24 @@ const List = ({ columns }) => {
       if (Array.isArray(item.images) && item.images.length > 0) {
         const candidate = item.images[0];
         const url = resolveCloudinaryUrl(candidate);
-        return url || '/images/no-image-icon-0.jpg';
+  return url || `${process.env.PUBLIC_URL}/images/placeholder.jpg`;
       }
-      return '/images/no-image-icon-0.jpg';
+  return `${process.env.PUBLIC_URL}/images/placeholder.jpg`;
     }
     if (path === 'imageslider') {
       const url = resolveCloudinaryUrl(item.imagePath || item.img || item.photo);
-      return url || '/images/no-image-icon-0.jpg';
+  return url || `${process.env.PUBLIC_URL}/images/placeholder.jpg`;
     }
     if (path === 'users') {
       const candidate = item.img || item.photo || item.profilePic || item.profileImage || item.avatar || item.image;
       const url = resolveCloudinaryUrl(candidate);
-      return url || '/images/no-image-icon-0.jpg';
+  return url || `${process.env.PUBLIC_URL}/images/placeholder.jpg`;
     }
     if (path === 'hotels') {
       if (Array.isArray(item.photos) && item.photos.length > 0) return item.photos[0];
-      return item.img || item.photo || '/images/no-image-icon-0.jpg';
+  return item.img || item.photo || `${process.env.PUBLIC_URL}/images/placeholder.jpg`;
     }
-    return item.img || item.photo || '/images/no-image-icon-0.jpg';
+  return item.img || item.photo || `${process.env.PUBLIC_URL}/images/placeholder.jpg`;
   };
 
   if (loading) {

@@ -15,7 +15,7 @@ const EditImageSlider = () => {
   const [file, setFile] = useState(null);
   const [slider, setSlider] = useState({ name: "", imagePath: "", imageType: "" });
 
-  const fallbackNoImage = "/images/no-image-icon-0.jpg";
+  const fallbackNoImage = `${process.env.PUBLIC_URL}/images/placeholder.jpg`;
 
   const previewUrl = useMemo(() => {
     if (file) return URL.createObjectURL(file);
@@ -24,7 +24,7 @@ const EditImageSlider = () => {
     if (value.startsWith("http://") || value.startsWith("https://")) return value;
     const cloudName = process.env.REACT_APP_CLOUDINARY_CLOUD_NAME;
     return cloudName ? `https://res.cloudinary.com/${cloudName}/image/upload/${value}` : fallbackNoImage;
-  }, [file, slider?.imagePath]);
+  }, [file, slider?.imagePath, fallbackNoImage]);
 
   useEffect(() => {
     const ac = new AbortController();

@@ -13,6 +13,7 @@ import {
   Chip,
   LinearProgress
 } from "@mui/material";
+import axios from "axios";
 
 const List = () => {
   const [loading, setLoading] = useState(false);
@@ -22,12 +23,14 @@ const List = () => {
     const fetchRecent = async () => {
       try {
         setLoading(true);
-        const res = await fetch("http://localhost:8800/api/reservations");
-        const data = await res.json();
+        // axios is globally configured with Authorization and withCredentials
+        const { data } = await axios.get("http://localhost:8800/api/reservations", {
+          withCredentials: true,
+        });
         const list = (Array.isArray(data) ? data : []).slice(0, 10).map((r) => ({
           id: r._id,
           service: r.hotelId?.name || "Hotel",
-          img: (r.hotelId?.photos && r.hotelId.photos[0]) || "/images/placeholder.jpg",
+          img: (r.hotelId?.photos && r.hotelId.photos[0]) || `${process.env.PUBLIC_URL}/images/placeholder.jpg`,
           customer: r.userId?.username || "User",
           date: new Date(r.createdAt || r.updatedAt).toLocaleDateString(),
           amount: r.totalPrice || 0,
