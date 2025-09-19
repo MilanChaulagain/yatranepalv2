@@ -2,72 +2,57 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import "./image-slider.css";
 
+const DEFAULTS = [
+    { _id: "1", imagePath: `${process.env.PUBLIC_URL || ""}/images/slider1.jpg`, name: "Default Image 1" },
+    { _id: "2", imagePath: `${process.env.PUBLIC_URL || ""}/images/slider2.jpg`, name: "Default Image 2" },
+    { _id: "3", imagePath: `${process.env.PUBLIC_URL || ""}/images/slider3.jpg`, name: "Default Image 3" },
+];
+
 function ImageSlider() {
     const [images, setImages] = useState([]);
     const [activeIndex, setActiveIndex] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const intervalRef = useRef(null);
+    const pollRef = useRef(null);
+    const isMountedRef = useRef(true);
+
+    const fetchImages = useCallback(async () => {
+        try {
+            if (!isMountedRef.current) return;
+            setError(null);
+            const res = await axios.get("http://localhost:8800/api/imageSlider", { withCredentials: false });
+            const payload = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+            const list = Array.isArray(payload) ? payload : [];
+            if (list.length === 0) {
+                if (images.length === 0) setImages(DEFAULTS);
+                return;
+            }
+            // Only update if changed (length or ids differ) to avoid resetting animation unnecessarily
+            const changed = images.length !== list.length || images.some((it, i) => (it._id || i) !== (list[i]?._id || i));
+            if (changed) {
+                setImages(list);
+                if (activeIndex >= list.length) setActiveIndex(0);
+            }
+        } catch (err) {
+            console.error("Failed to fetch images:", err);
+            if (images.length === 0) setImages(DEFAULTS);
+            setError(null); // do not show persistent error in UI for background poll
+        } finally {
+            if (loading) setLoading(false);
+        }
+    }, [activeIndex, images, loading]);
 
     useEffect(() => {
-        const fetchImages = async () => {
-            try {
-                setLoading(true);
-                setError(null);
-                console.log("Fetching images from API...");
-                
-                // Add your API endpoint here
-                const res = await axios.get("http://localhost:8800/api/imageSlider");
-                console.log("API response:", res.data);
-                
-                if (res.data.success && res.data.data && res.data.data.length > 0) {
-                    setImages(res.data.data);
-                } else {
-                    setImages([
-                    {
-                        _id: "1",
-                        imagePath: "/images/slider1.jpg",
-                        name: "Default Image 1"
-                    },
-                    {
-                        _id: "2", 
-                        imagePath: "/images/slider2.jpg",
-                        name: "Default Image 2"
-                    },
-                    {
-                        _id: "3", 
-                        imagePath: "/images/slider3.jpg",
-                        name: "Default Image 3"
-                    }
-                ]);
-                    // throw new Error("Invalid response format");
-                    
-                }
-
-
-            } catch (error) {
-                console.error("Failed to fetch images:", error);
-                setError("Failed to load images. Please try again later.");
-                
-                // Fallback to default images if API fails
-                setImages([
-                    {
-                        _id: "1",
-                        imagePath: "/images/slider1.jpg",
-                        name: "Default Image 1"
-                    },
-                    {
-                        _id: "2", 
-                        imagePath: "/images/slider2.jpg",
-                        name: "Default Image 2"
-                    }
-                ]);
-            } finally {
-                setLoading(false);
-            }
-        };
+        isMountedRef.current = true;
         fetchImages();
-    }, []);
+        // light polling to reflect admin uploads "near real-time"
+        pollRef.current = setInterval(fetchImages, 15000);
+        return () => {
+            isMountedRef.current = false;
+            if (pollRef.current) clearInterval(pollRef.current);
+        };
+    }, [fetchImages]);
 
     const startAutoSlide = useCallback(() => {
         if (intervalRef.current) {
@@ -80,10 +65,9 @@ function ImageSlider() {
 
     useEffect(() => {
         if (images.length === 0) return;
-
         startAutoSlide();
         return () => stopAutoSlide();
-    }, [images, activeIndex, startAutoSlide]);
+    }, [images, startAutoSlide]);
 
     const stopAutoSlide = () => {
         if (intervalRef.current) {
@@ -131,7 +115,7 @@ function ImageSlider() {
                         className="slider__image"
                         onError={(e) => {
                             // Fallback if image fails to load
-                            e.target.src = "/images/slider1.jpg";
+                            e.target.src = `${process.env.PUBLIC_URL || ""}/images/slider1.jpg`;
                             e.target.alt = "Image not available";
                         }}
                     />
