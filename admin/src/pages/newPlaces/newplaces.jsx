@@ -290,6 +290,7 @@ const NewPlace = () => {
     } catch (err) {
       console.error("Place creation failed:", err.response?.data || err.message);
       setError("Failed to create place: " + (err.response?.data?.message || err.message));
+      toast.error("Place creation failed", err)
     }
   };
 

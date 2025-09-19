@@ -92,21 +92,23 @@ const EditExchange = () => {
     if (!CLOUD_NAME || !UPLOAD_PRESET) {
       throw new Error("Missing Cloudinary config. Set REACT_APP_CLOUDINARY_CLOUD_NAME and REACT_APP_CLOUDINARY_UPLOAD_PRESET.");
     }
-    const uploadClient = axios.create();
-    uploadClient.interceptors.request.use((config) => {
-      if (config.headers) {
-        delete config.headers.Authorization;
-        delete config.headers.authorization;
-      }
-      return config;
-    });
     const urls = [];
     for (const file of files) {
       const data = new FormData();
       data.append("file", file);
       data.append("upload_preset", UPLOAD_PRESET);
-  const res = await uploadClient.post(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, data, { withCredentials: false });
-      urls.push(res.data.secure_url);
+      const resp = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+        method: 'POST',
+        body: data,
+        credentials: 'omit',
+        mode: 'cors',
+      });
+      if (!resp.ok) {
+        const txt = await resp.text();
+        throw new Error(`Upload failed ${resp.status}: ${txt}`);
+      }
+      const json = await resp.json();
+      urls.push(json.secure_url || json.url);
     }
     return urls;
   };
