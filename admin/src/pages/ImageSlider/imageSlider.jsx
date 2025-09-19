@@ -40,27 +40,23 @@ const NewImageSlider = ({ inputs = [], title }) => {
     }
 
     let imageUrl = "";
-    let imageType = file.type;
-
     const data = new FormData();
     data.append("file", file);
     data.append("upload_preset", UPLOAD_PRESET);
 
     try {
-      // Use a separate axios instance without global interceptors (no Authorization header)
-      const uploadClient = axios.create();
-      const uploadRes = await uploadClient.post(
-        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-        data,
-        {
-          onUploadProgress: (progressEvent) => {
-            if (!progressEvent.total) return;
-            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            console.log(`Upload progress: ${percentCompleted}%`);
-          },
-        }
-      );
-      imageUrl = uploadRes.data.secure_url;
+      const resp = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+        method: 'POST',
+        body: data,
+        credentials: 'omit',
+        mode: 'cors',
+      });
+      if (!resp.ok) {
+        const txt = await resp.text();
+        throw new Error(`Upload failed ${resp.status}: ${txt}`);
+      }
+      const json = await resp.json();
+      imageUrl = json.secure_url || json.url;
     } catch (err) {
       console.error("Cloudinary upload failed", err);
       alert("Image upload failed");
@@ -70,7 +66,7 @@ const NewImageSlider = ({ inputs = [], title }) => {
     // Prepare data to send to backend
     const sliderData = {
       name: info.name,
-      imageType,
+      imageType: file.type,
       imagePath: imageUrl,
     };
 

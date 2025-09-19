@@ -39,6 +39,7 @@ export const testCloudinaryUpload = async (file) => {
     const response = await fetch(url, {
       method: 'POST',
       body: data,
+      credentials: 'omit',
     });
     
     console.log('Response status:', response.status);

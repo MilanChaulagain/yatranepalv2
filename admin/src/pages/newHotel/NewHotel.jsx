@@ -51,10 +51,18 @@ const NewHotel = () => {
             const data = new FormData();
             data.append("file", file);
             data.append("upload_preset", process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET);
-            const res = await axios.post(
+            const uploadClient = axios.create();
+            uploadClient.interceptors.request.use((config) => {
+              if (config.headers) {
+                delete config.headers.Authorization;
+                delete config.headers.authorization;
+              }
+              return config;
+            });
+            const res = await uploadClient.post(
               `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_CLOUD_NAME}/image/upload`,
               data,
-              { headers: { "Content-Type": "multipart/form-data" } }
+              { withCredentials: false, headers: { "Content-Type": "multipart/form-data" } }
             );
             return res.data.url;
           })

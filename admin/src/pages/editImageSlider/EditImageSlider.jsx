@@ -63,13 +63,19 @@ const EditImageSlider = () => {
     const data = new FormData();
     data.append("file", imageFile);
     data.append("upload_preset", UPLOAD_PRESET);
-    const uploadClient = axios.create();
-    const uploadRes = await uploadClient.post(
-      `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-      data
-    );
+    const resp = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+      method: 'POST',
+      body: data,
+      credentials: 'omit',
+      mode: 'cors',
+    });
+    if (!resp.ok) {
+      const txt = await resp.text();
+      throw new Error(`Upload failed ${resp.status}: ${txt}`);
+    }
+    const json = await resp.json();
     return {
-      imagePath: uploadRes.data.secure_url,
+      imagePath: json.secure_url || json.url,
       imageType: imageFile.type,
     };
   };
