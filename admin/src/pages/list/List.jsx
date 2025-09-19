@@ -201,6 +201,10 @@ const List = ({ columns }) => {
   };
 
   const getThumbnailUrl = (item) => {
+    if (path === 'imageslider') {
+      const url = resolveCloudinaryUrl(item.imagePath || item.img || item.photo);
+      return url || '/images/no-image-icon-0.jpg';
+    }
     if (path === 'users') {
       const candidate = item.img || item.photo || item.profilePic || item.profileImage || item.avatar || item.image;
       const url = resolveCloudinaryUrl(candidate);

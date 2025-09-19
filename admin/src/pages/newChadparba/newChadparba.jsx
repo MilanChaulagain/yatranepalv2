@@ -20,7 +20,7 @@ const NewChadParba = () => {
     const handleClick = async (e) => {
         e.preventDefault();
         try {
-            await axios.post("http://localhost:3000/chadparba", info);
+            await axios.post("http://localhost:8800/api/chadparba", info, { withCredentials: true });
             alert("ChadParba event created successfully!");
             navigate("/chadparba");
         } catch (err) {
@@ -38,7 +38,7 @@ const NewChadParba = () => {
                     <h1>Add New ChadParba Event</h1>
                 </div>
                 <div className="bottom">
-                    <form>
+                    <form className="form" onSubmit={(e)=>e.preventDefault()}>
                         {chadParbaInputs.map((input) => (
                             <div className="formInput" key={input.id}>
                                 <label>{input.label}</label>
@@ -77,9 +77,10 @@ const NewChadParba = () => {
                             </div>
                         ))}
 
-                        <button type="submit" onClick={handleClick}>
-                            Create
-                        </button>
+                        <div className="actions">
+                          <button type="button" className="secondary-btn" onClick={()=>navigate(-1)}>Cancel</button>
+                          <button type="submit" className="primary-btn" onClick={handleClick}>Create</button>
+                        </div>
                     </form>
                 </div>
             </div>

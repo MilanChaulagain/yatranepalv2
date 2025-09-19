@@ -11,7 +11,6 @@ const NewImageSlider = ({ inputs = [], title }) => {
     // Debug environment variables
   console.log("Cloudinary Cloud Name:", process.env.REACT_APP_CLOUDINARY_CLOUD_NAME);
   console.log("Cloudinary Upload Preset:", process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET);
-  console.log("All env vars:", process.env);
 
   const [file, setFile] = useState(null);
   const [info, setInfo] = useState({});
@@ -33,26 +32,30 @@ const NewImageSlider = ({ inputs = [], title }) => {
       return;
     }
 
+    const CLOUD_NAME = process.env.REACT_APP_CLOUDINARY_CLOUD_NAME;
+    const UPLOAD_PRESET = process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET;
+    if (!CLOUD_NAME || !UPLOAD_PRESET) {
+      alert("Missing Cloudinary config. Please set REACT_APP_CLOUDINARY_CLOUD_NAME and REACT_APP_CLOUDINARY_UPLOAD_PRESET.");
+      return;
+    }
+
     let imageUrl = "";
     let imageType = file.type;
 
     const data = new FormData();
     data.append("file", file);
-    data.append("upload_preset", process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET);
+    data.append("upload_preset", UPLOAD_PRESET);
 
     try {
-      const uploadRes = await axios.post(
-        // Replace with your Cloudinary upload preset and cloud name
-        `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_CLOUD_NAME}/image/upload`,
+      // Use a separate axios instance without global interceptors (no Authorization header)
+      const uploadClient = axios.create();
+      const uploadRes = await uploadClient.post(
+        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
         data,
         {
-          // headers: {
-          //   "Content-Type": "multipart/form-data",
-          // },
           onUploadProgress: (progressEvent) => {
-            const percentCompleted = Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total
-            );
+            if (!progressEvent.total) return;
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
             console.log(`Upload progress: ${percentCompleted}%`);
           },
         }
@@ -72,7 +75,7 @@ const NewImageSlider = ({ inputs = [], title }) => {
     };
 
     try {
-      await axios.post("http://localhost:8800/api/imageslider", sliderData);
+      await axios.post("http://localhost:8800/api/imageslider", sliderData, { withCredentials: true });
       alert("Image slider added successfully!");
       navigate("/imageslider");
     } catch (err) {
