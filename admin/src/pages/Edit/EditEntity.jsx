@@ -18,6 +18,15 @@ const EditEntity = () => {
     const [loading, setLoading] = useState(true);
     const [files, setFiles] = useState([]);
 
+    const isPlace = path === 'place';
+    const isHotel = path === 'hotels';
+    const isUser = path === 'users';
+
+    const PLACE_CATEGORIES = [
+        'Cultural', 'Natural', 'Historical', 'Adventure', 'Religious', 'Food Destinations', 'Photography'
+    ];
+    const CITIES = ['kathmandu', 'lalitpur', 'bhaktapur', 'pokhara'];
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -43,6 +52,12 @@ const EditEntity = () => {
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleNumberChange = (e) => {
+        const { name, value } = e.target;
+        const parsed = value === '' ? '' : Number(value);
+        setFormData({ ...formData, [name]: parsed });
     };
 
     const handleSubmit = async (e) => {
@@ -72,11 +87,11 @@ const EditEntity = () => {
 
             const payload = { ...formData };
             // For hotels, update photos array
-            if (path === 'hotels') {
+            if (isHotel) {
                 payload.photos = photos;
             }
             // Handle role validation for users
-            if (path === 'users' && payload.role) {
+            if (isUser && payload.role) {
                 const validRoles = ['user', 'tourist guide'];
                 if (!validRoles.includes(payload.role)) {
                     delete payload.role;
@@ -90,7 +105,7 @@ const EditEntity = () => {
             delete payload.password;
 
             // Use the correct endpoint for users
-            const updateUrl = path === 'users' 
+            const updateUrl = isUser 
                 ? `http://localhost:8800/api/${path}/update/${id}`
                 : `http://localhost:8800/api/${path}/${id}`;
 
@@ -116,15 +131,26 @@ const EditEntity = () => {
                 <Sidebar />
                 <div className="newContainer">
                     <Navbar />
-                    <div className="editEntity">
-                        <div className="editHeader">
-                          <button className="backButton" onClick={() => navigate(-1)}>
-                            ← Back
-                          </button>
-                          <h2>Edit {path.slice(0, -1)}</h2>
-                        </div>
-                        <div className="editBody">
-                                                    <div className="leftPreview">
+                                        <div className="editEntity">
+                                                <div className="editHeader">
+                                                    <div className="headerLeft">
+                                                        <button className="backButton" onClick={() => navigate(-1)}>
+                                                            ← Back
+                                                        </button>
+                                                        <h2>Edit {path.slice(0, -1)}</h2>
+                                                    </div>
+                                                    <div className="headerActions">
+                                                        <button className="secondary-btn" type="button" onClick={() => navigate(`/${path}`)}>Cancel</button>
+                                                        <button className="primary-btn" type="submit" form="editEntityForm">Save Changes</button>
+                                                    </div>
+                                                </div>
+                                                <div className="editBody">
+                                                    <div className="leftPreview" onDragOver={(e)=>e.preventDefault()} onDrop={(e)=>{
+                                                        e.preventDefault();
+                                                        const dropped = Array.from(e.dataTransfer.files || []);
+                                                        if (!dropped.length) return;
+                                                        setFiles(dropped);
+                                                    }}>
                                                         {/* Show first photo for hotels, else fallback */}
                                                         <img
                                                             src={
@@ -132,93 +158,139 @@ const EditEntity = () => {
                                                                     ? URL.createObjectURL(files[0])
                                                                     : (Array.isArray(formData.photos) && formData.photos.length > 0)
                                                                         ? formData.photos[0]
-                                                                        : formData.img || formData.photo || "/assets/images/no-image-icon-0.jpg"
+                                                                        : formData.img || formData.photo || "/images/no-image-icon-0.jpg"
                                                             }
                                                             alt="preview"
                                                         />
                                                     </div>
-                                                    <form onSubmit={handleSubmit} className="rightForm">
-                                                        {/* For hotels, allow multiple image upload */}
-                                                        {path === 'hotels' ? (
+                                                    <form onSubmit={handleSubmit} id="editEntityForm" className="rightForm">
+                                                        {/* Media uploader */}
+                                                        {isHotel ? (
                                                             <div className="formInput">
-                                                                <label htmlFor="file">Images: <DriveFolderUploadOutlinedIcon className="icon" /></label>
+                                                                <label htmlFor="file">Images <DriveFolderUploadOutlinedIcon className="icon" /></label>
                                                                 <input type="file" id="file" multiple onChange={(e) => setFiles(Array.from(e.target.files))} />
+                                                                {files.length > 0 && (
+                                                                    <div className="fileChips">
+                                                                        {files.map((f, i) => (
+                                                                            <span key={i} className="chip" title={f.name}>{f.name}</span>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         ) : (
                                                             <div className="formInput">
-                                                                <label htmlFor="file">Image: <DriveFolderUploadOutlinedIcon className="icon" /></label>
+                                                                <label htmlFor="file">Image <DriveFolderUploadOutlinedIcon className="icon" /></label>
                                                                 <input type="file" id="file" onChange={(e) => setFiles([e.target.files[0]])} />
+                                                                {files.length > 0 && (
+                                                                    <div className="fileChips">
+                                                                        <span className="chip" title={files[0].name}>{files[0].name}</span>
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         )}
-                            {Object.keys(formData).map((key) => {
-                                if (key === "_id" || key === "__v" || key === "createdAt" || key === "updatedAt" || key === "password") {
-                                    return null;
-                                }
-                                if (path === 'users' && key === 'role') {
-                                    return (
-                                        <div key={key} className="form-group">
-                                            <select
-                                                name={key}
-                                                value={formData[key] || "user"}
-                                                onChange={handleChange}
-                                            >
-                                                <option value="user">User</option>
-                                                <option value="tourist guide">Tourist Guide</option>
-                                            </select>
-                                            <label>{key}</label>
+
+                                                        {/* Current images grid for hotels */}
+                                                        {isHotel && Array.isArray(formData.photos) && formData.photos.length > 0 && (
+                                                            <div className="form-group">
+                                                                <label>Current Images</label>
+                                                                <div className="thumbGrid">
+                                                                    {formData.photos.map((url, idx) => (
+                                                                        <img key={idx} src={url} alt={`Hotel ${idx + 1}`} />
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {/* Dynamic fields */}
+                                                        {Object.keys(formData).map((key) => {
+                                                            if (key === "_id" || key === "__v" || key === "createdAt" || key === "updatedAt" || key === "password") {
+                                                                return null;
+                                                            }
+                                                            if (isUser && key === 'role') {
+                                                                return (
+                                                                    <div key={key} className="form-group">
+                                                                        <label>Role</label>
+                                                                        <select name={key} value={formData[key] || "user"} onChange={handleChange}>
+                                                                            <option value="user">User</option>
+                                                                            <option value="tourist guide">Tourist Guide</option>
+                                                                        </select>
+                                                                    </div>
+                                                                );
+                                                            }
+                                                            if (typeof formData[key] === 'boolean') {
+                                                                return (
+                                                                    <div key={key} className="form-group">
+                                                                        <label>{key}</label>
+                                                                        <select
+                                                                            name={key}
+                                                                            value={formData[key] ? "true" : "false"}
+                                                                            onChange={(e) => handleChange({ target: { name: key, value: e.target.value === "true" } })}
+                                                                        >
+                                                                            <option value="true">True</option>
+                                                                            <option value="false">False</option>
+                                                                        </select>
+                                                                    </div>
+                                                                );
+                                                            }
+                                                            if (isPlace && key === 'category') {
+                                                                return (
+                                                                    <div key={key} className="form-group">
+                                                                        <label>Category</label>
+                                                                        <select name={key} value={formData[key] || ''} onChange={handleChange}>
+                                                                            <option value="">Select category</option>
+                                                                            {PLACE_CATEGORIES.map(cat => (
+                                                                                <option key={cat} value={cat}>{cat}</option>
+                                                                            ))}
+                                                                        </select>
+                                                                    </div>
+                                                                );
+                                                            }
+                                                            if (isPlace && key === 'city') {
+                                                                return (
+                                                                    <div key={key} className="form-group">
+                                                                        <label>City</label>
+                                                                        <select name={key} value={formData[key] || ''} onChange={handleChange}>
+                                                                            <option value="">Select city</option>
+                                                                            {CITIES.map(c => (
+                                                                                <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
+                                                                            ))}
+                                                                        </select>
+                                                                    </div>
+                                                                );
+                                                            }
+                                                            if (key.toLowerCase().includes('description')) {
+                                                                const val = formData[key] || '';
+                                                                return (
+                                                                    <div key={key} className="form-group">
+                                                                        <label>Description</label>
+                                                                        <textarea name={key} value={val} onChange={handleChange} placeholder="Write a clear, concise description..." />
+                                                                        <div className="helper-text">{val.length}/1000</div>
+                                                                    </div>
+                                                                );
+                                                            }
+                                                            if (/(price|rating|distance|lat|lng)/i.test(key)) {
+                                                                return (
+                                                                    <div key={key} className="form-group">
+                                                                        <label>{key}</label>
+                                                                        <input type="number" step="any" name={key} value={formData[key] ?? ''} onChange={handleNumberChange} placeholder="0" />
+                                                                    </div>
+                                                                );
+                                                            }
+                                                            return (
+                                                                <div key={key} className="form-group">
+                                                                    <label>{key}</label>
+                                                                    <input type="text" name={key} value={formData[key] || ''} onChange={handleChange} placeholder=" " />
+                                                                </div>
+                                                            );
+                                                        })}
+
+                                                        <div className="formActions">
+                                                            <button type="button" className="secondary-btn" onClick={() => navigate(`/${path}`)}>Cancel</button>
+                                                            <button type="submit" className="submit-btn">Save Changes</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
                                         </div>
-                                    );
-                                }
-                                if (typeof formData[key] === 'boolean') {
-                                    return (
-                                        <div key={key} className="form-group">
-                                            <select
-                                                name={key}
-                                                value={formData[key] ? "true" : "false"}
-                                                onChange={(e) => handleChange({
-                                                    target: {
-                                                        name: key,
-                                                        value: e.target.value === "true"
-                                                    }
-                                                })}
-                                            >
-                                                <option value="true">True</option>
-                                                <option value="false">False</option>
-                                            </select>
-                                            <label>{key}</label>
-                                        </div>
-                                    );
-                                }
-                                // For hotels, show all images in preview
-                                if (path === 'hotels' && key === 'photos' && Array.isArray(formData.photos)) {
-                                  return (
-                                    <div key={key} className="form-group">
-                                      <label>Current Images</label>
-                                      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                                        {formData.photos.map((url, idx) => (
-                                          <img key={idx} src={url} alt={`Hotel ${idx + 1}`} style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px' }} />
-                                        ))}
-                                      </div>
-                                    </div>
-                                  );
-                                }
-                                return (
-                                    <div key={key} className="form-group">
-                                        <input
-                                            type="text"
-                                            name={key}
-                                            value={formData[key] || ""}
-                                            onChange={handleChange}
-                                            placeholder=" "
-                                        />
-                                        <label>{key}</label>
-                                    </div>
-                                );
-                            })}
-                            <button type="submit" className="submit-btn">Save Changes</button>
-                          </form>
-                        </div>
-                    </div>
                 </div>
             </div>
         </>

@@ -1,5 +1,8 @@
 import TouristGuide from "../models/touristguide.js";
 import User from "../models/User.js";
+import mongoose from "mongoose";
+
+const LICENSE_PATTERN = /^[A-Z0-9]+$/;
 
 
 // CREATE a tourist guide
@@ -56,9 +59,8 @@ export const createTouristGuide = async (req, res, next) => {
             return res.status(400).json({ message: `Missing fields: ${missingFields.join(", ")}` });
         }
 
-        // const licensePattern = /^TCB\/TG\([A-Z/_]+\)-\d{2}\/\d{4,5}$/;
-        const licensePattern = /^[A-Z0-9]+$/;
-        if (!licensePattern.test(licenseNumber)) {
+        // Validate license number format
+        if (!LICENSE_PATTERN.test(String(licenseNumber || '').toUpperCase())) {
             return res.status(400).json({ message: "Invalid license number format." });
         }
 
@@ -105,7 +107,7 @@ export const updateTouristGuide = async (req, res, next) => {
         delete req.body.userId;
         delete req.body.email;
 
-        if (req.body.licenseNumber && !licenseNumberPattern.test(req.body.licenseNumber)) {
+        if (req.body.licenseNumber && !LICENSE_PATTERN.test(String(req.body.licenseNumber).toUpperCase())) {
             return res.status(400).json({ message: "Invalid license number format." });
         }
 
@@ -148,11 +150,17 @@ export const deleteTouristGuide = async (req, res, next) => {
 // GET a single tourist guide
 export const getTouristGuide = async (req, res, next) => {
     try {
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({ message: "Invalid guide id" });
+        }
         const guide = await TouristGuide.findById(req.params.id)
             .populate("userId", "username role");
         if (!guide) return res.status(404).json({ message: "Guide not found." });
         res.status(200).json(guide);
     } catch (err) {
+        if (err?.name === 'CastError') {
+            return res.status(400).json({ message: "Invalid guide id" });
+        }
         next(err);
     }
 };
@@ -162,10 +170,8 @@ export const getAllTouristGuides = async (req, res, next) => {
     try {
         const guides = await TouristGuide.find()
             .populate("userId", "username role");
-        if (!guides || guides.length === 0) {
-            return res.status(404).json({ message: "No tourist guides found." });
-        }
-        res.status(200).json(guides);
+        // Return empty array with 200 to keep admin list UX consistent
+        res.status(200).json(Array.isArray(guides) ? guides : []);
     } catch (err) {
         next(err);
     }

@@ -1,0 +1,13 @@
+.new {
+  .top { h1 { margin: 0 0 12px; } }
+  .bottom {
+    display: grid; grid-template-columns: 300px 1fr; gap: 20px;
+  }
+  .left img { width: 100%; height: 300px; object-fit: cover; border-radius: 8px; }
+  .right .formInput { margin-bottom: 14px; }
+  .right .formInput label { display:block; margin-bottom:6px; font-weight:500; }
+  .right .formInput input, .right .formInput select {
+    width: 100%; padding: 10px 12px; border:1px solid #ddd; border-radius:8px;
+  }
+  .right button { margin-top: 8px; padding: 10px 16px; border: 0; border-radius:8px; background:#2d5c7f; color:#fff; font-weight:600; }
+}

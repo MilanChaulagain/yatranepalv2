@@ -26,18 +26,34 @@
   }
 
   .editHeader {
+    position: sticky;
+    top: 0;
+    z-index: 2;
     padding: $spacing-unit * 2.5;
     border-bottom: 1px solid rgba($text-muted, 0.08);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: rgba($background-secondary, 0.3);
+    background: rgba($background-secondary, 0.6);
+    backdrop-filter: blur(8px);
 
     h2 {
       font-size: 1.5rem;
       font-weight: 600;
       color: $text-primary;
       margin: 0;
+    }
+
+    .headerLeft {
+      display: flex;
+      align-items: center;
+      gap: $spacing-unit * 2;
+    }
+
+    .headerActions {
+      display: flex;
+      align-items: center;
+      gap: $spacing-unit * 1.5;
     }
   }
 
@@ -106,6 +122,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: $spacing-unit * 2;
+    align-content: start;
   }
 
   .formInput {
@@ -166,6 +183,86 @@
       background-position: right $spacing-unit center;
       background-size: 1.25rem;
       padding-right: $spacing-unit * 4;
+    }
+  }
+
+  .fileChips {
+    margin-top: $spacing-unit;
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-unit;
+
+    .chip {
+      padding: $spacing-unit * 0.75 $spacing-unit * 1.25;
+      background: rgba($background-secondary, 0.5);
+      border: 1px solid rgba($text-muted, 0.15);
+      border-radius: $border-radius-xl;
+      font-size: 0.8rem;
+      color: $text-secondary;
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .thumbGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: $spacing-unit;
+
+    img {
+      width: 100%;
+      height: 80px;
+      object-fit: cover;
+      border-radius: $border-radius-md;
+      border: 1px solid rgba($text-muted, 0.1);
+    }
+  }
+
+  .helper-text {
+    margin-top: $spacing-unit * 0.5;
+    font-size: 0.75rem;
+    color: $text-muted;
+  }
+
+  .formActions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-unit * 1.5;
+    margin-top: $spacing-unit;
+  }
+
+  .primary-btn {
+    padding: $spacing-unit * 1.25 $spacing-unit * 2;
+    background: linear-gradient(135deg, $primary-color 0%, darken($primary-color, 8%) 100%);
+    color: white;
+    border: none;
+    border-radius: $border-radius-lg;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba($primary-color, 0.2);
+    }
+  }
+
+  .secondary-btn {
+    padding: $spacing-unit * 1.25 $spacing-unit * 2;
+    background: rgba($background-secondary, 0.5);
+    color: $text-secondary;
+    border: 1px solid rgba($text-muted, 0.15);
+    border-radius: $border-radius-lg;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba($background-secondary, 0.6);
+      transform: translateY(-1px);
     }
   }
 

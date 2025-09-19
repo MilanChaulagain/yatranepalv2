@@ -33,13 +33,10 @@ const Single = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(`http://localhost:8800/api/${path}/${id}`, { withCredentials: true });
-        // Handle different response formats
         const responseData = response.data;
         if (responseData.data) {
-          // Places format: { success: true, data: {...} }
           setData(responseData.data);
         } else {
-          // Direct object format
           setData(responseData);
         }
       } catch (error) {
@@ -50,10 +47,9 @@ const Single = () => {
       }
     };
 
-    if (id) {
-      fetchData();
-    }
+    if (id) fetchData();
   }, [id, path]);
+
   if (loading) {
     return (
       <div className="single">
@@ -87,16 +83,19 @@ const Single = () => {
     return `https://res.cloudinary.com/${cloudName}/image/upload/${value}`;
   };
 
-  const fallbackNoImage = "/assets/images/no-image-icon-0.jpg";
+  const fallbackNoImage = "/images/no-image-icon-0.jpg";
   const mainImage =
     resolveCloudinaryUrl(
       data.img || data.photo || data.profilePic || data.profileImage || data.avatar || data.image
     ) ||
     fallbackNoImage;
 
-  const handleDelete = async () => {
-    setConfirmOpen(true);
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    toast.success('Copied to clipboard!');
   };
+
+  const handleDelete = async () => setConfirmOpen(true);
 
   const confirmDelete = async () => {
     try {
@@ -119,13 +118,14 @@ const Single = () => {
     }
   };
 
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
-    toast.success('Copied to clipboard!');
+  // Category helpers that tolerate string or array values
+  const getCategoryKey = (category) => {
+    const v = Array.isArray(category) ? (category[0] ?? "") : (category ?? "");
+    return String(v).toLowerCase();
   };
 
   const getCategoryIcon = (category) => {
-    switch (category?.toLowerCase()) {
+    switch (getCategoryKey(category)) {
       case 'cultural': return '🏛️';
       case 'natural': return '🌿';
       case 'historical': return '🏺';
@@ -138,7 +138,7 @@ const Single = () => {
   };
 
   const getCategoryColor = (category) => {
-    switch (category?.toLowerCase()) {
+    switch (getCategoryKey(category)) {
       case 'cultural': return '#8B5CF6';
       case 'natural': return '#10B981';
       case 'historical': return '#F59E0B';
@@ -160,12 +160,14 @@ const Single = () => {
     return `https://www.google.com/maps?q=${coordinates[1]},${coordinates[0]}`;
   };
 
+  const primaryCategory = Array.isArray(data.category) ? data.category[0] : data.category;
+
   return (
     <div className="single">
       <Sidebar />
       <div className="singleContainer">
         <Navbar />
-        
+
         {/* Header Section */}
         <div className="header-section">
           <div className="header-content">
@@ -204,17 +206,17 @@ const Single = () => {
                   }
                 }}
               />
-              {data.category && (
+              {primaryCategory && (
                 <div 
                   className="category-badge"
-                  style={{ backgroundColor: getCategoryColor(data.category) }}
+                  style={{ backgroundColor: getCategoryColor(primaryCategory) }}
                 >
-                  <span className="category-icon">{getCategoryIcon(data.category)}</span>
-                  {data.category}
+                  <span className="category-icon">{getCategoryIcon(primaryCategory)}</span>
+                  {primaryCategory}
                 </div>
               )}
             </div>
-            
+
             <div className="hero-info">
               <div className="title-section">
                 <h1 className="main-title">
@@ -290,13 +292,28 @@ const Single = () => {
                 {data.category && (
                   <div className="detail-row">
                     <label>Category</label>
-                    <div 
-                      className="category-tag"
-                      style={{ backgroundColor: getCategoryColor(data.category) }}
-                    >
-                      <span className="category-icon">{getCategoryIcon(data.category)}</span>
-                      {data.category}
-                    </div>
+                    {Array.isArray(data.category) ? (
+                      <div className="category-tags">
+                        {data.category.map((cat, idx) => (
+                          <div
+                            key={idx}
+                            className="category-tag"
+                            style={{ backgroundColor: getCategoryColor(cat), display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 8px', borderRadius: 6, marginRight: 6, marginBottom: 6, color: '#fff' }}
+                          >
+                            <span className="category-icon">{getCategoryIcon(cat)}</span>
+                            {cat}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div 
+                        className="category-tag"
+                        style={{ backgroundColor: getCategoryColor(data.category) }}
+                      >
+                        <span className="category-icon">{getCategoryIcon(data.category)}</span>
+                        {data.category}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

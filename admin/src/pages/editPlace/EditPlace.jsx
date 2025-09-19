@@ -1,57 +1,80 @@
-import "./newplaces.scss";
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
+import toast from "react-hot-toast";
+import "./editPlace.scss";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Navbar from "../../components/navbar/Navbar";
 import DriveFolderUploadOutlinedIcon from "@mui/icons-material/DriveFolderUploadOutlined";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import { useState, useEffect } from "react";
 import { placeInputs } from "../../formSource";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
 import { testCloudinaryConfig, testCloudinaryUpload } from "../../utils/cloudinaryTest";
 
-const categoryOptions = [
-  { label: "Cultural", value: "Cultural" },
-  { label: "Natural", value: "Natural" },
-  { label: "Historical", value: "Historical" },
-  { label: "Adventure", value: "Adventure" },
-  { label: "Religious", value: "Religious" },
-];
-
-const NewPlace = () => {
-  const [files, setFiles] = useState(null);
-  const [info, setInfo] = useState({});
-  const [loadingLatLng, setLoadingLatLng] = useState(false);
-  const [suggestedLocations, setSuggestedLocations] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [error, setError] = useState("");
+const EditPlace = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
 
-  // Cleanup function to prevent memory leaks
+  const [info, setInfo] = useState({});
+  const [files, setFiles] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [loadingLatLng, setLoadingLatLng] = useState(false);
+  const [error, setError] = useState("");
+  const [suggestedLocations, setSuggestedLocations] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const categoryOptions = [
+    { value: "archaeological", label: "Archaeological" },
+    { value: "religious", label: "Religious" },
+    { value: "cultural", label: "Cultural" },
+    { value: "natural", label: "Natural" },
+    { value: "adventure", label: "Adventure" },
+    { value: "historical", label: "Historical" },
+    { value: "museum", label: "Museum" },
+    { value: "wildlife", label: "Wildlife" },
+    { value: "trekking", label: "Trekking" },
+    { value: "other", label: "Other" },
+  ];
+
+  // Fetch existing place data
   useEffect(() => {
-    return () => {
-      // Cleanup any ongoing operations when component unmounts
-      setLoadingLatLng(false);
+    const fetchPlace = async () => {
+      try {
+        const res = await axios.get(`/api/place/${id}`, { withCredentials: true });
+        const placeData = res.data.data || res.data;
+        
+        // Convert location coordinates back to latitude/longitude for editing
+        const location = placeData.location;
+        if (location && location.coordinates) {
+          placeData.longitude = location.coordinates[0].toString();
+          placeData.latitude = location.coordinates[1].toString();
+        }
+
+        setInfo(placeData);
+      } catch (err) {
+        console.error("Failed to fetch place:", err);
+        toast.error("Failed to load place data for editing.");
+        navigate("/place");
+      } finally {
+        setLoading(false);
+      }
     };
-  }, []);
+
+    fetchPlace();
+  }, [id, navigate]);
 
   const handleChange = (e) => {
     setInfo((prev) => ({ ...prev, [e.target.id]: e.target.value }));
-    setError(""); // Clear error when user starts typing
+    setError("");
   };
 
-  // Auto-fetch latitude and longitude when location field loses focus
   const handleLocationBlur = async (e) => {
-    const location = e.target.value;
+    const location = e.target.value.trim();
     if (!location) return;
 
-    console.log("Location value:", location);
-    
     setLoadingLatLng(true);
     setError("");
     
     try {
-      // Use LocationIQ API (requires API key)
       const apiKey = process.env.REACT_APP_LOCATIONIQ_ACCESS_TOKEN;
       if (!apiKey) {
         throw new Error("LocationIQ API key is missing");
@@ -66,7 +89,6 @@ const NewPlace = () => {
       }
       
       const data = await response.json();
-      console.log("API response:", data);
       
       if (data.length > 0) {
         const lat = parseFloat(data[0].lat);
@@ -92,7 +114,6 @@ const NewPlace = () => {
   const handleSuggestLocation = async () => {
     const { name, city, address, location } = info;
     
-    // Check if we have enough information
     if (!name && !city && !address && !location) {
       setError("Please fill in at least the place name, city, address, or location to get suggestions.");
       return;
@@ -104,10 +125,8 @@ const NewPlace = () => {
     setError("");
 
     try {
-      // Create search queries using available information
       const searchQueries = [];
       
-      // Use the most specific combination available
       if (name && city && address) {
         searchQueries.push(`${name}, ${address}, ${city}, Nepal`);
       } else if (name && city) {
@@ -126,16 +145,14 @@ const NewPlace = () => {
         searchQueries.push(`${location}, Nepal`);
       }
 
-      // Add more specific queries if we have a name
       if (name) {
-        searchQueries.push(`${name},  Nepal`);
+        searchQueries.push(`${name}, Nepal`);
         searchQueries.push(`${name}, Kathmandu, Nepal`);
       }
 
       const allSuggestions = [];
       const apiKey = process.env.REACT_APP_LOCATIONIQ_ACCESS_TOKEN;
 
-      // Fetch suggestions for each query
       for (const query of searchQueries.slice(0, 3)) {
         try {
           if (!apiKey) {
@@ -144,7 +161,6 @@ const NewPlace = () => {
           
           const response = await fetch(
             `https://us1.locationiq.com/v1/search?key=${apiKey}&q=${encodeURIComponent(query)}&format=json`
-            
           );
           
           if (!response.ok) continue;
@@ -164,7 +180,6 @@ const NewPlace = () => {
                 confidence: getConfidenceScore(result, name, city, address)
               };
               
-              // Avoid duplicates
               if (!allSuggestions.find(s => 
                 Math.abs(s.lat - suggestion.lat) < 0.001 && 
                 Math.abs(s.lng - suggestion.lng) < 0.001
@@ -178,7 +193,6 @@ const NewPlace = () => {
         }
       }
 
-      // Sort suggestions by confidence score
       allSuggestions.sort((a, b) => b.confidence - a.confidence);
       
       setSuggestedLocations(allSuggestions.slice(0, 5));
@@ -196,7 +210,6 @@ const NewPlace = () => {
     }
   };
 
-  // Helper function to calculate confidence score
   const getConfidenceScore = (result, name, city, address) => {
     let score = 0;
     const displayName = result.display_name.toLowerCase();
@@ -205,17 +218,14 @@ const NewPlace = () => {
     if (city && displayName.includes(city.toLowerCase())) score += 2;
     if (address && displayName.includes(address.toLowerCase())) score += 2;
     
-    // Bonus for Nepal locations
     if (displayName.includes('nepal')) score += 1;
     
-    // Bonus for specific location types (adjust based on LocationIQ response structure)
     if (result.class === 'tourism') score += 2;
     if (result.class === 'amenity') score += 1;
     
     return score;
   };
 
-  // Handle selection of a suggested location
   const handleSelectSuggestion = (suggestion) => {
     setInfo((prev) => ({
       ...prev,
@@ -243,9 +253,10 @@ const NewPlace = () => {
       return;
     }
 
-    let photoUrls = [];
+    let photoUrls = info.img ? [info.img] : []; // Keep existing image by default
+
+    // If new files are selected, upload them
     if (files && files.length > 0) {
-      // Test Cloudinary configuration first
       if (!testCloudinaryConfig()) {
         setError("Cloudinary configuration is missing. Please check your environment variables.");
         return;
@@ -271,7 +282,7 @@ const NewPlace = () => {
       }
     }
 
-    const newPlace = {
+    const updatedPlace = {
       ...info,
       img: photoUrls[0] || "", 
       location: {
@@ -280,18 +291,37 @@ const NewPlace = () => {
       },
     };
 
-    delete newPlace.latitude;
-    delete newPlace.longitude;
+    // Remove fields that shouldn't be sent in update
+    delete updatedPlace._id;
+    delete updatedPlace.__v;
+    delete updatedPlace.createdAt;
+    delete updatedPlace.updatedAt;
+    delete updatedPlace.latitude;
+    delete updatedPlace.longitude;
 
     try {
-      await axios.post("/api/place", newPlace);
-      toast.success("Place created successfully!");
+      await axios.put(`/api/place/${id}`, updatedPlace, { withCredentials: true });
+      toast.success("Place updated successfully!");
       navigate("/place");
     } catch (err) {
-      console.error("Place creation failed:", err.response?.data || err.message);
-      setError("Failed to create place: " + (err.response?.data?.message || err.message));
+      console.error("Place update failed:", err.response?.data || err.message);
+      setError("Failed to update place: " + (err.response?.data?.message || err.message));
     }
   };
+
+  if (loading) {
+    return (
+      <div className="new">
+        <Sidebar />
+        <div className="newContainer">
+          <Navbar />
+          <div className="loading" style={{ padding: "20px", textAlign: "center" }}>
+            Loading place data...
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="new">
@@ -299,7 +329,7 @@ const NewPlace = () => {
       <div className="newContainer">
         <Navbar />
         <div className="top">
-          <h1>Add New Place</h1>
+          <h1>Edit Place</h1>
         </div>
         <div className="bottom">
           <div className="left">
@@ -307,7 +337,7 @@ const NewPlace = () => {
               src={
                 files && files.length > 0
                   ? URL.createObjectURL(files[0])
-                  : "/images/no-image-icon-0.jpg"
+                  : info.img || "/images/no-image-icon-0.jpg"
               }
               alt="Preview"
             />
@@ -369,7 +399,7 @@ const NewPlace = () => {
                   <h3 style={{ margin: 0, color: "#2d5c7f" }}>Smart Location Finder</h3>
                 </div>
                 <p style={{ margin: "5px 0", fontSize: "0.9rem", color: "#666" }}>
-                  Fill in the place name, city, and address above, then click the button below to get accurate location suggestions.
+                  Update the place name, city, and address above, then click the button below to get accurate location suggestions.
                 </p>
                 <button
                   type="button"
@@ -479,7 +509,7 @@ const NewPlace = () => {
               )}
 
               <button onClick={handleClick} disabled={loadingLatLng}>
-                {loadingLatLng ? "Processing..." : "Send"}
+                {loadingLatLng ? "Processing..." : "Update Place"}
               </button>
             </form>
           </div>
@@ -489,4 +519,4 @@ const NewPlace = () => {
   );
 };
 
-export default NewPlace;
+export default EditPlace;

@@ -76,6 +76,8 @@ const List = ({ columns }) => {
       }
     } catch (error) {
       console.error('Error fetching data:', error);
+      // Clear stale data so previous endpoint results don't linger
+      setData([]);
       toast.error('Failed to fetch data');
     } finally {
       setLoading(false);
