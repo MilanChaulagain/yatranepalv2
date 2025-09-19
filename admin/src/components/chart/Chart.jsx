@@ -16,7 +16,11 @@ const Chart = ({ aspect }) => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await axios.get("http://localhost:8800/api/reservations");
+        const token = localStorage.getItem("token");
+        const res = await axios.get("http://localhost:8800/api/reservations", {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        });
         const items = Array.isArray(res.data) ? res.data : [];
         // Aggregate by month (last 6 months)
         const now = new Date();
@@ -41,7 +45,7 @@ const Chart = ({ aspect }) => {
   }, []);
   return (
     <div className="chart">
-      <div className="title">Last 6 Months Bookings</div>
+      <div className="title">Bookings (Last 6 Months)</div>
       <ResponsiveContainer width="100%" aspect={aspect}>
         <AreaChart
           data={data}

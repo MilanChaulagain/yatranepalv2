@@ -18,9 +18,9 @@ import {
 
 
 const Home = () => {
-  const [stats, setStats] = useState({ users: 0, hotels: 0, rooms: 0, places: 0, guides: 0, bookings: 0 });
   const [reservations, setReservations] = useState([]);
   const [hotels, setHotels] = useState([]);
+  const [rooms, setRooms] = useState([]);
   const [places, setPlaces] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [users, setUsers] = useState([]);
@@ -42,25 +42,17 @@ const Home = () => {
           }
         };
 
-        const [usersRes, hotelsRes, roomsRes, placesRes, guidesRes, reservationsRes, reviewsRes] = await Promise.all([
+        const [usersRes, hotelsRes, roomsRes, placesRes, reservationsRes, reviewsRes] = await Promise.all([
           axios.get("http://localhost:8800/api/users", config),
           axios.get("http://localhost:8800/api/hotels", config),
           axios.get("http://localhost:8800/api/rooms", config),
           axios.get("http://localhost:8800/api/place", config),
-          axios.get("http://localhost:8800/api/touristguide/getAllTouristGuides", config),
           axios.get("http://localhost:8800/api/reservations", config),
           axios.get("http://localhost:8800/api/review", config),
         ]);
-        setStats({
-          users: Array.isArray(usersRes.data) ? usersRes.data.length : 0,
-          hotels: Array.isArray(hotelsRes.data) ? hotelsRes.data.length : 0,
-          rooms: Array.isArray(roomsRes.data) ? roomsRes.data.length : 0,
-          places: Array.isArray(placesRes.data?.data) ? placesRes.data.data.length : (Array.isArray(placesRes.data) ? placesRes.data.length : 0),
-          guides: Array.isArray(guidesRes.data) ? guidesRes.data.length : 0,
-          bookings: Array.isArray(reservationsRes.data) ? reservationsRes.data.length : 0,
-        });
         setReservations(Array.isArray(reservationsRes.data) ? reservationsRes.data : []);
         setHotels(Array.isArray(hotelsRes.data) ? hotelsRes.data : []);
+        setRooms(Array.isArray(roomsRes.data) ? roomsRes.data : []);
         setPlaces(Array.isArray(placesRes.data?.data) ? placesRes.data.data : (Array.isArray(placesRes.data) ? placesRes.data : []));
         setReviews(Array.isArray(reviewsRes.data) ? reviewsRes.data : (reviewsRes.data?.data || []));
         setUsers(Array.isArray(usersRes.data) ? usersRes.data : []);
@@ -143,6 +135,28 @@ const Home = () => {
     return counts;
   })();
 
+  // Derived dashboards
+  const totalRevenue = reservations.reduce((sum, r) => sum + (r.totalPrice || 0), 0);
+  const cancelled = reservations.filter(r => r.status === 'cancelled').length;
+  const pendingCancels = reservations.filter(r => r.status === 'cancel_requested').length;
+  const occupancyRate = (() => {
+    const totalNights = reservations.reduce((acc, r) => acc + (Array.isArray(r.dates) ? r.dates.length : 0), 0);
+    const totalRooms = rooms.length || 1; // rooms from state
+    return totalRooms ? Math.min(100, Math.round((totalNights / (totalRooms * 30)) * 100)) : 0;
+  })();
+
+  const hotelsByBookings = (() => {
+    const map = new Map();
+    reservations.forEach(r => {
+      const hid = String(r.hotelId?._id || r.hotelId);
+      map.set(hid, (map.get(hid) || 0) + 1);
+    });
+    return [...map.entries()]
+      .map(([id, count]) => ({ id, count, name: hotels.find(h => String(h._id) === id)?.name || 'Hotel' }))
+      .sort((a,b)=>b.count-a.count)
+      .slice(0,5);
+  })();
+
   return (
     <div className="home">
       <Sidebar />
@@ -153,6 +167,24 @@ const Home = () => {
           <Widget type="order" />
           <Widget type="earning" />
           <Widget type="balance" />
+        </div>
+        <div className="kpis">
+          <div className="kpi-card">
+            <div className="kpi-title">Total Revenue</div>
+            <div className="kpi-value">Rs. {totalRevenue.toLocaleString()}</div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-title">Cancelled Bookings</div>
+            <div className="kpi-value">{cancelled}</div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-title">Pending Cancellations</div>
+            <div className="kpi-value">{pendingCancels}</div>
+          </div>
+          <div className="kpi-card">
+            <div className="kpi-title">Occupancy (est.)</div>
+            <div className="kpi-value">{occupancyRate}%</div>
+          </div>
         </div>
         <div className="charts">
           <Featured />
@@ -204,6 +236,17 @@ const Home = () => {
                 <li key={item.city} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
                   <span>{item.city}</span>
                   <strong>{item.count}</strong>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="card" style={{ flex: 1 }}>
+            <div className="title">Top Hotels (by bookings)</div>
+            <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+              {hotelsByBookings.map(h => (
+                <li key={h.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
+                  <span>{h.name}</span>
+                  <strong>{h.count}</strong>
                 </li>
               ))}
             </ul>

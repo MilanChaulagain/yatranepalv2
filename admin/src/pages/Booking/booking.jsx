@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCalendarDays,
   faMoneyBillWave,
-  faClock,
+  
   faSpinner,
   faBan,
   faCheckCircle,
   faUser,
   faHotel,
-  faBed,
+  
   faTimesCircle,
   faCheck,
   faEllipsisV
@@ -30,34 +30,29 @@ const AdminBookings = () => {
   const [expandedId, setExpandedId] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
 
-  useEffect(() => {
-    fetchBookings();
+  const fetchBookings = useCallback(async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      const params = filter !== "all" ? { status: filter } : {};
+      const { data } = await axios.get(`${API_BASE_URL}/reservations`, {
+        params,
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      });
+      setBookings(data);
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to load bookings");
+      toast.error(err.response?.data?.message || "Failed to load bookings");
+      setBookings([]);
+    } finally {
+      setLoading(false);
+    }
   }, [filter]);
 
-    const fetchBookings = async () => {
-  try {
-    setLoading(true);
-      const token = localStorage.getItem("token");  // Using the correct token key
-
-    const params = filter !== "all" ? { status: filter } : {};
-    
-    const { data } = await axios.get(`${API_BASE_URL}/reservations`, {
-      params,
-      headers: {
-        Authorization: `Bearer ${token}`  // Add the token to the headers
-      },
-      withCredentials: true
-    });
-
-    setBookings(data);
-  } catch (err) {
-    setError(err.response?.data?.message || "Failed to load bookings");
-    toast.error(err.response?.data?.message || "Failed to load bookings");
-    setBookings([]);
-  } finally {
-    setLoading(false);
-  }
-};
+  useEffect(() => {
+    fetchBookings();
+  }, [fetchBookings]);
 
 
   const updateStatus = async (bookingId, action) => {
@@ -152,30 +147,35 @@ const AdminBookings = () => {
                         <td><FontAwesomeIcon icon={faMoneyBillWave} /> Rs. {b.totalPrice.toLocaleString()}</td>
                         <td>{statusBadge(b.status)}</td>
                         <td className="actions">
-                          {isCancelReq && (
-                            <>
-                              <button
-                                disabled={actionLoading}
-                                onClick={() => updateStatus(b._id, "approve-cancel")}
-                                title="Approve Cancellation"
-                              >
-                                <FontAwesomeIcon icon={faCheck} />
-                              </button>
-                              <button
-                                disabled={actionLoading}
-                                onClick={() => updateStatus(b._id, "reject-cancel")}
-                                title="Reject Cancellation"
-                              >
-                                <FontAwesomeIcon icon={faTimesCircle} />
-                              </button>
-                            </>
-                          )}
-                          <button
-                            onClick={() => setExpandedId(expandedId === b._id ? null : b._id)}
-                            title="View Details"
-                          >
-                            <FontAwesomeIcon icon={faEllipsisV} />
-                          </button>
+                          <div className="booking-actions">
+                            {isCancelReq && (
+                              <>
+                                <button
+                                  className="approve-btn"
+                                  disabled={actionLoading}
+                                  onClick={() => updateStatus(b._id, "approve-cancel")}
+                                  title="Approve Cancellation"
+                                >
+                                  <FontAwesomeIcon icon={faCheck} />
+                                </button>
+                                <button
+                                  className="reject-btn"
+                                  disabled={actionLoading}
+                                  onClick={() => updateStatus(b._id, "reject-cancel")}
+                                  title="Reject Cancellation"
+                                >
+                                  <FontAwesomeIcon icon={faTimesCircle} />
+                                </button>
+                              </>
+                            )}
+                            <button
+                              className="details-btn"
+                              onClick={() => setExpandedId(expandedId === b._id ? null : b._id)}
+                              title="View Details"
+                            >
+                              <FontAwesomeIcon icon={faEllipsisV} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -184,9 +184,9 @@ const AdminBookings = () => {
               </table>
 
               {expandedId && bookings.find(b => b._id === expandedId) && (
-                <div className="modal">
+                <div className="booking-details-modal">
                   <div className="modal-content">
-                    <button className="close" onClick={() => setExpandedId(null)}>&times;</button>
+                    <button className="close-modal" aria-label="Close" onClick={() => setExpandedId(null)}>&times;</button>
                     {(() => {
                       const b = bookings.find(x => x._id === expandedId);
                       const sd = formatDate(b.dates[0]), ed = formatDate(b.dates.at(-1));

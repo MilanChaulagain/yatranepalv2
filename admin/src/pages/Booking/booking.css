@@ -147,6 +147,7 @@
 }
 
 .booking-actions button {
+    margin-top: 0px;
     width: 32px;
     height: 32px;
     border: none;
@@ -156,6 +157,12 @@
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease;
+    line-height: 0; /* ensure icon centers vertically */
+}
+
+/* Remove baseline gap inside icon buttons */
+.booking-actions button svg {
+    display: block;
 }
 
 .booking-actions button:hover {
@@ -215,13 +222,42 @@
 
 .close-modal {
     position: absolute;
-    top: 1rem;
+    top: 0.4rem;
     right: 1rem;
-    background: none;
+    background: white;
     border: none;
     font-size: 1.5rem;
     cursor: pointer;
     color: #7f8c8d;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0; /* center the × glyph */
+    transition: background-color 0.15s ease, color 0.15s ease, transform 0.05s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Ensure the close icon does not sit on baseline */
+.close-modal svg {
+    display: block;
+}
+
+.close-modal:hover {
+    background: #f5f7f9; /* light hover */
+    color: #5c6b73;
+}
+
+.close-modal:active {
+    background: #eef2f5; /* slightly darker on press */
+    transform: scale(0.98);
+}
+
+.close-modal:focus { outline: none; }
+.close-modal:focus-visible {
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2); /* subtle focus ring */
 }
 
 .modal-content h3 {

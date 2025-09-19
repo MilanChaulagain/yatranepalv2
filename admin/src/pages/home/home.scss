@@ -19,6 +19,41 @@
       flex-wrap: wrap; /* makes widgets/charts responsive */
     }
 
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(180px, 1fr));
+      gap: 20px;
+      padding: 0 20px;
+      margin-bottom: 10px;
+    }
+
+    .kpi-card, .card {
+      -webkit-box-shadow: 2px 4px 10px 1px rgba(0, 0, 0, 0.08);
+      box-shadow: 2px 4px 10px 1px rgba(201, 201, 201, 0.25);
+      padding: 16px;
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    .kpi-card {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .kpi-title {
+      color: #6b7280;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .kpi-value {
+      font-size: 22px;
+      font-weight: 600;
+      color: #111827;
+    }
+
     .charts {
       padding: 5px 20px;
     }
@@ -47,6 +82,13 @@
       .charts {
         flex-direction: column; /* stack on smaller screens */
       }
+
+      .kpis {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        padding: 0 12px;
+      }
     }
   }
 
@@ -56,6 +98,21 @@
       margin-left: 0; /* no sidebar */
       width: 100%;
       padding: 0 10px;
+
+      .kpis {
+        grid-template-columns: 1fr;
+        padding: 0 10px;
+      }
     }
   }
+}
+
+/* Align content width with fixed sidebar using sibling selector */
+.sidebar + .homeContainer {
+  margin-left: 280px;
+  width: calc(100% - 280px);
+}
+.sidebar.collapsed + .homeContainer {
+  margin-left: 80px;
+  width: calc(100% - 80px);
 }

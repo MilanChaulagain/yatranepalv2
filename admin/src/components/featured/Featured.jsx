@@ -15,7 +15,11 @@ const Featured = () => {
   useEffect(() => {
     const fetchRevenue = async () => {
       try {
-        const res = await axios.get("http://localhost:8800/api/reservations");
+        const token = localStorage.getItem("token");
+        const res = await axios.get("http://localhost:8800/api/reservations", {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        });
         const bookings = Array.isArray(res.data) ? res.data : [];
         const now = new Date();
         const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -68,7 +72,7 @@ const Featured = () => {
           />
         </div>
         <p className="title">Revenue today</p>
-        <p className="amount">${today.toFixed(2)}</p>
+  <p className="amount">Rs. {today.toLocaleString()}</p>
         <p className="desc">
           Revenue data is updated in real-time. Previous transactions and pending payments may affect these values.
         </p>
@@ -81,21 +85,21 @@ const Featured = () => {
               ) : (
                 <KeyboardArrowDownIcon fontSize="small" />
               )}
-              <div className="resultAmount">${(10000 - lastMonth).toFixed(2)}</div>
+              <div className="resultAmount">Rs. {(10000 - lastMonth).toLocaleString()}</div>
             </div>
           </div>
           <div className="item">
             <div className="itemTitle">Last Week</div>
             <div className="itemResult positive">
               <KeyboardArrowUpOutlinedIcon fontSize="small" />
-              <div className="resultAmount">${lastWeek.toFixed(2)}</div>
+              <div className="resultAmount">Rs. {lastWeek.toLocaleString()}</div>
             </div>
           </div>
           <div className="item">
             <div className="itemTitle">This Month</div>
             <div className="itemResult positive">
               <KeyboardArrowUpOutlinedIcon fontSize="small" />
-              <div className="resultAmount">${lastMonth.toFixed(2)}</div>
+              <div className="resultAmount">Rs. {lastMonth.toLocaleString()}</div>
             </div>
           </div>
         </div>

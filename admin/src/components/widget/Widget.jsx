@@ -15,8 +15,10 @@ const Widget = ({ type }) => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
+        const token = localStorage.getItem("token");
+        const config = { headers: { Authorization: `Bearer ${token}` }, withCredentials: true };
         if (type === "user") {
-          const res = await axios.get("http://localhost:8800/api/users");
+          const res = await axios.get("http://localhost:8800/api/users", config);
           const users = Array.isArray(res.data) ? res.data : [];
           setAmount(users.length);
           
@@ -34,7 +36,7 @@ const Widget = ({ type }) => {
           setDiff(prev7Days ? Math.round((last7Days - prev7Days) / prev7Days * 100) : 0);
           
         } else if (type === "order") {
-          const res = await axios.get("http://localhost:8800/api/reservations");
+          const res = await axios.get("http://localhost:8800/api/reservations", config);
           const bookings = Array.isArray(res.data) ? res.data : [];
           setAmount(bookings.length);
           
@@ -52,7 +54,7 @@ const Widget = ({ type }) => {
           setDiff(prev7Days ? Math.round((last7Days - prev7Days) / prev7Days * 100) : 0);
           
         } else if (type === "earning") {
-          const res = await axios.get("http://localhost:8800/api/reservations");
+          const res = await axios.get("http://localhost:8800/api/reservations", config);
           const bookings = Array.isArray(res.data) ? res.data : [];
           
           // Calculate total revenue
@@ -76,8 +78,8 @@ const Widget = ({ type }) => {
           
         } else if (type === "balance") {
           const [placesRes, reviewsRes] = await Promise.all([
-            axios.get("http://localhost:8800/api/place"),
-            axios.get("http://localhost:8800/api/review")
+            axios.get("http://localhost:8800/api/place", config),
+            axios.get("http://localhost:8800/api/review", config)
           ]);
           
           const places = placesRes.data?.data || placesRes.data || [];
@@ -179,7 +181,7 @@ const Widget = ({ type }) => {
       <div className="left">
         <span className="title">{data.title}</span>
         <span className="counter">
-          {data.isMoney && "$"} {amount}
+          {data.isMoney ? `Rs. ${amount.toLocaleString()}` : amount}
         </span>
         <span className="link">{data.link}</span>
       </div>
