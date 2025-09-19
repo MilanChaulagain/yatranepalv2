@@ -33,6 +33,7 @@ import imageSliderRoute from "./routes/imageSlider.js";
 import reservationRoute from "./routes/reservations.js";
 import paymentRoute from "./routes/payment.js";
 import uploadRoute from "./routes/upload.js";
+import tripRoute from "./routes/trips.js";
 
 dotenv.config();
 
@@ -51,14 +52,25 @@ app.use(express.urlencoded({ extended: true }));
 
 // Allowed frontend origins
 const allowedOrigins = [
-  "http://localhost:3000",  // React frontend
-  "http://localhost:3001",  // Optional: other dev ports
-  process.env.FRONTEND_URL   // Production frontend from env
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://localhost:8080",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:8080",
+    process.env.FRONTEND_URL
 ].filter(Boolean);
 
 app.use(cors({
-  origin: allowedOrigins,      // simpler than the callback function
-  credentials: true,
+    origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin) || /^(http:\/\/(localhost|127\.0\.0\.1))(\:\\d+)?$/.test(origin)) {
+            return callback(null, true);
+        }
+        return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
 }));
 // app.use(cors({
 //   origin: function (origin, callback) {
@@ -107,6 +119,7 @@ app.use("/api/imageSlider", imageSliderRoute);
 app.use('/api/reservations', reservationRoute);
 app.use('/api/payment', paymentRoute);
 app.use('/api/upload', uploadRoute);
+app.use("/api/trips", tripRoute);
 // Health check endpoint
 app.get("/api/health", (req, res) => {
     res.json({ status: "ok" });

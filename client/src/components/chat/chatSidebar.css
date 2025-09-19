@@ -1,0 +1,109 @@
+.chat-sidebar {
+  position: fixed;
+  top: 0;
+  right: -400px;
+  width: 350px;
+  height: 100vh;
+  background: #fff;
+  box-shadow: -2px 0 8px rgba(0,0,0,0.08);
+  z-index: 1200;
+  transition: right 0.3s cubic-bezier(.4,0,.2,1);
+  display: flex;
+  flex-direction: column;
+}
+.chat-sidebar.open {
+  right: 0;
+}
+.chat-sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #3a86ff;
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+.chat-close-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 2rem;
+  cursor: pointer;
+  margin-left: 1rem;
+  transition: color 0.2s;
+}
+.chat-close-btn:hover {
+  color: #ebd1d1;
+}
+.chat-conversations {
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0.5rem 1rem;
+  background: #f8fafc;
+}
+.chat-conv {
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  transition: background 0.2s;
+}
+.chat-conv.active {
+  background: #e0e7ff;
+  color: #3a86ff;
+}
+.chat-messages {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  background: #f8fafc;
+}
+.chat-msg {
+  margin-bottom: 0.7rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 12px;
+  max-width: 80%;
+  word-break: break-word;
+}
+.chat-msg.me {
+  background: #3a86ff;
+  color: #fff;
+  margin-left: auto;
+}
+.chat-msg.other {
+  background: #e0e7ff;
+  color: #3a86ff;
+  margin-right: auto;
+}
+.chat-empty {
+  color: #64748b;
+  text-align: center;
+  margin-top: 2rem;
+}
+.chat-input-box {
+  display: flex;
+  padding: 1rem;
+  border-top: 1px solid #e2e8f0;
+  background: #fff;
+}
+.chat-input-box input {
+  flex: 1;
+  padding: 0.7rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  font-size: 1rem;
+  margin-right: 0.5rem;
+}
+.chat-input-box button {
+  background: #3a86ff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.7rem 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.chat-input-box button:hover {
+  background: #2563eb;
+}

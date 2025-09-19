@@ -542,6 +542,38 @@
   gap: 12px;
 }
 
+.desktopIcons {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+.chatIconBtn, .notifIconBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  padding: 0.3rem;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+.chatIconBtn:hover, .notifIconBtn:hover {
+  background: #e0e7ff;
+}
+.chatNotifBadge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 50%;
+  padding: 2px 6px;
+  min-width: 18px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
 /* Responsive Breakpoint */
 @media (min-width: 768px) {
   .navMobileContainer {

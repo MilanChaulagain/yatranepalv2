@@ -40,6 +40,14 @@ const StarRating = ({ rating, size = 16, showEmpty = false }) => {
 
 // Review Component
 const ReviewItem = ({ review }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const characterLimit = 150;
+  
+  const shouldTruncate = review.comment && review.comment.length > characterLimit;
+  const displayComment = shouldTruncate && !isExpanded 
+    ? review.comment.substring(0, characterLimit) + '...'
+    : review.comment;
+
   return (
     <div className="review-item">
       <div className="review-header">
@@ -57,7 +65,17 @@ const ReviewItem = ({ review }) => {
         <StarRating rating={review.rating} size={16} />
       </div>
       {review.comment && (
-        <p className="review-comment">{review.comment}</p>
+        <div className="review-content">
+          <p className="review-comment">{displayComment}</p>
+          {shouldTruncate && (
+            <button 
+              className="read-more-button"
+              onClick={() => setIsExpanded(!isExpanded)}
+            >
+              {isExpanded ? 'Show Less' : 'Read'}
+            </button>
+          )}
+        </div>
       )}
     </div>
   );
