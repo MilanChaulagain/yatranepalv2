@@ -5,13 +5,16 @@ import {
   getUserTrips,
   getTrip,
   updateTrip,
-  deleteTrip
+  deleteTrip,
+  planTrip
 } from "../controllers/trip.js";
 
 const router = express.Router();
 
 // Create a new trip
 router.post("/", verifyToken, createTrip);
+// Plan a trip (generate itinerary)
+router.post("/plan", verifyToken, planTrip);
 // Get all trips for logged-in user
 router.get("/user", verifyToken, getUserTrips);
 // Get a single trip

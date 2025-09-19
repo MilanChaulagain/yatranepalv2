@@ -1,6 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import 'leaflet/dist/leaflet.css';
+import './index.css';
 import { SearchContextProvider } from './context/SearchContext.js';
 import { AuthContextProvider } from './context/AuthContext.js';
 

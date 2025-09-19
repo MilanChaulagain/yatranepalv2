@@ -1,0 +1,106 @@
+.createTrip {
+  max-width: 1100px;
+  margin: 20px auto;
+  padding: 0 16px;
+
+  --surface: #ffffff;
+  --text: #111827;
+  --muted: #6b7280;
+  --border: #e5e7eb;
+  --primary: #2563eb;
+  --accent: #3730a3;
+  --accent-50: #eef2ff;
+  --accent-200: #c7d2fe;
+
+  color: var(--text);
+
+  .title {
+    margin: 0 0 8px 0;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+  }
+  .subtitle {
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  .demoGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+
+  .demoTripCard {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--surface);
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+    }
+  }
+
+  .demoTripHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .badge {
+    background: var(--accent-50);
+    color: var(--accent);
+    border: 1px solid var(--accent-200);
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+  .demoTripDesc {
+    color: #374151;
+    margin: 0;
+  }
+  .demoTripMeta {
+    display: flex;
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .actions {
+    margin-top: 24px;
+    display: flex;
+    gap: 12px;
+  }
+
+  // Button baseline if needed
+  .button-17 {
+    appearance: none;
+    background: var(--primary);
+    color: #fff;
+    border: 0;
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-weight: 600;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+    cursor: pointer;
+    transition:
+      transform .15s ease,
+      box-shadow .15s ease,
+      background .15s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+    }
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 3px 10px rgba(37, 99, 235, 0.25);
+    }
+  }
+}

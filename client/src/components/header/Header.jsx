@@ -307,8 +307,8 @@ const Header = () => {
           )}
         </nav>
 
-        {/* Promo Text - Hidden on mobile when menu/search is open */}
-        {(!isMobile || (!isMenuOpen && !isSearchOpen)) && (
+        {/* Promo Text - Hidden on /trips and on mobile when menu/search is open */}
+        {currentSection !== 'trips' && currentSection !== 'write-review' && currentSection !== 'places' && (!isMobile || (!isMenuOpen && !isSearchOpen)) && (
           <div className="promo-text">
             <h1 className="promo-title">{title}</h1>
             <p className="promo-desc">{desc}</p>

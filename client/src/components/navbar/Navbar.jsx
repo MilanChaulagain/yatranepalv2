@@ -69,8 +69,8 @@ const Navbar = () => {
       title: "Trips",
       items: [
         { label: "View my trips", path: "/trips" },
-        { label: "Start a new trip", path: "/trips" },
-        { label: "Create a trip with AI", path: "/trips" },
+        { label: "Start a new trip", path: "/trips/create" },
+        { label: "Create a trip with AI", path: "/trips/plan" },
       ],
     },
     {

@@ -123,6 +123,11 @@
     background: var(--primary);
 }
 
+/* Hide the native file input; label acts as trigger */
+.hidden-file-input {
+    display: none !important;
+}
+
 .user-email {
     color: var(--text-light);
     font-size: 0.9rem;

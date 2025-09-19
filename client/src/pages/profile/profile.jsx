@@ -121,43 +121,28 @@ const UserProfile = () => {
 const uploadImageToCloudinary = async () => {
     if (!imageFile) return null;
 
-    // Cloudinary configuration - replace with your actual values
-    const CLOUD_NAME = process.env.REACT_APP_CLOUDINARY_CLOUD_NAME || "your_cloud_name";
-    const UPLOAD_PRESET = process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET || "your_upload_preset";
+    const CLOUD_NAME = process.env.REACT_APP_CLOUDINARY_CLOUD_NAME;
+    const UPLOAD_PRESET = process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET;
+
+    if (!CLOUD_NAME || !UPLOAD_PRESET) {
+        setError("Image upload is not configured. Please set REACT_APP_CLOUDINARY_CLOUD_NAME and REACT_APP_CLOUDINARY_UPLOAD_PRESET.");
+        return null;
+    }
 
     const data = new FormData();
     data.append("file", imageFile);
-    data.append("upload_preset", UPLOAD_PRESET); // Required
-    
+    data.append("upload_preset", UPLOAD_PRESET);
 
     try {
-        console.log("Uploading image to Cloudinary...");
-        console.log("Cloud Name:", CLOUD_NAME);
-        console.log("Upload Preset:", UPLOAD_PRESET);
-        
         const res = await axios.post(
             `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
             data,
             {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-                onUploadProgress: (progressEvent) => {
-                    const percentCompleted = Math.round(
-                        (progressEvent.loaded * 100) / progressEvent.total
-                    );
-                    console.log(`Upload progress: ${percentCompleted}%`);
-                },
+                headers: { "Content-Type": "multipart/form-data" },
             }
         );
-
-        console.log("Cloudinary upload successful:", res.data);
         return res.data.secure_url;
-        
     } catch (err) {
-        console.error("Image upload failed:", err);
-        console.error("Error response:", err.response?.data);
-        console.error("Error message:", err.message);
         setError("Failed to upload image. Please try again.");
         return null;
     }
@@ -179,11 +164,12 @@ const uploadImageToCloudinary = async () => {
         try {
             let imageUrl = formData.personal.img;
             if (imageFile) {
-                // imageUrl = await uploadImageToCloudinary();
-                // if (!imageUrl) {
-                //     setIsLoading(false);
-                //     return;
-                // }
+                const uploaded = await uploadImageToCloudinary();
+                if (!uploaded) {
+                    setIsLoading(false);
+                    return;
+                }
+                imageUrl = uploaded;
             }
 
             const response = await axios.put(
@@ -201,7 +187,10 @@ const uploadImageToCloudinary = async () => {
                 }
             );
 
-            dispatch({ type: "LOGIN_SUCCESS", payload: response.data });
+            const updatedUser = response.data?.data || response.data;
+            dispatch({ type: "LOGIN_SUCCESS", payload: updatedUser });
+            setImagePreview(updatedUser.img || imageUrl || imagePreview);
+            setImageFile(null);
             setSuccessMessage("Profile updated successfully!");
             setEditMode({ ...editMode, personal: false });
         } catch (err) {

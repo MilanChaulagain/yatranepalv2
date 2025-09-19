@@ -23,6 +23,7 @@ import Places from "./pages/place/place";
 import TravellersChoice from "./pages/Discover/TravellerChoise/TravellersChoice";
 import TravelStories from "./pages/Discover/TravellersStories/TravellersStories";
 import Trips from "./pages/Trips/trips";
+import CreateTrip from "./pages/Trips/CreateTrip";
 import WriteReview from "./pages/ReviewAll/writereview/writereview";
 import AllReviewsPage from "./pages/ReviewAll/viewreview/viewreview";
 import Createblog from "./pages/blog/Createblog/createblog";
@@ -37,7 +38,9 @@ import ForgotPassword from "./pages/ForgotPassword/ForgotPassword";
 import NepaliCalendar from "./pages/calender/calender";
 import PaymentSuccess from "./pages/Payment/PaymentSuccess";
 import PaymentFailure from "./pages/Payment/PaymentFailure";
+import Planner from "./pages/Trips/Planner";
 import { Toaster } from "react-hot-toast";
+import RequireAuth from "./components/auth/RequireAuth";
 
 const AppContent = () => {
   const { progress } = useLoading();
@@ -93,7 +96,9 @@ const AppContent = () => {
         <Route path="/placedetails/:id" element={<PlaceDetails />} />
         <Route path="/travellers-choice" element={<TravellersChoice />} />
         <Route path="/travel-stories" element={<TravelStories />} />
-        <Route path="/trips" element={<Trips />} />
+        <Route path="/trips" element={<RequireAuth><Trips /></RequireAuth>} />
+        <Route path="/trips/create" element={<RequireAuth><CreateTrip /></RequireAuth>} />
+        <Route path="/trips/plan" element={<RequireAuth><Planner /></RequireAuth>} />
         <Route path="/write-review" element={<WriteReview />} />
         <Route path="/reviews" element={<AllReviewsPage />} />
         <Route path="/write-blog" element={<Createblog />} />

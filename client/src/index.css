@@ -1,0 +1,7 @@
+/* Global styles */
+:root{
+	--bg:#ffffff; --text:#111827; --muted:#6b7280; --border:#e5e7eb;
+}
+html,body,#root{height:100%}
+body{margin:0;background:var(--bg);color:var(--text);}
+*{box-sizing:border-box}
