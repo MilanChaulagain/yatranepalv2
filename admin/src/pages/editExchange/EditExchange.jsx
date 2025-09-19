@@ -1,14 +1,15 @@
-import "./NewExchange.scss";
+import "../NewExchange/NewExchange.scss";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Navbar from "../../components/navbar/Navbar";
 import DriveFolderUploadOutlinedIcon from "@mui/icons-material/DriveFolderUploadOutlined";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
 
-const NewExchange = ({ title }) => {
+const EditExchange = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
   const isMounted = useRef(true);
 
@@ -23,23 +24,60 @@ const NewExchange = ({ title }) => {
     isActive: true,
     lat: "",
     lng: "",
+    images: [],
   });
   const [files, setFiles] = useState([]);
-  const [uploading, setUploading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [loadingLatLng, setLoadingLatLng] = useState(false);
   const [suggestedLocations, setSuggestedLocations] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   useEffect(() => () => { isMounted.current = false; }, []);
 
+  useEffect(() => {
+    const ac = new AbortController();
+    const load = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get(`http://localhost:8800/api/money-exchange/${id}`, { withCredentials: true, signal: ac.signal });
+        const d = res.data?.data || res.data;
+        setForm({
+          name: d.name || "",
+          // Backend stores address as a single string possibly including city; try to split best-effort
+          address: (d.address || "").replace(/,\s*(Kathmandu|Lalitpur|Bhaktapur).*/i, "").trim(),
+          city: ((d.address || "").match(/(Kathmandu|Lalitpur|Bhaktapur)/i)?.[0]) || "",
+          contactNumber: d.contactNumber || "",
+          hours: d.hours || "",
+          services: d.services || "",
+          description: d.description || "",
+          isActive: d.isActive !== false,
+          lat: (d.lat != null ? parseFloat(d.lat).toString() : ""),
+          lng: (d.lng != null ? parseFloat(d.lng).toString() : ""),
+          images: Array.isArray(d.images) ? d.images : [],
+        });
+      } catch (e) {
+        if (!axios.isCancel(e)) {
+          console.error(e);
+          toast.error("Failed to load exchange center");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (id) load();
+    return () => ac.abort();
+  }, [id]);
+
   const previewSrc = useMemo(() => {
     if (files.length > 0) return URL.createObjectURL(files[0]);
+    if (form.images && form.images.length > 0) return form.images[0];
     return "/images/no-image-icon-0.jpg";
-  }, [files]);
+  }, [files, form.images]);
 
   const onChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setForm((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const onFileChange = (e) => {
@@ -48,7 +86,7 @@ const NewExchange = ({ title }) => {
   };
 
   const uploadImages = async () => {
-    if (files.length === 0) return [];
+    if (files.length === 0) return undefined; // no change
     const CLOUD_NAME = process.env.REACT_APP_CLOUDINARY_CLOUD_NAME;
     const UPLOAD_PRESET = process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET;
     if (!CLOUD_NAME || !UPLOAD_PRESET) {
@@ -84,8 +122,8 @@ const NewExchange = ({ title }) => {
     e.preventDefault();
     if (!validate()) return;
     try {
-      setUploading(true);
-      const images = await uploadImages();
+      setSaving(true);
+      const maybeImages = await uploadImages();
       const payload = {
         name: form.name,
         address: `${form.address}, ${form.city}`.trim(),
@@ -96,17 +134,17 @@ const NewExchange = ({ title }) => {
         isActive: !!form.isActive,
         lat: parseFloat(form.lat),
         lng: parseFloat(form.lng),
-        images,
       };
-      await axios.post("http://localhost:8800/api/money-exchange", payload, { withCredentials: true });
-      toast.success("Exchange Center created successfully!");
+      if (maybeImages) payload.images = maybeImages; // only include if replaced
+      await axios.put(`http://localhost:8800/api/money-exchange/${id}`, payload, { withCredentials: true });
+      toast.success("Exchange Center updated successfully!");
       navigate("/money-exchange");
     } catch (err) {
-      console.error("Create error:", err);
-      const msg = err?.response?.data?.error || err?.response?.data?.message || "Failed to create Exchange Center.";
+      console.error("Update error:", err);
+      const msg = err?.response?.data?.error || err?.response?.data?.message || "Failed to update Exchange Center.";
       toast.error(msg);
     } finally {
-      if (isMounted.current) setUploading(false);
+      if (isMounted.current) setSaving(false);
     }
   };
 
@@ -162,12 +200,24 @@ const NewExchange = ({ title }) => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="new">
+        <Sidebar />
+        <div className="newContainer">
+          <Navbar />
+          <div className="top">Loading…</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="new">
       <Sidebar />
       <div className="newContainer">
         <Navbar />
-        <div className="top">{title || "Add New Exchange Center"}</div>
+        <div className="top">Edit Exchange Center</div>
         <div className="bottom">
           <div className="left">
             <img src={previewSrc} alt="Preview" />
@@ -175,7 +225,7 @@ const NewExchange = ({ title }) => {
           <div className="right">
             <form onSubmit={handleSubmit}>
               <div className="formInput">
-                <label htmlFor="file">Upload Images (Max 3): <DriveFolderUploadOutlinedIcon /></label>
+                <label htmlFor="file">Replace Images (Max 3): <DriveFolderUploadOutlinedIcon /></label>
                 <input id="file" type="file" accept="image/*" multiple onChange={onFileChange} style={{ display: "none" }} />
               </div>
 
@@ -250,9 +300,7 @@ const NewExchange = ({ title }) => {
                 </div>
               </div>
 
-              {loadingLatLng && <div className="loading-coords">🔍 Fetching coordinates...</div>}
-
-              <button type="submit" disabled={uploading}>{uploading ? "Uploading..." : "Create"}</button>
+              <button type="submit" disabled={saving}>{saving ? "Saving..." : "Save Changes"}</button>
             </form>
           </div>
         </div>
@@ -261,4 +309,4 @@ const NewExchange = ({ title }) => {
   );
 };
 
-export default NewExchange;
+export default EditExchange;

@@ -1,0 +1,87 @@
+@import "../../style/layout.scss";
+
+.imageslider {
+  @extend .page-wrapper;
+
+  &Container {
+    @extend .page-content;
+  }
+
+  &Top {
+    @extend .content-container;
+    margin-bottom: $spacing-unit * 3;
+    h1 { font-size: 24px; font-weight: 600; }
+  }
+
+  &Bottom {
+    display: flex;
+    padding: 20px;
+    gap: 20px;
+    @media (max-width: 768px) { flex-direction: column; }
+  }
+
+  &Preview {
+    flex: 1;
+    @extend .content-container;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: $spacing-unit * 4;
+    &Image {
+      max-width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+      border-radius: $border-radius-lg;
+    }
+  }
+
+  &FormContainer {
+    flex: 2;
+    @extend .content-container;
+    padding: $spacing-unit * 4;
+  }
+
+  &Form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  &FormGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    label { font-size: 14px; font-weight: 500; color: #555; }
+  }
+
+  &UploadLabel {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    background-color: #f0f2f5;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+
+  &UploadIcon { color: #555; }
+  &FileInput { display: none; }
+  &FileName { font-size: 12px; color: #666; }
+
+  &Input, &Textarea {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+
+  &SubmitButton {
+    padding: $spacing-unit * 2;
+    background: $gradient-primary;
+    color: white;
+    border: none;
+    border-radius: $border-radius-lg;
+    font-weight: $font-weight-semibold;
+    cursor: pointer;
+  }
+}

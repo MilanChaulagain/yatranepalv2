@@ -84,11 +84,22 @@ const Single = () => {
   };
 
   const fallbackNoImage = "/images/no-image-icon-0.jpg";
-  const mainImage =
-    resolveCloudinaryUrl(
-      data.img || data.photo || data.profilePic || data.profileImage || data.avatar || data.image
-    ) ||
-    fallbackNoImage;
+  const mainImage = (() => {
+    if (path === 'imageslider') {
+      return resolveCloudinaryUrl(data.imagePath) || fallbackNoImage;
+    }
+    if (path === 'money-exchange') {
+      if (Array.isArray(data.images) && data.images.length > 0) {
+        return resolveCloudinaryUrl(data.images[0]) || fallbackNoImage;
+      }
+      return fallbackNoImage;
+    }
+    return (
+      resolveCloudinaryUrl(
+        data.img || data.photo || data.profilePic || data.profileImage || data.avatar || data.image
+      ) || fallbackNoImage
+    );
+  })();
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);

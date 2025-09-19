@@ -12,7 +12,9 @@ import NewChadparba from "./pages/newChadparba/newChadparba";
 import AdminBookings from "./pages/Booking/booking";
 import NewImageSlider from "./pages/ImageSlider/imageSlider";
 import EditEntity from "./pages/Edit/EditEntity";
+import EditImageSlider from "./pages/editImageSlider/EditImageSlider";
 import EditChadparba from "./pages/editChadparba/EditChadparba";
+import EditExchange from "./pages/editExchange/EditExchange";
 import EditPlace from "./pages/editPlace/EditPlace";
 import EditTouristGuide from "./pages/editTouristGuide/EditTouristGuide";
 import Single from "./pages/single/Single";
@@ -217,7 +219,7 @@ function App() {
                 path=":id/edit"
                 element={
                   <ProtectedRoute>
-                    <EditEntity />
+                    <EditExchange />
                   </ProtectedRoute>
                 }
               />
@@ -360,7 +362,7 @@ function App() {
                 path=":id/edit"
                 element={
                   <ProtectedRoute>
-                    <EditEntity />
+                    <EditImageSlider />
                   </ProtectedRoute>
                 }
               />

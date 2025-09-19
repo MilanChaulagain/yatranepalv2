@@ -201,6 +201,14 @@ const List = ({ columns }) => {
   };
 
   const getThumbnailUrl = (item) => {
+    if (path === 'money-exchange') {
+      if (Array.isArray(item.images) && item.images.length > 0) {
+        const candidate = item.images[0];
+        const url = resolveCloudinaryUrl(candidate);
+        return url || '/images/no-image-icon-0.jpg';
+      }
+      return '/images/no-image-icon-0.jpg';
+    }
     if (path === 'imageslider') {
       const url = resolveCloudinaryUrl(item.imagePath || item.img || item.photo);
       return url || '/images/no-image-icon-0.jpg';
