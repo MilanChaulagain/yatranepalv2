@@ -153,6 +153,7 @@
     gap: 12px;
     margin-top: 8px;
   }
+  .actions-between { justify-content: space-between; }
 
   .itinerary { margin-top: 24px; }
   .itinerary-title { margin: 0 0 8px 0; font-weight: 700; }
@@ -212,3 +213,77 @@
     .planner-form-top { grid-template-columns: 1fr; }
   }
 }
+
+/* Details modal styles */
+.details-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.details-modal {
+  width: min(900px, 96vw);
+  max-height: 88vh;
+  overflow: auto;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+.details-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.details-close {
+  background: #f1f5f9;
+  border: none;
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+.details-summary {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px 0 16px;
+}
+.details-content { padding: 8px 16px 16px 16px; }
+.details-day { border: 1px solid #eee; border-radius: 12px; padding: 12px; margin: 10px 0; background: var(--surface); }
+.details-day-header { font-weight: 700; margin-bottom: 6px; }
+.details-roadmap { position: relative; margin: 8px 0 12px; }
+.roadmap-row { display: grid; grid-template-columns: 28px 1fr; gap: 10px; position: relative; }
+.roadmap-left { position: relative; display: flex; flex-direction: column; align-items: center; }
+.roadmap-marker { width: 24px; height: 24px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; box-shadow: 0 0 0 2px #fff, 0 2px 6px rgba(0,0,0,0.15); }
+.roadmap-connector { width: 2px; flex: 1; background: linear-gradient(180deg, var(--primary) 0%, #a5b4fc 100%); margin-top: 4px; margin-bottom: 6px; }
+.roadmap-content { padding-bottom: 10px; }
+.roadmap-top { display: flex; justify-content: space-between; gap: 10px; }
+.roadmap-name { font-weight: 700; }
+.roadmap-time { color: #6b7280; font-size: 13px; }
+.roadmap-sub { color: #6b7280; font-size: 12px; }
+.details-list { list-style: none; padding-left: 0; margin: 0; }
+.details-item { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+.details-thumb { width: 48px; height: 48px; border-radius: 8px; object-fit: cover; border: 1px solid var(--border); background: #f3f4f6; }
+.details-info { flex: 1; min-width: 0; }
+.details-row { display: flex; justify-content: space-between; gap: 10px; }
+.details-name { font-weight: 700; }
+.details-time { color: #6b7280; font-size: 13px; }
+.details-sub { color: #6b7280; font-size: 12px; }
+
+.details-hotels { margin-top: 8px; }
+.details-hotels-title { font-weight: 600; margin-bottom: 6px; }
+.details-hotels-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; }
+.details-hotel-card { display: flex; gap: 8px; border: 1px solid #eee; border-radius: 10px; padding: 8px; align-items: center; }
+.details-hotel-thumb { width: 44px; height: 44px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); background: #f3f4f6; }
+.details-hotel-info { flex: 1; min-width: 0; }
+.details-hotel-name { font-weight: 600; }
+.details-hotel-sub { color: #6b7280; font-size: 12px; }
+.details-hotel-price { color: #111827; font-weight: 600; font-size: 13px; }
+
+.details-modal-actions { display: flex; justify-content: flex-end; gap: 10px; padding: 10px 16px 14px; border-top: 1px solid var(--border); }

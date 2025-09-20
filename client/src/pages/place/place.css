@@ -373,7 +373,7 @@
     gap: 6px;
     padding: 0.8rem 1.4rem;
     border-radius: 50px;
-    background: var(--glass);
+    background: var(--accent);
     color: white;
     border: 1px solid var(--glass-border);
     font-size: 0.85rem;
@@ -388,7 +388,7 @@
 }
 
 .category-btn.active {
-    background: white;
+    background: var(--accent);
     color: var(--primary);
     font-weight: 500;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -682,7 +682,7 @@
 }
 
 .category {
-    background: var(--primary-light);
+    background: var(--primary);
     color: var(--primary);
 }
 
@@ -704,6 +704,7 @@
     font-size: 0.8rem;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -1302,3 +1303,27 @@
     color: #fff !important;
     fill: #fff !important;
 }
+
+/* Modal styles for Places page - global scope */
+.places-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+.places-modal {
+    width: 92%;
+    max-width: 420px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    padding: 16px 16px 14px;
+}
+.places-modal h3 { margin: 0 0 6px; font-size: 1.1rem; color: #0f172a; }
+.places-modal p { margin: 0 0 14px; color: #475569; }
+.places-modal-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.places-ghost-btn { background: #f1f5f9; color: #0f172a; border: none; border-radius: 8px; padding: 0.5rem 0.9rem; font-weight: 600; cursor: pointer; }
+.places-ghost-btn:hover { background: #e2e8f0; }

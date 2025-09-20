@@ -154,6 +154,8 @@ const getImageUrl = (imagePath) => {
   return `${BASE_URL}${imagePath.startsWith('/') ? imagePath : '/' + imagePath}`;
 };
 
+
+//Haversine Algorithm
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
   const R = 6371;
   const dLat = deg2rad(lat2 - lat1);
@@ -256,6 +258,7 @@ const Places = () => {
   const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [errorModal, setErrorModal] = useState({ open: false, message: "" });
   const [selectedCity, setSelectedCity] = useState("all");
   const [useLocation, setUseLocation] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
@@ -450,7 +453,7 @@ const Places = () => {
                 break;
             }
             
-            alert(errorMessage);
+            setErrorModal({ open: true, message: errorMessage });
             setUseLocation(false);
             locationRequested.current = false;
           },
@@ -461,7 +464,7 @@ const Places = () => {
           }
         );
       } else {
-        alert("Geolocation is not supported by your browser.");
+        setErrorModal({ open: true, message: "Geolocation is not supported by your browser." });
         setUseLocation(false);
         locationRequested.current = false;
       }
@@ -558,6 +561,7 @@ const Places = () => {
     text?.length > maxLength ? `${text.substring(0, maxLength)}...` : text || "";
 
   return (
+    <>
     <div className="places-page">
       <Navbar />
       <Header />
@@ -878,6 +882,28 @@ const Places = () => {
       </div>
       {/* Previous footer section */}
     </div>
+    {errorModal.open && (
+      <div
+        className="places-modal-overlay"
+        role="dialog"
+        aria-modal="true"
+        onClick={() => setErrorModal({ open: false, message: "" })}
+      >
+        <div className="places-modal" onClick={(e) => e.stopPropagation()}>
+          <h3>Something went wrong</h3>
+          <p>{errorModal.message}</p>
+          <div className="places-modal-actions">
+            <button
+              className="places-ghost-btn"
+              onClick={() => setErrorModal({ open: false, message: "" })}
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+  </>
   );
 };
 

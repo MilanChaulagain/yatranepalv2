@@ -72,6 +72,32 @@
     font-size: 13px;
   }
 
+  .demoTripThumbs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 4px 0 6px;
+  }
+  .demoTripThumb {
+    width: 42px;
+    height: 42px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  }
+  .demoTripMore {
+    font-size: 12px;
+    color: var(--muted);
+    background: #f3f4f6;
+    border: 1px solid var(--border);
+    padding: 6px 10px;
+    border-radius: 999px;
+    line-height: 1;
+    font-weight: 600;
+  }
+
   .actions {
     margin-top: 24px;
     display: flex;

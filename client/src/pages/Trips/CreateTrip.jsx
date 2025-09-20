@@ -5,6 +5,23 @@ import useFetch from "../../hooks/useFetch";
 import { Link, useNavigate } from "react-router-dom";
 import "./createTrip.scss";
 
+// Shared image resolver (mirrors Planner)
+const PLACE_IMG_FALLBACK = "/images/1.jpg";
+function getEntityImage(entity, fallback = PLACE_IMG_FALLBACK) {
+  if (!entity) return fallback;
+  const tryVal = (v) => (typeof v === "string" ? v : v?.url || v?.src || v?.secure_url);
+  if (Array.isArray(entity?.photos) && entity.photos.length) {
+    const v = tryVal(entity.photos[0]);
+    if (v) return v;
+  }
+  if (Array.isArray(entity?.images) && entity.images.length) {
+    const v = tryVal(entity.images[0]);
+    if (v) return v;
+  }
+  const single = tryVal(entity?.photo || entity?.image || entity?.img || entity?.thumbnail);
+  return single || fallback;
+}
+
 const DemoTripCard = ({ trip, onSelect }) => (
   <div className="demoTripCard">
     <div className="demoTripHeader">
@@ -12,6 +29,23 @@ const DemoTripCard = ({ trip, onSelect }) => (
       <span className="badge">{trip.days} days</span>
     </div>
     <p className="demoTripDesc">{trip.description}</p>
+    <div className="demoTripThumbs">
+      {trip.places.slice(0, 6).map((p) => (
+        <img
+          key={p._id}
+          className="demoTripThumb"
+          src={getEntityImage(p)}
+          alt={p.name}
+          loading="lazy"
+          onError={(e) => {
+            e.currentTarget.src = PLACE_IMG_FALLBACK;
+          }}
+        />
+      ))}
+      {trip.places.length > 6 && (
+        <span className="demoTripMore">+{trip.places.length - 6}</span>
+      )}
+    </div>
     <div className="demoTripMeta">
       <span>Places: {trip.places.map(p=>p.name).join(", ")}</span>
       <span>Total est. cost: NPR {trip.estimate.toLocaleString()}</span>

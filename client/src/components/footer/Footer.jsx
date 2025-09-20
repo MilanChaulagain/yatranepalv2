@@ -28,7 +28,7 @@ export default function Footer() {
           <div className="footer-section">
             <h2>Explore</h2>
             <ul>
-              <li><a href="/review">Write a review</a></li>
+              <li><a href="/write-review">Write a review</a></li>
               <li><a href="/add">Add a Place</a></li>
               <li><a href="/join">Join</a></li>
               <li><a href="/traveller">Travelers' Choice</a></li>
@@ -94,26 +94,19 @@ export default function Footer() {
 
           {/* Social Media Icons */}
           <div className="footer-social">
-            <a href="https://www.facebook.com/NeymardaSilvaSantosJr.Nishant" target="_blank" rel="noopener noreferrer">
+            <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer">
               <Facebook />
             </a>
-            <a href="https://x.com/im_nishantt18" target="_blank" rel="noopener noreferrer">
+            <a href="https://x.com" target="_blank" rel="noopener noreferrer">
               <Twitter />
             </a>
-            <a href="https://www.instagram.com/ni_sh_ant_u/" target="_blank" rel="noopener noreferrer">
+            <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer">
               <Instagram />
             </a>
-            <a href="https://github.com/ImNishant18" target="_blank" rel="noopener noreferrer">
+            <a href="https://github.com/MilanChaulagain" target="_blank" rel="noopener noreferrer">
               <Github />
             </a>
           </div>
-
-          <p className="footer-disclaimer">
-            This is the version of our website addressed to speakers of English in the United States.
-            If you are a resident of another country or region, please select the appropriate version
-            of Tripadvisor for your country or region in the drop-down menu.
-            <button>more</button>
-          </p>
         </div>
       </div>
     </footer>

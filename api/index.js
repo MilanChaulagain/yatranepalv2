@@ -34,6 +34,8 @@ import reservationRoute from "./routes/reservations.js";
 import paymentRoute from "./routes/payment.js";
 import uploadRoute from "./routes/upload.js";
 import tripRoute from "./routes/trips.js";
+import storiesRoute from "./routes/stories.js";
+import travellersChoiceRoute from "./routes/travellersChoice.js";
 
 dotenv.config();
 
@@ -49,6 +51,7 @@ const server = http.createServer(app);
 // These middlewares are required to read req.body
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Allowed frontend origins
 const allowedOrigins = [
@@ -90,7 +93,27 @@ const io = new Server(server, {
     cors: {
         origin: allowedOrigins,
         credentials: true,
+        methods: ["GET", "POST"],
+        allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     },
+});
+
+io.on("connection", (socket) => {
+    try {
+        const { userId } = socket.handshake.query || {};
+        console.log("Socket connected:", socket.id, userId ? `user=${userId}` : "");
+
+        socket.on("message", (msg) => {
+            // Simple broadcast for now; can be targeted later
+            io.emit("message", msg);
+        });
+
+        socket.on("disconnect", (reason) => {
+            console.log("Socket disconnected:", socket.id, reason);
+        });
+    } catch (e) {
+        console.error("Socket error on connection handler:", e);
+    }
 });
 
 // Mount API routes
@@ -114,6 +137,8 @@ app.use('/api/reservations', reservationRoute);
 app.use('/api/payment', paymentRoute);
 app.use('/api/upload', uploadRoute);
 app.use("/api/trips", tripRoute);
+app.use('/api/stories', storiesRoute);
+app.use('/api/travellers-choice', travellersChoiceRoute);
 // Health check endpoint
 app.get("/api/health", (req, res) => {
     res.json({ status: "ok" });
@@ -128,10 +153,22 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
     const errorStatus = err.status || 500;
     const errorMessage = err.message || "Something went wrong!";
+    // Log server-side for diagnostics
+    console.error("[API Error]", {
+        method: req.method,
+        url: req.originalUrl,
+        status: errorStatus,
+        message: errorMessage,
+        name: err?.name,
+        code: err?.code,
+        stack: process.env.NODE_ENV === "production" ? undefined : err?.stack,
+    });
     res.status(errorStatus).json({
         success: false,
         status: errorStatus,
         message: errorMessage,
+        name: err?.name,
+        code: err?.code,
         stack: process.env.NODE_ENV === "production" ? undefined : err.stack,
     });
 });
@@ -142,6 +179,14 @@ const startServer = async () => {
     try {
         await mongoose.connect(process.env.MONGO);
         console.log("Connected to MongoDB.");
+        // Sync indexes to drop outdated ones (e.g., text index on tags)
+        try {
+            const TravelStory = (await import('./models/TravelStory.js')).default;
+            await TravelStory.syncIndexes();
+            console.log('TravelStory indexes synced.');
+        } catch (e) {
+            console.warn('Index sync warning:', e.message);
+        }
         server.listen(PORT, () => {
             console.log(`Backend running at http://localhost:${PORT}`);
         });

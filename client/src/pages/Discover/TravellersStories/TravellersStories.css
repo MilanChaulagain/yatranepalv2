@@ -262,6 +262,109 @@
     box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
 }
 
+/* Comments */
+.travelerstories-comments {
+    cursor: pointer;
+    margin-top: 16px;
+    background: #fafafa;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.travelerstories-comment-box {
+    cursor: pointer;
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.travelerstories-comment-box input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    outline: none;
+    transition: border-color .2s ease;
+}
+
+.travelerstories-comment-box input:focus {
+    border-color: #4CAF50;
+}
+
+.travelerstories-comment-box button {
+    padding: 8px 14px;
+    border: none;
+    background: #4CAF50;
+    color: #fff;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.travelerstories-comments-loading,
+.travelerstories-comments-empty {
+    font-size: .95rem;
+    color: #7f8c8d;
+    padding: 8px 2px;
+}
+
+.travelerstories-comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 220px; /* ~3-5 comments depending on size */
+    overflow: auto;
+    padding-right: 6px;
+}
+
+.comment-item {
+    display: flex;
+    gap: 10px;
+}
+
+.comment-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #e0e0e0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.comment-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-fallback {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.comment-body {
+    flex: 1;
+}
+
+.comment-meta {
+    display: flex;
+    gap: 8px;
+    font-size: .85rem;
+    color: #7f8c8d;
+}
+
+.comment-author {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+.comment-text {
+    margin-top: 2px;
+}
+
 /* Share Your Story Section */
 .travelerstories-share {
     background-color: #e8f5e9;

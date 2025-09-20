@@ -1,20 +1,121 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './TravellersStories.css';
 import { FaRegHeart, FaHeart, FaRegComment, FaMapMarkerAlt, FaCalendarAlt, FaUserAlt } from 'react-icons/fa';
 import { GiMountainRoad, GiTempleGate,GiElephant } from 'react-icons/gi';
 import Navbar from '../../../components/navbar/Navbar';
 import Header from '../../../components/header/Header';
 import Footer from '../../../components/footer/Footer';
+import { useNavigate } from 'react-router-dom';
+import api from '../../../utils/api';
 
 const TravelStories = () => {
     const [activeTab, setActiveTab] = useState('featured');
-    const [likedStories, setLikedStories] = useState({});
+    const navigate = useNavigate();
+    const [fetchedStories, setFetchedStories] = useState([]);
+    const [expandedComments, setExpandedComments] = useState({});
+    const [commentsByStory, setCommentsByStory] = useState({});
+    const [loadingComments, setLoadingComments] = useState({});
 
-    const toggleLike = (storyId) => {
-        setLikedStories(prev => ({
-            ...prev,
-            [storyId]: !prev[storyId]
-        }));
+    useEffect(() => {
+        let mounted = true;
+        (async () => {
+            try {
+                const res = await api.get('/stories');
+                const list = res.data?.data || res.data || [];
+                if (!mounted) return;
+                // Normalize to match the card UI shape minimally
+                const normalized = list.map(s => ({
+                    id: s._id,
+                    title: s.title,
+                    author: s.user?.username || 'Anonymous',
+                    date: s.visitDate ? new Date(s.visitDate).toLocaleDateString() : new Date(s.createdAt).toLocaleDateString(),
+                    location: s.destination,
+                    image: s.images?.[0] || 'https://via.placeholder.com/800x500?text=Travel+Story',
+                    content: s.content,
+                    likes: s.likes || 0,
+                    comments: Array.isArray(s.comments) ? s.comments.length : 0,
+                    category: (s.tags && s.tags[0]) || 'story',
+                    readTime: '5 min read',
+                    icon: null,
+                    liked: !!s.liked,
+                }));
+                setFetchedStories(normalized);
+                // Initialize liked state and comments cache from API so it persists on reload
+                const initialLiked = normalized.reduce((acc, st) => {
+                    acc[st.id] = !!st.liked;
+                    return acc;
+                }, {});
+                setLikedStories(initialLiked);
+                // Seed commentsByStory with populated comments (including author info) from the list response
+                const initialComments = (list || []).reduce((acc, s) => {
+                    if (Array.isArray(s.comments) && s.comments.length) acc[s._id] = s.comments;
+                    return acc;
+                }, {});
+                setCommentsByStory((prev) => ({ ...initialComments, ...prev }));
+            } catch (e) {
+                // silent fail to keep dummy data
+            }
+        })();
+        return () => { mounted = false; };
+    }, []);
+    const [likedStories, setLikedStories] = useState({});
+    const [commentInputs, setCommentInputs] = useState({});
+
+    const toggleLike = async (story) => {
+        const id = story.id;
+        // If it's a fetched story (has Mongo ObjectId-like id), hit API
+        const isReal = typeof id === 'string' && id.length >= 12;
+        if (isReal) {
+            try {
+                await api.post(`/stories/${id}/like`);
+            } catch (_) { /* ignore errors to keep UI responsive */ }
+        }
+        setLikedStories(prev => ({ ...prev, [id]: !prev[id] }));
+    };
+
+    const handleCommentChange = (id, val) => {
+        setCommentInputs((prev) => ({ ...prev, [id]: val }));
+    };
+
+    const submitComment = async (story) => {
+        const id = story.id;
+        const text = (commentInputs[id] || '').trim();
+        if (!text) return;
+        const isReal = typeof id === 'string' && id.length >= 12;
+        if (isReal) {
+            try {
+                const res = await api.post(`/stories/${id}/comments`, { text });
+                const updated = res.data?.data;
+                // Optimistically update local comments list and count
+                setCommentsByStory((prev) => ({
+                    ...prev,
+                    [id]: updated?.comments || prev[id] || []
+                }));
+                // also update fetchedStories comments count for that id
+                setFetchedStories((prev) => prev.map(st => st.id === id ? { ...st, comments: (updated?.comments?.length ?? (st.comments || 0) + 1) } : st));
+                setCommentInputs((prev) => ({ ...prev, [id]: '' }));
+            } catch (_) { /* ignore for now */ }
+        } else {
+            setCommentInputs((prev) => ({ ...prev, [id]: '' }));
+        }
+    };
+
+    const toggleCommentsPanel = async (story) => {
+        const id = story.id;
+        const nextState = !expandedComments[id];
+        setExpandedComments((prev) => ({ ...prev, [id]: nextState }));
+        const isReal = typeof id === 'string' && id.length >= 12;
+        if (nextState && isReal && !commentsByStory[id]) {
+            try {
+                setLoadingComments((prev) => ({ ...prev, [id]: true }));
+                const res = await api.get(`/stories/${id}`);
+                const full = res.data?.data;
+                setCommentsByStory((prev) => ({ ...prev, [id]: full?.comments || [] }));
+            } catch (_) { /* noop */ }
+            finally {
+                setLoadingComments((prev) => ({ ...prev, [id]: false }));
+            }
+        }
     };
 
     const featuredStories = [
@@ -113,13 +214,13 @@ const TravelStories = () => {
     const renderStories = () => {
         switch (activeTab) {
             case 'featured':
-                return featuredStories;
+                return [...fetchedStories, ...featuredStories];
             case 'recent':
-                return recentStories;
+                return [...fetchedStories, ...recentStories];
             case 'popular':
-                return popularStories;
+                return [...fetchedStories, ...popularStories];
             default:
-                return [...featuredStories, ...recentStories, ...popularStories];
+                return [...fetchedStories, ...featuredStories, ...recentStories, ...popularStories];
         }
     };
 
@@ -188,7 +289,7 @@ const TravelStories = () => {
                                 <div className="travelerstories-card-actions">
                                     <button 
                                         className="travelerstories-like-btn"
-                                        onClick={() => toggleLike(story.id)}
+                                        onClick={() => toggleLike(story)}
                                     >
                                         {likedStories[story.id] ? (
                                             <FaHeart className="liked" />
@@ -197,11 +298,52 @@ const TravelStories = () => {
                                         )}
                                         <span>{likedStories[story.id] ? story.likes + 1 : story.likes}</span>
                                     </button>
-                                    <button className="travelerstories-comment-btn">
+                                    <button className="travelerstories-comment-btn" onClick={() => toggleCommentsPanel(story)}>
                                         <FaRegComment />
-                                        <span>{story.comments}</span>
+                                        <span>Comments ({story.comments})</span>
                                     </button>
                                 </div>
+                                {expandedComments[story.id] && (
+                                    <div className="travelerstories-comments">
+                                        <div className="travelerstories-comment-box">
+                                            <input
+                                                type="text"
+                                                placeholder="Write a comment..."
+                                                value={commentInputs[story.id] || ''}
+                                                onChange={(e) => handleCommentChange(story.id, e.target.value)}
+                                                onKeyDown={(e) => e.key === 'Enter' && submitComment(story)}
+                                            />
+                                            <button onClick={() => submitComment(story)}>Post</button>
+                                        </div>
+                                        {loadingComments[story.id] ? (
+                                            <div className="travelerstories-comments-loading">Loading comments...</div>
+                                        ) : (
+                                            <div className="travelerstories-comments-list">
+                                                {(commentsByStory[story.id] || []).map((c, idx) => (
+                                                    <div key={idx} className="comment-item">
+                                                        <div className="comment-avatar">
+                                                            {(c.user?.img) ? (
+                                                                <img src={c.user.img} alt={c.user?.username || 'user'} />
+                                                            ) : (
+                                                                <div className="avatar-fallback">{(c.user?.username || 'U').charAt(0).toUpperCase()}</div>
+                                                            )}
+                                                        </div>
+                                                        <div className="comment-body">
+                                                            <div className="comment-meta">
+                                                                <span className="comment-author">{c.user?.username || 'User'}</span>
+                                                                <span className="comment-date">{c.createdAt ? new Date(c.createdAt).toLocaleString() : ''}</span>
+                                                            </div>
+                                                            <div className="comment-text">{c.text}</div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                {(!commentsByStory[story.id] || commentsByStory[story.id].length === 0) && (
+                                                    <div className="travelerstories-comments-empty">No comments yet. Be the first to comment!</div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))}
@@ -210,7 +352,7 @@ const TravelStories = () => {
                 <div className="travelerstories-share">
                     <h3>Have a story to share?</h3>
                     <p>Contribute your own travel experience to inspire others</p>
-                    <button className="travelerstories-cta-button">Share Your Story</button>
+                    <button className="travelerstories-cta-button" onClick={()=>navigate('/share-story')}>Share Your Story</button>
                 </div>
             </div>
 

@@ -48,6 +48,8 @@ export default function Planner() {
   const [trip, setTrip] = useState(null);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
     if (!useMyLocation) return;
@@ -84,6 +86,7 @@ export default function Planner() {
     e.preventDefault();
     setPlanning(true);
     setError("");
+    setIsSaved(false);
     try {
       const body = {
         name: tripName,
@@ -123,7 +126,8 @@ export default function Planner() {
       delete payload.unsaved;
       const res = await api.post("/trips", payload);
       setTrip(res.data?.data || res.data);
-      toast.success("Trip saved")
+      setIsSaved(true);
+      toast.success("Trip saved");
     } catch (err) {
       console.error("Save failed", err);
       setError(err.response?.data?.message || err.message || "Failed to save trip");
@@ -240,13 +244,28 @@ export default function Planner() {
             <div className="itinerary-map">
               <ItineraryMap polylines={itineraryCoords} markers={markersFromPolylines(itineraryCoords)} />
             </div>
-            <div className="actions" style={{ marginTop: 16 }}>
-              <button className="button-17" onClick={handleSave} disabled={saving}>{saving ? "Saving..." : "Save Trip"}</button>
+            <div className="actions actions-between" style={{ marginTop: 16 }}>
+              <button className="button-17" onClick={handleSave} disabled={saving || isSaved}>
+                {saving ? "Saving..." : isSaved ? "Trip saved" : "Save Trip"}
+              </button>
+              {isSaved && (
+                <button className="button-17" onClick={() => setShowDetails(true)} style={{ marginLeft: 'auto' }}>
+                  View details
+                </button>
+              )}
             </div>
           </div>
         )}
       </div>
       <Footer />
+      {showDetails && trip && (
+        <DetailsModal
+          trip={trip}
+          places={places}
+          hotelsByDay={nearbyHotelsByDay}
+          onClose={() => setShowDetails(false)}
+        />
+      )}
     </div>
   );
 }
@@ -304,6 +323,97 @@ function ItineraryView({ trip, places, hotelsByDay = [] }) {
           ) : null}
         </div>
       ))}
+    </div>
+  );
+}
+
+function DetailsModal({ trip, places, hotelsByDay, onClose }) {
+  const byId = useMemo(() => new Map(places.map(p => [p._id, p])), [places]);
+  const totalDays = trip?.itinerary?.length || 0;
+  const totalPlaces = trip?.itinerary?.reduce((s, d) => s + (d.items?.length || 0), 0) || 0;
+  return (
+    <div className="details-modal-overlay" role="dialog" aria-modal="true">
+      <div className="details-modal">
+        <div className="details-modal-header">
+          <h3>{trip?.name || "Your Trip"}</h3>
+          <button className="details-close" onClick={onClose} aria-label="Close">×</button>
+        </div>
+        <div className="details-summary">
+          <span className="chip">{totalDays} days</span>
+          <span className="chip">{totalPlaces} places</span>
+          {trip?.budget?.total ? (<span className="chip">Budget: NPR {trip.budget.total}</span>) : null}
+          {trip?.startDate && trip?.endDate ? (
+            <span className="chip">{trip.startDate} → {trip.endDate}</span>
+          ) : null}
+        </div>
+        <div className="details-content">
+          {trip?.itinerary?.map((day, idx) => (
+            <div key={idx} className="details-day">
+              <div className="details-day-header">Day {idx + 1}</div>
+              <div className="details-roadmap">
+                {day.items.map((it, j) => {
+                  const p = byId.get(it.place);
+                  const isLast = j === day.items.length - 1;
+                  return (
+                    <div key={`rm-${j}`} className="roadmap-row">
+                      <div className="roadmap-left">
+                        <div className="roadmap-marker">{j + 1}</div>
+                        {!isLast && <div className="roadmap-connector" />}
+                      </div>
+                      <div className="roadmap-content">
+                        <div className="roadmap-top">
+                          <span className="roadmap-name">{p?.name || 'Place'}</span>
+                          <span className="roadmap-time">{it.startTime} – {it.endTime}</span>
+                        </div>
+                        <div className="roadmap-sub">{p?.city} • {p?.address}</div>
+                        <div className="roadmap-sub">{it.distanceKmFromPrev} km • {it.travelMinutesFromPrev} mins</div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <ol className="details-list">
+                {day.items.map((it, j) => {
+                  const p = byId.get(it.place);
+                  return (
+                    <li key={j} className="details-item">
+                      <img className="details-thumb" src={getEntityImage(p)} alt={p?.name || 'Place'} loading="lazy" onError={(e)=>{e.currentTarget.src='/images/1.jpg'}} />
+                      <div className="details-info">
+                        <div className="details-row">
+                          <span className="details-name">{p?.name || 'Place'}</span>
+                          <span className="details-time">{it.startTime} – {it.endTime}</span>
+                        </div>
+                        <div className="details-sub">{p?.city} • {p?.address}</div>
+                        <div className="details-sub">{it.distanceKmFromPrev} km / {it.travelMinutesFromPrev} mins</div>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+              {hotelsByDay?.[idx]?.length ? (
+                <div className="details-hotels">
+                  <div className="details-hotels-title">Recommended nearby hotels</div>
+                  <div className="details-hotels-list">
+                    {hotelsByDay[idx].map((h, k) => (
+                      <div key={k} className="details-hotel-card">
+                        <img className="details-hotel-thumb" src={getEntityImage(h)} alt={h.name} loading="lazy" onError={(e)=>{e.currentTarget.src='/images/1.jpg'}} />
+                        <div className="details-hotel-info">
+                          <div className="details-hotel-name">{h.name}</div>
+                          <div className="details-hotel-sub">{h.city} • {h.address}</div>
+                          {typeof h.cheapestPrice === 'number' && (<div className="details-hotel-price">NPR {h.cheapestPrice}</div>)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          ))}
+        </div>
+        <div className="details-modal-actions">
+          <button className="button-17" onClick={onClose}>Close</button>
+        </div>
+      </div>
     </div>
   );
 }

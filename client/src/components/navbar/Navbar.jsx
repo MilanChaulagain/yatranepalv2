@@ -70,7 +70,7 @@ const Navbar = () => {
       items: [
         { label: "View my trips", path: "/trips" },
         { label: "Start a new trip", path: "/trips/create" },
-        { label: "Create a trip with AI", path: "/trips/plan" },
+        // { label: "Create a trip with AI", path: "/trips/tripswithai" },
       ],
     },
     {

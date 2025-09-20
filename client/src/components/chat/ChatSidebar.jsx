@@ -15,6 +15,8 @@ const ChatSidebar = ({ open, onClose, user }) => {
   useEffect(() => {
     socketRef.current = io(SOCKET_URL, {
       query: { userId: user?._id },
+      transports: ["websocket", "polling"],
+      withCredentials: true,
     });
     socketRef.current.on("message", (msg) => {
       setMessages((prev) => [...prev, msg]);
