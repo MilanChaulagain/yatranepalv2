@@ -139,13 +139,11 @@ const EditTouristGuide = () => {
   }
 
   return (
-    <div className="new">
+    <div className="">
       <Sidebar />
       <div className="newContainer">
         <Navbar />
-        <div className="top">
           <h1>Edit Tourist Guide</h1>
-        </div>
         <div className="bottom">
           <div className="left">
             <img

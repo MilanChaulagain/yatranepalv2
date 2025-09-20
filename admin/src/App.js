@@ -13,7 +13,8 @@ import NewPlace from "./pages/newPlaces/newplaces";
 import NewChadparba from "./pages/newChadparba/newChadparba";
 import AdminBookings from "./pages/Booking/booking";
 import NewImageSlider from "./pages/ImageSlider/imageSlider";
-import EditEntity from "./pages/Edit/EditEntity";
+// import EditEntity from "./pages/Edit/EditEntity";
+import EditRoom from "./pages/editRoom/EditRoom";
 import EditHotel from "./pages/editHotel/EditHotel";
 import EditImageSlider from "./pages/editImageSlider/EditImageSlider";
 import EditChadparba from "./pages/editChadparba/EditChadparba";
@@ -202,7 +203,7 @@ function App() {
                 path=":id/edit"
                 element={
                   <ProtectedRoute>
-                    <EditEntity />
+                    <EditRoom />
                   </ProtectedRoute>
                 }
               />

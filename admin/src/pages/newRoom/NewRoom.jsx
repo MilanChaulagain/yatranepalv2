@@ -1,18 +1,22 @@
 import "./newRoom.scss";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Navbar from "../../components/navbar/Navbar";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { roomInputs } from "../../formSource";
 import useFetch from "../../hooks/useFetch";
 import axios from "axios";
 import { useNavigate } from "react-router-dom"; 
 import toast from "react-hot-toast";
+import DriveFolderUploadOutlinedIcon from "@mui/icons-material/DriveFolderUploadOutlined";
+import { testCloudinaryConfig, testCloudinaryUpload } from "../../utils/cloudinaryTest";
 
 const NewRoom = () => {
   const [info, setInfo] = useState({});
   const [hotelId, setHotelId] = useState("");
   const [rooms, setRooms] = useState("");
-  const { data, loading } = useFetch("/hotels");
+  const [files, setFiles] = useState([]);
+  const fileInputRef = useRef();
+  const { data, loading } = useFetch("/api/hotels");
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -36,7 +40,23 @@ const NewRoom = () => {
       .map((room) => ({ number: room }));
 
     try {
-      await axios.post(`/rooms/${hotelId}`, { ...info, roomNumbers });
+      // Upload photos if any
+      let photos = [];
+      if (files.length) {
+        if (!testCloudinaryConfig()) {
+          toast.error("Cloudinary configuration is missing.");
+          return;
+        }
+        try {
+          const uploaded = await Promise.all(files.map((f) => testCloudinaryUpload(f)));
+          photos = uploaded.map((u) => u.url);
+        } catch (e) {
+          toast.error("One or more image uploads failed.");
+          return;
+        }
+      }
+
+      await axios.post(`/api/rooms/${hotelId}`, { ...info, roomNumbers, photos });
       toast.success("New room created successfully");
             navigate("/rooms");
 
@@ -57,6 +77,18 @@ const NewRoom = () => {
         <div className="bottom">
           <div className="right">
             <form>
+              <div className="formInput">
+                <label htmlFor="file">
+                  Room Photos: <DriveFolderUploadOutlinedIcon className="icon" />
+                </label>
+                <input
+                  type="file"
+                  id="file"
+                  multiple
+                  ref={fileInputRef}
+                  onChange={(e) => setFiles(Array.from(e.target.files))}
+                />
+              </div>
               {roomInputs.map((input) => (
                 <div className="formInput" key={input.id}>
                   <label>{input.label}</label>

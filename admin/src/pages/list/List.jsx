@@ -222,6 +222,10 @@ const List = ({ columns }) => {
       if (Array.isArray(item.photos) && item.photos.length > 0) return item.photos[0];
   return item.img || item.photo || `${process.env.PUBLIC_URL}/images/placeholder.jpg`;
     }
+    if (path === 'rooms') {
+      if (Array.isArray(item.photos) && item.photos.length > 0) return item.photos[0];
+      return item.img || item.photo || `${process.env.PUBLIC_URL}/images/placeholder.jpg`;
+    }
   return item.img || item.photo || `${process.env.PUBLIC_URL}/images/placeholder.jpg`;
   };
 
@@ -348,6 +352,20 @@ const List = ({ columns }) => {
                       {getThumbnailUrl(item) && (
                         <div className={`thumbnail ${path === 'users' ? 'avatar' : ''}`}>
                           <img src={getThumbnailUrl(item)} alt={item.username || item.name || 'thumb'} />
+                        </div>
+                      )}
+                      {path === 'rooms' && Array.isArray(item.photos) && item.photos.length > 1 && (
+                        <div style={{ display: 'flex', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+                          {item.photos.slice(0, 3).map((url, idx) => (
+                            <div key={idx} style={{ position: 'relative', width: 58, height: 58, borderRadius: 6, overflow: 'hidden', border: '1px solid #eee' }}>
+                              <img src={url} alt={`Room ${idx+1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                              {idx === 2 && item.photos.length > 3 && (
+                                <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.45)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, fontSize: 12 }}>
+                                  +{item.photos.length - 3}
+                                </div>
+                              )}
+                            </div>
+                          ))}
                         </div>
                       )}
                       {item.email && <p><strong>Email:</strong> {item.email}</p>}

@@ -16,7 +16,6 @@ import { DarkModeContext } from "../../context/darkModeContext";
 import { useContext } from "react";
 import logo from "../../assets/logo.png";
 import MenuIcon from '@mui/icons-material/Menu';
-import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import EventIcon from '@mui/icons-material/Event';
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
