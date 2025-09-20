@@ -10,15 +10,18 @@ import { useContext, useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import UserDropdown from "./UserDropdown";
 import { User } from "lucide-react";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
 const Navbar = () => {
   const { dispatch } = useContext(DarkModeContext);
   const { user } = useContext(AuthContext);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const [search, setSearch] = useState("");
   const location = useLocation();
   const navigate = useNavigate();
+  const [canGoBack, setCanGoBack] = useState(false);
+  const [canGoForward, setCanGoForward] = useState(false);
 
   const defaultAvatar = "https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-High-Quality-Image.png";
 
@@ -33,46 +36,49 @@ const Navbar = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    const term = search.trim();
-    if (!term) return;
-
-    const normalized = term.toLowerCase();
-    const sectionMap = {
-      users: "users",
-      user: "users",
-      hotels: "hotels",
-      hotel: "hotels",
-      rooms: "rooms",
-      room: "rooms",
-      places: "place",
-      place: "place",
-      exchange: "money-exchange",
-      money: "money-exchange",
-      tourist: "touristguide",
-      guides: "touristguide",
-      images: "imageslider",
-      slider: "imageslider",
-      events: "chadparba",
-      event: "chadparba",
-      booking: "admin-booking",
-      bookings: "admin-booking",
+  useEffect(() => {
+    const updateNavState = () => {
+      const idx = window.history.state?.idx ?? 0;
+      const len = window.history.length ?? 0;
+      setCanGoBack(idx > 0);
+      setCanGoForward(idx < len - 1);
     };
+    updateNavState();
+    window.addEventListener('popstate', updateNavState);
+    return () => window.removeEventListener('popstate', updateNavState);
+  }, [location]);
 
-    if (sectionMap[normalized]) {
-      navigate(`/${sectionMap[normalized]}`);
-      return;
-    }
+  // Search functionality is currently disabled; form is commented out.
 
-    const pathSeg = location.pathname.split("/")[1] || "users";
-    navigate(`/${pathSeg}?q=${encodeURIComponent(term)}`);
-  };
+  const goBack = () => navigate(-1);
+  const goForward = () => navigate(1);
 
   return (
     <div className="navbar">
       <div className="wrapper">
         <div className="left">
+          <div className="nav-history">
+            <button
+              type="button"
+              className={`history-btn back${canGoBack ? '' : ' disabled'}`}
+              onClick={goBack}
+              disabled={!canGoBack}
+              aria-label="Go back"
+              title={canGoBack ? 'Go back' : 'No previous page'}
+            >
+              <ChevronLeftIcon className="history-icon" />
+            </button>
+            <button
+              type="button"
+              className={`history-btn forward${canGoForward ? '' : ' disabled'}`}
+              onClick={goForward}
+              disabled={!canGoForward}
+              aria-label="Go forward"
+              title={canGoForward ? 'Go forward' : 'No next page'}
+            >
+              <ChevronRightIcon className="history-icon" />
+            </button>
+          </div>
           {/* <form className="search" onSubmit={handleSearchSubmit}>
             <input
               type="text"

@@ -324,11 +324,11 @@ const EditPlace = () => {
   }
 
   return (
-    <div className="new">
+    <div className="">
       <Sidebar />
       <div className="newContainer">
         <Navbar />
-        <div className="top">
+        <div className="">
           <h1>Edit Place</h1>
         </div>
         <div className="bottom">

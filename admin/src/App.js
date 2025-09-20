@@ -1,7 +1,9 @@
 import Home from "./pages/home/Home";
 import Login from "./pages/login/Login";
 import List from "./pages/list/List";
-import New from "./pages/new/New";
+// import New from "./pages/new/New";
+import NewUser from "./pages/newUser/NewUser";
+import EditUser from "./pages/editUser/EditUser";
 import Profile from "./pages/profile/Profile";
 import NewHotel from "./pages/newHotel/NewHotel";
 import NewRoom from "./pages/newRoom/NewRoom";
@@ -12,6 +14,7 @@ import NewChadparba from "./pages/newChadparba/newChadparba";
 import AdminBookings from "./pages/Booking/booking";
 import NewImageSlider from "./pages/ImageSlider/imageSlider";
 import EditEntity from "./pages/Edit/EditEntity";
+import EditHotel from "./pages/editHotel/EditHotel";
 import EditImageSlider from "./pages/editImageSlider/EditImageSlider";
 import EditChadparba from "./pages/editChadparba/EditChadparba";
 import EditExchange from "./pages/editExchange/EditExchange";
@@ -25,7 +28,7 @@ import {
   moneyexchangeInputs,
   placeInputs,
   touristguideInputs,
-  userInputs,
+  // userInputs,
 } from "./formSource";
 
 import {
@@ -143,7 +146,7 @@ function App() {
                 path=":id/edit"
                 element={
                   <ProtectedRoute>
-                    <EditEntity />
+                    <EditUser />
                   </ProtectedRoute>
                 }
               />
@@ -151,7 +154,7 @@ function App() {
                 path="new"
                 element={
                   <ProtectedRoute>
-                    <New inputs={userInputs} title="Add New User" />
+                    <NewUser />
                   </ProtectedRoute>
                 }
               />
@@ -171,7 +174,7 @@ function App() {
                 path=":id/edit"
                 element={
                   <ProtectedRoute>
-                    <EditEntity />
+                    <EditHotel />
                   </ProtectedRoute>
                 }
               />

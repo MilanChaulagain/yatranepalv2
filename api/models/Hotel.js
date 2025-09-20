@@ -6,6 +6,8 @@ const HotelSchema = new mongoose.Schema({
     city: { type: String, required: true },
     address: { type: String, required: true },
     distance: { type: String, required: true },
+    latitude: { type: Number },
+    longitude: { type: Number },
     photos: { type: [String] },
     title: { type: String, required: true },
     desc: { type: String, required: true },

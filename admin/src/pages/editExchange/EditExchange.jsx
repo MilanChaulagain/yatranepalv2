@@ -222,11 +222,11 @@ const EditExchange = () => {
   }
 
   return (
-    <div className="new">
+    <div className="">
       <Sidebar />
       <div className="newContainer">
         <Navbar />
-        <div className="top">Edit Exchange Center</div>
+        <h1>Edit Exchange Center</h1>
         <div className="bottom">
           <div className="left">
             <img src={previewSrc} alt="Preview" />

@@ -50,9 +50,6 @@ const Sidebar = () => {
               <span className="logo-text">yatraNepal</span>
             </div>
           </Link>
-          <button className="sidebar-btn" aria-label="Back" onClick={() => navigate(-1)}>
-            <ArrowBackIosNewIcon className="icon" />
-          </button>
         </div>
       </div>
       <hr />

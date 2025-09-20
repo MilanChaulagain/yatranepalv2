@@ -47,11 +47,11 @@ const NewRoom = () => {
   };
 
   return (
-    <div className="new">
+    <div className="">
       <Sidebar />
       <div className="newContainer">
         <Navbar />
-        <div className="top">
+        <div className="">
           <h1>Add New Room</h1>
         </div>
         <div className="bottom">

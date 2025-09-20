@@ -1,0 +1,251 @@
+@import "../../style/variables";
+@import "../../style/layout.scss";
+
+.editHotel {
+  @extend .page-wrapper;
+
+  .editContainer {
+    @extend .page-content;
+
+    .top,
+    .bottom {
+      background: linear-gradient(145deg, rgba($background-paper, 0.95) 0%, rgba($background-paper, 0.9) 100%);
+      border-radius: $border-radius-xl;
+      box-shadow: $shadow-lg;
+      border: 1px solid rgba($text-muted, 0.08);
+      backdrop-filter: blur(8px);
+      padding: $spacing-unit * 4;
+      margin: $spacing-unit * 3;
+      display: flex;
+      max-width: 1400px;
+      margin-left: auto;
+      margin-right: auto;
+
+      h1 {
+        font-size: $font-size-xxl;
+        font-weight: $font-weight-bold;
+        color: $text-primary;
+        margin-bottom: $spacing-unit * 3;
+        position: relative;
+        
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: -8px;
+          left: 0;
+          width: 60px;
+          height: 4px;
+          background: $gradient-primary;
+          border-radius: $border-radius-sm;
+        }
+      }
+
+      .left {
+        flex: 1;
+        text-align: center;
+        padding: $spacing-unit * 3;
+
+        .image-drop-area {
+          border: 2px dashed rgba($primary-color, 0.25);
+          border-radius: $border-radius-xl;
+          padding: $spacing-unit * 6;
+          background: rgba($background-secondary, 0.35);
+          transition: all $transition-normal;
+
+          &:hover {
+            background: rgba($background-secondary, 0.45);
+            border-color: rgba($primary-color, 0.5);
+          }
+        }
+
+        .image-drop-placeholder {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: $spacing-unit * 2;
+          color: $text-secondary;
+        }
+
+        .image-preview-list {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+          gap: $spacing-unit * 2;
+        }
+
+        .image-preview-item {
+          position: relative;
+          border-radius: $border-radius-lg;
+          overflow: hidden;
+          box-shadow: $shadow-md;
+
+          .image-preview {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+          }
+
+          .remove-image-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            border: none;
+            border-radius: $border-radius-sm;
+            padding: 6px 8px;
+            cursor: pointer;
+          }
+        }
+      }
+
+      .right {
+        flex: 2;
+        padding: $spacing-unit * 3;
+
+        form {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 30px;
+          justify-content: space-between;
+
+          .form-section {
+            width: 100%;
+
+            h2 {
+              font-size: $font-size-xl;
+              color: $text-primary;
+              margin-bottom: $spacing-unit * 2;
+            }
+          }
+
+          .selectRooms {
+            width: 100%;
+            margin-bottom: $spacing-unit * 3;
+
+            select {
+              width: 100%;
+              padding: $spacing-unit * 1.75 $spacing-unit * 2;
+              background: rgba($background-secondary, 0.4);
+              border: 1px solid rgba($text-muted, 0.15);
+              border-radius: $border-radius-lg;
+              font-size: $font-size-base;
+              color: $text-primary;
+              transition: all $transition-normal;
+              min-height: 150px;
+              
+              &:hover {
+                background: rgba($background-secondary, 0.5);
+                border-color: rgba($text-muted, 0.25);
+              }
+              
+              &:focus {
+                outline: none;
+                background: $background-paper;
+                border-color: $primary-color;
+                box-shadow: 0 0 0 4px rgba($primary-color, 0.1);
+              }
+
+              option {
+                padding: $spacing-unit;
+                
+                &:checked {
+                  background: linear-gradient(145deg, $primary-color 0%, $primary-dark 100%);
+                  color: white;
+                }
+              }
+            }
+
+            .rooms-helper {
+              color: $text-secondary;
+              margin-top: $spacing-unit;
+              font-size: $font-size-sm;
+            }
+          }
+
+          .formInput {
+            width: calc(50% - $spacing-unit * 2);
+            margin-bottom: $spacing-unit * 3;
+
+            label {
+              display: block;
+              margin-bottom: $spacing-unit;
+              color: $text-secondary;
+              font-weight: $font-weight-medium;
+            }
+
+            input, select, textarea {
+              width: 100%;
+              padding: $spacing-unit * 1.75 $spacing-unit * 2;
+              background: rgba($background-secondary, 0.4);
+              border: 1px solid rgba($text-muted, 0.15);
+              border-radius: $border-radius-lg;
+              font-size: $font-size-base;
+              color: $text-primary;
+              transition: all $transition-normal;
+              
+              &:hover {
+                background: rgba($background-secondary, 0.5);
+                border-color: rgba($text-muted, 0.25);
+              }
+              
+              &:focus {
+                outline: none;
+                background: $background-paper;
+                border-color: $primary-color;
+                box-shadow: 0 0 0 4px rgba($primary-color, 0.1);
+              }
+            }
+
+            textarea {
+              min-height: 110px;
+            }
+          }
+
+          .submit-btn {
+            width: 220px;
+            padding: $spacing-unit * 2;
+            background: $gradient-primary;
+            color: white;
+            border: none;
+            border-radius: $border-radius-lg;
+            font-weight: $font-weight-semibold;
+            font-size: $font-size-base;
+            cursor: pointer;
+            transition: all $transition-normal;
+            margin-top: $spacing-unit * 3;
+            position: relative;
+            overflow: hidden;
+
+            &::before {
+              content: '';
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              width: 100%;
+              height: 100%;
+              background: rgba(255, 255, 255, 0.2);
+              transform: translate(-50%, -50%) scale(0);
+              border-radius: inherit;
+              transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            }
+
+            &:hover {
+              transform: translateY(-2px);
+              box-shadow: 0 8px 20px rgba($primary-color, 0.3);
+
+              &::before {
+                transform: translate(-50%, -50%) scale(1.5);
+                opacity: 0;
+              }
+            }
+
+            &:active { transform: translateY(1px); }
+            &:disabled { opacity: .7; cursor: not-allowed; }
+          }
+
+          .error-text { color: #e02424; }
+        }
+      }
+    }
+  }
+}

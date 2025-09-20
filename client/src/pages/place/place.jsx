@@ -146,7 +146,7 @@ const localExperiences = [
   { title: "Music Performance", description: "Enjoy classical Newari music", location: "Cultural centers" },
 ];
 
-const BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8800";
+const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8800";
 
 const getImageUrl = (imagePath) => {
   if (!imagePath) return "/images/placeholder.jpg";
@@ -371,8 +371,22 @@ const Places = () => {
 
         if (searchQuery) params.append("search", searchQuery);
         if (selectedCity !== "all") {
-          // Get the proper city name from cityData or capitalize the city key
-          const cityName = cityData[selectedCity]?.name || selectedCity.charAt(0).toUpperCase() + selectedCity.slice(1);
+          // Canonical city values for API filter (avoid display names like "Lalitpur (Patan)")
+          const cityQueryMap = {
+            kathmandu: "Kathmandu",
+            lalitpur: "Lalitpur",
+            bhaktapur: "Bhaktapur",
+            pokhara: "Pokhara",
+            janakpur: "Janakpur",
+            chitwan: "Chitwan",
+            lumbini: "Lumbini",
+            nagarkot: "Nagarkot",
+            bandipur: "Bandipur",
+            gorkha: "Gorkha",
+            mustang: "Mustang",
+            everest: "Everest Region",
+          };
+          const cityName = cityQueryMap[selectedCity] || (selectedCity.charAt(0).toUpperCase() + selectedCity.slice(1));
           params.append("city", cityName);
           console.log("Adding city filter:", selectedCity, "->", cityName);
         }
@@ -570,7 +584,7 @@ const Places = () => {
         <div className="places-sidebar">
           <div className="places-header">
             <div className="places-title">
-              <h1>Explore Kathmandu Valley</h1>
+              <h1>Explore Nepal</h1>
               <p>Discover heritage sites, cultural experiences, and hidden gems</p>
             </div>
             <div className="places-count">
@@ -698,22 +712,31 @@ const Places = () => {
           ) : (
             <>
               {selectedCity === "all" ? (
-                <div>
-                </div>
+                <div></div>
               ) : (
-                <div className="city-details">
-                  <h2>{cityData[selectedCity].icon} Explore {cityData[selectedCity].name}</h2>
-                  <p>{getCityDescription(selectedCity)}</p>
+                (() => {
+                  const cityInfo = cityData[selectedCity] || {
+                    name: selectedCity.charAt(0).toUpperCase() + selectedCity.slice(1),
+                    icon: <Landmark size={20} />,
+                    color: "#475569",
+                    description: "",
+                  };
+                  return (
+                    <div className="city-details">
+                      <h2>{cityInfo.icon} Explore {cityInfo.name}</h2>
+                      <p>{getCityDescription(selectedCity)}</p>
 
-                  <div className="city-tips">
-                    <h3><Info size={18} /> Travel Tips</h3>
-                    <ul>
-                      {getCityTips(selectedCity).map((tip, idx) => (
-                        <li key={idx}>{tip}</li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
+                      <div className="city-tips">
+                        <h3><Info size={18} /> Travel Tips</h3>
+                        <ul>
+                          {getCityTips(selectedCity).map((tip, idx) => (
+                            <li key={idx}>{tip}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  );
+                })()
               )}
 
               <div className="places-grid">
@@ -765,17 +788,25 @@ const Places = () => {
                       <div className="place-info">
                         <h3>{place.name}</h3>
                         <div className="place-meta">
-                          <span className="category">
-                            {getCategoryIcon(place.category)} {place.category}
-                          </span>
-                          <span className="city" style={{ color: cityData[place.city]?.color }}>
-                            {cityData[place.city]?.name || place.city}
-                          </span>
-                          {place.distance !== undefined && (
-                            <span className="distance">
-                              {place.distance?.toFixed(1)} km away
-                            </span>
-                          )}
+                          {(() => {
+                            const cityKey = (place.city || '').toString().toLowerCase();
+                            const meta = cityData[cityKey];
+                            return (
+                              <>
+                                <span className="category">
+                                  {getCategoryIcon(place.category)} {place.category}
+                                </span>
+                                <span className="city" style={{ color: meta?.color }}>
+                                  {meta?.name || place.city}
+                                </span>
+                                {place.distance !== undefined && (
+                                  <span className="distance">
+                                    {place.distance?.toFixed(1)} km away
+                                  </span>
+                                )}
+                              </>
+                            );
+                          })()}
                         </div>
 
                         <p className="description">

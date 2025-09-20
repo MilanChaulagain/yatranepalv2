@@ -2,13 +2,6 @@
 
 // Main content area, adjusting for the sidebar
 
-.new {
-  display: flex;
-  width: 100%;
-  min-height: 100vh;
-  background: linear-gradient(120deg, #f5faff 60%, #e0e7ef 100%);
-}
-
 .newContainer {
   flex: 6;
   display: flex;
@@ -16,13 +9,6 @@
   min-height: 100vh;
 }
 
-.top {
-  padding: 32px 32px 0 32px;
-  font-size: 2rem;
-  font-weight: 700;
-  color: #2d5c7f;
-  letter-spacing: 1px;
-}
 
 .bottom {
   display: flex;
@@ -103,8 +89,8 @@ form {
 button {
   margin-top: 22px;
   padding: 14px 0;
-  background: linear-gradient(90deg, #2d5c7f 60%, #ffb347 100%);
-  color: #fff;
+  background: var(--accent);
+  background-color: #2d5c7f;
   font-size: 1.15rem;
   font-weight: 700;
   border: none;
@@ -115,18 +101,17 @@ button {
 }
 
 button:hover {
-  background: linear-gradient(90deg, #ffb347 0%, #2d5c7f 100%);
   transform: translateY(-2px) scale(1.04);
 }
 
 button:disabled {
-  background: #ccc;
+  background: var(--accent);
   cursor: not-allowed;
   transform: none;
 }
 
 button:disabled:hover {
-  background: #ccc;
+  background: var(--accent);
   transform: none;
 }
 

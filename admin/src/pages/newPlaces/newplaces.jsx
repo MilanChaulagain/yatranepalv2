@@ -295,11 +295,11 @@ const NewPlace = () => {
   };
 
   return (
-    <div className="new">
+    <div className="">
       <Sidebar />
       <div className="newContainer">
         <Navbar />
-        <div className="top">
+        <div className="">
           <h1>Add New Place</h1>
         </div>
         <div className="bottom">
@@ -330,15 +330,33 @@ const NewPlace = () => {
 
               {placeInputs.map((input) => (
                 <div className="formInput" key={input.id}>
-                  <label>{input.label}</label>
-                  <input
-                    id={input.id}
-                    type={input.type}
-                    placeholder={input.placeholder}
-                    onChange={handleChange}
-                    value={info[input.id] || ""}
-                    {...(input.id === "location" ? { onBlur: handleLocationBlur } : {})}
-                  />
+                  <label htmlFor={input.id}>{input.label}</label>
+                  {input.type === "textarea" ? (
+                    <textarea
+                      id={input.id}
+                      placeholder={input.placeholder}
+                      rows={3}
+                      value={info[input.id] || ""}
+                      onChange={(e) => {
+                        // update state
+                        handleChange(e);
+                        // auto-resize height
+                        e.target.style.height = 'auto';
+                        e.target.style.height = e.target.scrollHeight + 'px';
+                      }}
+                      style={{ overflow: 'hidden', resize: 'none' }}
+                      required={!!input.required}
+                    />
+                  ) : (
+                    <input
+                      id={input.id}
+                      type={input.type}
+                      placeholder={input.placeholder}
+                      onChange={handleChange}
+                      value={info[input.id] || ""}
+                      {...(input.id === "location" ? { onBlur: handleLocationBlur } : {})}
+                    />
+                  )}
                 </div>
               ))}
 
@@ -479,8 +497,8 @@ const NewPlace = () => {
                 </div>
               )}
 
-              <button onClick={handleClick} disabled={loadingLatLng}>
-                {loadingLatLng ? "Processing..." : "Send"}
+              <button class= "save-btn" onClick={handleClick} disabled={loadingLatLng}>
+                {loadingLatLng ? "Processing..." : "Save Place"}
               </button>
             </form>
           </div>

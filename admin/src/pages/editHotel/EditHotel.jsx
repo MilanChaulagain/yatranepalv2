@@ -1,28 +1,52 @@
-
-import React, { useState, useRef } from "react";
-import "./newHotel.scss";
+import React, { useEffect, useRef, useState } from "react";
+import "../newHotel/newHotel.scss";
 import Sidebar from "../../components/sidebar/Sidebar";
 import Navbar from "../../components/navbar/Navbar";
 import DriveFolderUploadOutlinedIcon from "@mui/icons-material/DriveFolderUploadOutlined";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import useFetch from "../../hooks/useFetch";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
-const NewHotel = () => {
-  const [files, setFiles] = useState([]);
+const EditHotel = () => {
+console.log("Edit hotel mounted")
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const fileInputRef = useRef();
+
+  const { data: hotelData, loading: loadingHotel, error: hotelError } = useFetch(`/api/hotels/${id}`);
+  const { data: roomsData, loading: loadingRooms, error: roomsError } = useFetch("/api/rooms");
+
   const [info, setInfo] = useState({});
   const [rooms, setRooms] = useState([]);
-  // const [step, setStep] = useState(1);
+  const [existingPhotos, setExistingPhotos] = useState([]);
+  const [files, setFiles] = useState([]);
   const [loadingLatLng, setLoadingLatLng] = useState(false);
   const [suggestedLocations, setSuggestedLocations] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [geoError, setGeoError] = useState("");
-  const navigate = useNavigate();
-  const fileInputRef = useRef();
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const { data, loading, error } = useFetch("/api/rooms");
+  useEffect(() => {
+    if (hotelData && hotelData._id) {
+      setInfo({
+        name: hotelData.name || "",
+        type: hotelData.type || "",
+        city: hotelData.city || "",
+        address: hotelData.address || "",
+        distance: hotelData.distance || "",
+        title: hotelData.title || "",
+        desc: hotelData.desc || "",
+        rating: hotelData.rating ?? "",
+        cheapestPrice: hotelData.cheapestPrice ?? "",
+        featured: !!hotelData.featured,
+        latitude: hotelData.latitude ?? "",
+        longitude: hotelData.longitude ?? "",
+      });
+      setRooms(Array.isArray(hotelData.rooms) ? hotelData.rooms.map(String) : []);
+      setExistingPhotos(Array.isArray(hotelData.photos) ? hotelData.photos : []);
+    }
+  }, [hotelData]);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -32,10 +56,10 @@ const NewHotel = () => {
       parsed = value === "" ? "" : Number(value);
     }
     setInfo((prev) => ({ ...prev, [id]: parsed }));
-  if (geoError) setGeoError("");
+    if (geoError) setGeoError("");
   };
 
-  const handleSelect = (e) => {
+  const handleSelectRooms = (e) => {
     const value = Array.from(e.target.selectedOptions, (option) => option.value);
     setRooms(value);
   };
@@ -47,15 +71,20 @@ const NewHotel = () => {
   };
 
   const handleFileChange = (e) => {
-    setFiles(Array.from(e.target.files));
+    setFiles((prev) => [...prev, ...Array.from(e.target.files)]);
   };
 
-  const handleRemoveFile = (idx) => {
+  const handleRemoveNewFile = (idx) => {
     setFiles((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  const handleClick = async (e) => {
+  const handleRemoveExistingPhoto = (url) => {
+    setExistingPhotos((prev) => prev.filter((p) => p !== url));
+  };
+
+  const handleUpdate = async (e) => {
     e.preventDefault();
+    // Upload newly added images if any
     let photoUrls = [];
     if (files && files.length > 0) {
       try {
@@ -85,36 +114,34 @@ const NewHotel = () => {
         return;
       }
     }
-  const roomsPayload = Array.isArray(rooms) ? rooms.filter(Boolean) : [];
-  const newHotel = { ...info, rooms: roomsPayload, photos: photoUrls };
+
+    const roomsPayload = Array.isArray(rooms) ? rooms.filter(Boolean) : [];
+    const updatedHotel = {
+      ...info,
+      rooms: roomsPayload,
+      photos: [...existingPhotos, ...photoUrls],
+    };
+
     try {
       const token = localStorage.getItem("token");
-      await axios.post("/api/hotels", newHotel, {
+      await axios.put(`/api/hotels/${id}`, updatedHotel, {
         headers: { Authorization: `Bearer ${token}` },
         withCredentials: true,
       });
       setShowSuccess(true);
     } catch (err) {
-      alert("Failed to create hotel: " + (err.response?.data?.message || err.message));
+      alert("Failed to update hotel: " + (err.response?.data?.message || err.message));
     }
   };
 
-  const handleAddAnother = () => {
-    setInfo({});
-    setRooms([]);
-    setFiles([]);
-    setShowSuccess(false);
-  };
-
-  // Auto-fetch latitude and longitude when address loses focus
   const handleLocationBlur = async (e) => {
     const address = e.target.value;
     if (!address) return;
     setLoadingLatLng(true);
-  setGeoError("");
+    setGeoError("");
     try {
       const apiKey = process.env.REACT_APP_LOCATIONIQ_ACCESS_TOKEN;
-  if (!apiKey) throw new Error("LocationIQ API key is missing");
+      if (!apiKey) throw new Error("LocationIQ API key is missing");
       const resp = await fetch(
         `https://us1.locationiq.com/v1/search?key=${apiKey}&q=${encodeURIComponent(address + ", Nepal")}&format=json`
       );
@@ -154,7 +181,7 @@ const NewHotel = () => {
     setLoadingLatLng(true);
     setSuggestedLocations([]);
     setShowSuggestions(false);
-  setGeoError("");
+    setGeoError("");
     try {
       const queries = [];
       if (name && city && address) queries.push(`${name}, ${address}, ${city}, Nepal`);
@@ -192,9 +219,7 @@ const NewHotel = () => {
               all.push(suggestion);
             }
           });
-        } catch (e) {
-          // ignore individual query errors
-        }
+        } catch {}
       }
       all.sort((a, b) => b.confidence - a.confidence);
       setSuggestedLocations(all.slice(0, 5));
@@ -213,17 +238,13 @@ const NewHotel = () => {
     setSuggestedLocations([]);
   };
 
-  // Step 1: Images
-  // Step 2: Basic Info
-  // Step 3: Details & Rooms
-
   return (
     <div className="">
       <Sidebar />
       <div className="newContainer">
         <Navbar />
         <div className="top">
-          <h1>Add New Hotel</h1>
+          <h1>Edit Hotel</h1>
         </div>
         <div className="bottom">
           <div className="left">
@@ -231,7 +252,7 @@ const NewHotel = () => {
               className="image-drop-area"
               onDrop={handleFileDrop}
               onDragOver={(e) => e.preventDefault()}
-              onClick={() => fileInputRef.current.click()}
+              onClick={() => fileInputRef.current?.click()}
               style={{ cursor: "pointer" }}
             >
               <input
@@ -242,21 +263,25 @@ const NewHotel = () => {
                 onChange={handleFileChange}
                 style={{ display: "none" }}
               />
-              {files.length === 0 ? (
+              {(files.length === 0 && existingPhotos.length === 0) ? (
                 <div className="image-drop-placeholder">
                   <DriveFolderUploadOutlinedIcon style={{ fontSize: 48, color: "#4cc9f0" }} />
-                  <p>Drag & drop hotel images here, or click to select</p>
+                  <p>Drag & drop images, or click to select</p>
                 </div>
               ) : (
                 <div className="image-preview-list">
+                  {existingPhotos.map((url, idx) => (
+                    <div key={`ex-${idx}`} className="image-preview-item">
+                      <img src={url} alt={`Existing ${idx + 1}`} className="image-preview" />
+                      <button type="button" className="remove-image-btn" onClick={() => handleRemoveExistingPhoto(url)}>
+                        Remove
+                      </button>
+                    </div>
+                  ))}
                   {files.map((file, idx) => (
-                    <div key={idx} className="image-preview-item">
-                      <img
-                        src={URL.createObjectURL(file)}
-                        alt={`Preview ${idx + 1}`}
-                        className="image-preview"
-                      />
-                      <button type="button" className="remove-image-btn" onClick={() => handleRemoveFile(idx)}>
+                    <div key={`new-${idx}`} className="image-preview-item">
+                      <img src={URL.createObjectURL(file)} alt={`New ${idx + 1}`} className="image-preview" />
+                      <button type="button" className="remove-image-btn" onClick={() => handleRemoveNewFile(idx)}>
                         Remove
                       </button>
                     </div>
@@ -271,50 +296,52 @@ const NewHotel = () => {
                 <h2>Basic Info</h2>
                 <div className="formInput">
                   <label>Name</label>
-                  <input id="name" type="text" placeholder="Hotel Name" onChange={handleChange} required />
+                  <input id="name" type="text" value={info.name || ""} onChange={handleChange} placeholder="Hotel Name" />
                 </div>
                 <div className="formInput">
                   <label>Type</label>
-                  <input id="type" type="text" placeholder="hotel/apartment/resort" onChange={handleChange} required />
+                  <input id="type" type="text" value={info.type || ""} onChange={handleChange} placeholder="hotel/apartment/resort" />
                 </div>
                 <div className="formInput">
                   <label>City</label>
-                  <input id="city" type="text" placeholder="City" onChange={handleChange} required />
+                  <input id="city" type="text" value={info.city || ""} onChange={handleChange} placeholder="City" />
                 </div>
                 <div className="formInput">
                   <label>Address</label>
-                  <input id="address" type="text" placeholder="123 Main St" onChange={handleChange} onBlur={handleLocationBlur} required />
+                  <input id="address" type="text" value={info.address || ""} onChange={handleChange} onBlur={handleLocationBlur} placeholder="123 Main St" />
                 </div>
               </div>
+
               <div className="form-section">
                 <h2>Details</h2>
                 <div className="formInput">
                   <label>Distance (from center)</label>
-                  <input id="distance" type="text" placeholder="500m" onChange={handleChange} required />
+                  <input id="distance" type="text" value={info.distance || ""} onChange={handleChange} placeholder="500m" />
                 </div>
                 <div className="formInput">
                   <label>Title</label>
-                  <input id="title" type="text" placeholder="Hotel title" onChange={handleChange} required />
+                  <input id="title" type="text" value={info.title || ""} onChange={handleChange} placeholder="Hotel title" />
                 </div>
                 <div className="formInput">
                   <label>Description</label>
-                  <textarea id="desc" placeholder="Hotel description" onChange={handleChange} required />
+                  <textarea id="desc" value={info.desc || ""} onChange={handleChange} placeholder="Hotel description" />
                 </div>
                 <div className="formInput">
                   <label>Cheapest Price</label>
-                  <input id="cheapestPrice" type="number" placeholder="100" onChange={handleChange} required />
+                  <input id="cheapestPrice" type="number" value={info.cheapestPrice ?? ""} onChange={handleChange} placeholder="100" />
                 </div>
                 <div className="formInput">
                   <label>Rating (0-5)</label>
-                  <input id="rating" type="number" min="0" max="5" step="0.1" placeholder="4.5" onChange={handleChange} />
+                  <input id="rating" type="number" min="0" max="5" step="0.1" value={info.rating ?? ""} onChange={handleChange} placeholder="4.5" />
                 </div>
                 <div className="formInput">
                   <label>Featured</label>
-                  <select id="featured" onChange={handleChange}>
-                    <option value={false}>No</option>
-                    <option value={true}>Yes</option>
+                  <select id="featured" value={String(info.featured ?? false)} onChange={handleChange}>
+                    <option value="false">No</option>
+                    <option value="true">Yes</option>
                   </select>
                 </div>
+
                 {geoError && (
                   <div style={{ color: "red", margin: "10px 0", padding: "10px", backgroundColor: "#ffeeee", borderRadius: 5 }}>
                     {geoError}
@@ -434,18 +461,19 @@ const NewHotel = () => {
                   </div>
                 )}
               </div>
+
               <div className="form-section">
                 <h2>Rooms</h2>
                 <div className="selectRooms">
                   <label>Choose Rooms</label>
-                  <select id="rooms" multiple onChange={handleSelect} disabled={loading || !!error}>
-                    {loading && <option>Loading rooms...</option>}
-                    {!loading && error && <option disabled>Failed to load rooms</option>}
-                    {!loading && !error && data && data.length === 0 && (
+                  <select id="rooms" multiple onChange={handleSelectRooms} disabled={loadingRooms || !!roomsError} value={rooms}>
+                    {loadingRooms && <option>Loading rooms...</option>}
+                    {!loadingRooms && roomsError && <option disabled>Failed to load rooms</option>}
+                    {!loadingRooms && !roomsError && roomsData && roomsData.length === 0 && (
                       <option disabled>No rooms found</option>
                     )}
-                    {!loading && !error && data &&
-                      data.map((room) => (
+                    {!loadingRooms && !roomsError && roomsData &&
+                      roomsData.map((room) => (
                         <option key={room._id} value={room._id}>
                           {room.title}
                         </option>
@@ -454,7 +482,11 @@ const NewHotel = () => {
                   <div className="rooms-helper">{rooms.length} room(s) selected</div>
                 </div>
               </div>
-              <button className="submit-btn" onClick={handleClick}>Add Hotel</button>
+
+              <button className="submit-btn" onClick={handleUpdate} disabled={loadingHotel}>
+                {loadingHotel ? "Updating..." : "Update Hotel"}
+              </button>
+              {hotelError && <div className="error-text">Failed to load hotel.</div>}
             </form>
           </div>
         </div>
@@ -476,9 +508,9 @@ const NewHotel = () => {
               boxShadow: "0 12px 28px rgba(0,0,0,0.18)",
               textAlign: "center",
             }}>
-              <h3 style={{ margin: 0, marginBottom: 8, color: "#1f2937" }}>Hotel Created</h3>
+              <h3 style={{ margin: 0, marginBottom: 8, color: "#1f2937" }}>Hotel Updated</h3>
               <p style={{ margin: 0, marginBottom: 20, color: "#4b5563" }}>
-                Your hotel has been added successfully.
+                Your changes have been saved successfully.
               </p>
               <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
                 <button
@@ -493,10 +525,10 @@ const NewHotel = () => {
                     fontWeight: 600,
                   }}
                 >
-                  Go to Hotels
+                  Back to Hotels
                 </button>
                 <button
-                  onClick={handleAddAnother}
+                  onClick={() => setShowSuccess(false)}
                   style={{
                     padding: "10px 16px",
                     background: "#f3f4f6",
@@ -507,7 +539,7 @@ const NewHotel = () => {
                     fontWeight: 600,
                   }}
                 >
-                  Add Another
+                  Stay on Page
                 </button>
               </div>
             </div>
@@ -518,4 +550,4 @@ const NewHotel = () => {
   );
 };
 
-export default NewHotel;
+export default EditHotel;

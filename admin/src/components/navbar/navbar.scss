@@ -41,6 +41,50 @@
       flex: 1;
       min-width: 0; // allow shrink to prevent overlap
 
+      .nav-history {
+        margin-left: -900px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: $spacing-unit * 0.75;
+
+        .history-btn {
+          width: 36px;
+          height: 36px;
+          border-radius: 10px;
+          border: 1px solid rgba($text-muted, 0.14);
+          background: $backbutton-primary;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: $text-primary;
+          cursor: pointer;
+          transition: all $transition-quick;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+
+          &:hover {
+            background: rgba($background-paper, 0.9);
+            border-color: rgba($primary-color, 0.35);
+            box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+            transform: translateY(-1px);
+            color: $primary-color;
+          }
+
+          &.disabled,
+          &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            filter: grayscale(0.2);
+          }
+
+
+          .history-icon {
+            font-size: 20px;
+            color: inherit;
+          }
+        }
+      }
+
       .search {
         display: flex;
         align-items: center;

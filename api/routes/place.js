@@ -18,15 +18,6 @@ router.post('/', createPlace);
 // Get all places with optional filters
 router.get('/', getAllPlaces);
 
-// Get place by ID
-router.get('/:id', getPlaceById);
-
-// Update a place
-router.put('/:id', updatePlace);
-
-// Delete a place
-router.delete('/:id', deletePlace);
-
 // Get places by category
 router.get('/category/:category', getPlacesByCategory);
 
@@ -35,5 +26,14 @@ router.get('/categories/all', getAllCategories);
 
 // Get all available cities
 router.get('/cities', getAllCities);
+
+// Get place by ID
+router.get('/:id', getPlaceById);
+
+// Update a place
+router.put('/:id', updatePlace);
+
+// Delete a place
+router.delete('/:id', deletePlace);
 
 export default router;

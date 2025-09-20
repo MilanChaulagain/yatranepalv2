@@ -114,11 +114,11 @@ const NewTouristGuide = ({ title, isAdmin }) => {
     };
 
     return (
-        <div className="new">
+        <div className="">
             <Sidebar />
             <div className="newContainer">
                 <Navbar />
-                <div className="top">
+                <div className="">
                     <h1>{title || "Add New Tourist Guide"}</h1>
                 </div>
                 <div className="bottom">

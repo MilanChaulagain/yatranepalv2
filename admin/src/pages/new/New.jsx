@@ -63,7 +63,7 @@ const New = ({ inputs, title }) => {
   };
 
   return (
-    <div className="new">
+    <div className="">
       <Sidebar />
       <div className="newContainer">
         <Navbar />

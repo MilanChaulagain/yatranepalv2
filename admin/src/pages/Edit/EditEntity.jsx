@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import { testCloudinaryConfig, testCloudinaryUpload } from "../../utils/cloudinaryTest";
 
 const EditEntity = () => {
+    console.log("Edit entity mounted")
     const { id } = useParams();
     const navigate = useNavigate();
     const location = useLocation();
