@@ -94,9 +94,7 @@ const EditUser = () => {
       <Sidebar />
       <div className="newContainer">
         <Navbar />
-        <div className="top">
           <h1>Edit User</h1>
-        </div>
         <div className="bottom">
           <div className="left" onClick={() => fileInputRef.current?.click()} style={{ cursor: "pointer" }}>
             <img

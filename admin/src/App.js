@@ -96,7 +96,7 @@ function App() {
   return (
     <div className={`app ${darkMode ? 'dark' : ''} fade-in main-layout`} style={{"--sidebar-width": sidebarCollapsed ? "80px" : "280px"}}>
       <Toaster position="top-center" reverseOrder={false} />
-      <BrowserRouter basename="/admin">
+      <BrowserRouter>
         <Routes>
           <Route path="/">
             <Route path="login" element={<Login />} />

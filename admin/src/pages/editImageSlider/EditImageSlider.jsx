@@ -124,9 +124,7 @@ const EditImageSlider = () => {
       <Sidebar />
       <div className="imagesliderContainer">
         <Navbar />
-        <div className="imagesliderTop">
           <h1>Edit Slider Image</h1>
-        </div>
         <div className="imagesliderBottom">
           <div className="imagesliderPreview">
             <img src={previewUrl} alt="preview" className="imagesliderPreviewImage" onError={(e) => {

@@ -3,8 +3,6 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import http from "http";
-import { Server } from "socket.io";
 import path from "path";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
@@ -46,7 +44,6 @@ console.log("PORT:", process.env.PORT);
 console.log("All env vars:", process.env);
 
 const app = express();
-const server = http.createServer(app);
 
 // These middlewares are required to read req.body
 app.use(express.json());
@@ -87,34 +84,6 @@ app.use(cors({
 
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-// Setup Socket.IO
-const io = new Server(server, {
-    cors: {
-        origin: allowedOrigins,
-        credentials: true,
-        methods: ["GET", "POST"],
-        allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-    },
-});
-
-io.on("connection", (socket) => {
-    try {
-        const { userId } = socket.handshake.query || {};
-        console.log("Socket connected:", socket.id, userId ? `user=${userId}` : "");
-
-        socket.on("message", (msg) => {
-            // Simple broadcast for now; can be targeted later
-            io.emit("message", msg);
-        });
-
-        socket.on("disconnect", (reason) => {
-            console.log("Socket disconnected:", socket.id, reason);
-        });
-    } catch (e) {
-        console.error("Socket error on connection handler:", e);
-    }
-});
 
 // Mount API routes
 app.use("/api/auth", authRoute);
@@ -187,7 +156,7 @@ const startServer = async () => {
         } catch (e) {
             console.warn('Index sync warning:', e.message);
         }
-        server.listen(PORT, () => {
+        app.listen(PORT, () => {
             console.log(`Backend running at http://localhost:${PORT}`);
         });
     } catch (error) {

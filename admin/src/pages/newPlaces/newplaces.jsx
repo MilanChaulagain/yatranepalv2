@@ -497,7 +497,7 @@ const NewPlace = () => {
                 </div>
               )}
 
-              <button class= "save-btn" onClick={handleClick} disabled={loadingLatLng}>
+              <button className="save-btn" onClick={handleClick} disabled={loadingLatLng}>
                 {loadingLatLng ? "Processing..." : "Save Place"}
               </button>
             </form>

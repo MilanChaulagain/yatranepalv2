@@ -34,9 +34,7 @@ const NewChadParba = () => {
             <Sidebar />
             <div className="newChadParbaContainer">
                 <Navbar />
-                <div className="top">
                     <h1>Add New ChadParba Event</h1>
-                </div>
                 <div className="bottom">
                     <form className="form" onSubmit={(e)=>e.preventDefault()}>
                         {chadParbaInputs.map((input) => (

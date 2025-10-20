@@ -382,7 +382,12 @@ const List = ({ columns }) => {
                     <div className="card-footer">
                       <span className="created-date">
                         <Calendar className="w-3 h-3" />
-                        {new Date(item.createdAt || item.updatedAt).toLocaleDateString()}
+                        {(() => {
+                          const d = item.createdAt || item.updatedAt;
+                          const dt = d ? new Date(d) : null;
+                          const valid = dt && !isNaN(dt.getTime());
+                          return valid ? dt.toLocaleDateString() : '—';
+                        })()}
                       </span>
                     </div>
                   </div>

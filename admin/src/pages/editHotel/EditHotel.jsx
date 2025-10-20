@@ -93,24 +93,39 @@ console.log("Edit hotel mounted")
             const data = new FormData();
             data.append("file", file);
             data.append("upload_preset", process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET);
-            const uploadClient = axios.create();
-            uploadClient.interceptors.request.use((config) => {
-              if (config.headers) {
-                delete config.headers.Authorization;
-                delete config.headers.authorization;
-              }
-              return config;
+            
+            // Use XMLHttpRequest to bypass any fetch/axios interceptors
+            return new Promise((resolve, reject) => {
+              const xhr = new XMLHttpRequest();
+              
+              xhr.open('POST', `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_CLOUD_NAME}/image/upload`);
+              
+              // Explicitly set withCredentials to false to prevent sending auth
+              xhr.withCredentials = false;
+              
+              xhr.onload = function() {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                  try {
+                    const response = JSON.parse(xhr.responseText);
+                    resolve(response.secure_url || response.url);
+                  } catch (e) {
+                    reject(new Error('Failed to parse response'));
+                  }
+                } else {
+                  reject(new Error(`Upload failed: ${xhr.status} ${xhr.statusText}`));
+                }
+              };
+              
+              xhr.onerror = function() {
+                reject(new Error('Network error occurred'));
+              };
+              
+              xhr.send(data);
             });
-            const res = await uploadClient.post(
-              `https://api.cloudinary.com/v1_1/${process.env.REACT_APP_CLOUDINARY_CLOUD_NAME}/image/upload`,
-              data,
-              { withCredentials: false, headers: { "Content-Type": "multipart/form-data" } }
-            );
-            return res.data.url;
           })
         );
       } catch (err) {
-        alert("One or more image uploads failed!");
+        alert("One or more image uploads failed: " + err.message);
         return;
       }
     }

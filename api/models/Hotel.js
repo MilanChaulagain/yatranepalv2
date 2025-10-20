@@ -20,7 +20,7 @@ const HotelSchema = new mongoose.Schema({
     ], 
     cheapestPrice: { type: Number, required: true },
     featured: { type: Boolean, default: false },
-});
+}, { timestamps: true });
 
 const Hotel = mongoose.models.Hotel || mongoose.model("Hotel", HotelSchema);
 export default Hotel;

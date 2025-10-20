@@ -75,6 +75,10 @@
     font-size: 14px;
   }
 
+  h1{
+    margin-left: 50px;
+  }
+
   &SubmitButton {
     padding: $spacing-unit * 2;
     background: $gradient-primary;

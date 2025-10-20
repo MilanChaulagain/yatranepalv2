@@ -123,22 +123,18 @@
             font-size: 0.875rem;
           }
         }
-        
-        .search-icon {
-          color: $text-muted;
-          margin-right: $spacing-unit;
-          font-size: 20px;
-        }
       }
     }
 
     .right {
+      margin-right: 10px;
       display: flex;
       align-items: center;
       gap: $spacing-unit * 1.25;
       flex: 0 0 auto;
 
       .item {
+        margin-right: 10px;
         display: flex;
         align-items: center;
         position: relative;

@@ -105,7 +105,6 @@ const AdminBookings = () => {
     return <span className={`badge ${cls}`}><FontAwesomeIcon icon={icon} spin={status === "pending"} /> {label}</span>;
   };
 
-  if (loading) return <div className="admin-loading"><FontAwesomeIcon icon={faSpinner} spin size="3x" /></div>;
   if (error) return <div className="admin-error">{error}</div>;
 
   return (

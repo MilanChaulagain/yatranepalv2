@@ -4,9 +4,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import logo from "../../assets/logo.png";
 import { IoMenu } from "react-icons/io5";
-import { FaComments, FaBell } from "react-icons/fa";
+import { FaBell } from "react-icons/fa";
 import { toast } from "react-hot-toast";
-import ChatSidebar from "../chat/ChatSidebar";
 
 const Navbar = () => {
   const { user, dispatch } = useContext(AuthContext);
@@ -14,8 +13,6 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(null);
-  const [chatOpen, setChatOpen] = useState(false);
-  const [chatNotifications, setChatNotifications] = useState(0);
   const dropdownRef = useRef();
 
   const getInitial = (name) => (name ? name.charAt(0).toUpperCase() : "");
@@ -242,10 +239,6 @@ const Navbar = () => {
           </nav>
 
           <div className="desktopIcons">
-            <button className="chatIconBtn" onClick={() => setChatOpen(true)}>
-              <FaComments size={22} />
-              {chatNotifications > 0 && <span className="chatNotifBadge">{chatNotifications}</span>}
-            </button>
             <button className="notifIconBtn">
               <FaBell size={22} />
             </button>
@@ -292,9 +285,6 @@ const Navbar = () => {
           </div>
         </div>
       </div>
-
-      {/* Chat Sidebar */}
-      <ChatSidebar open={chatOpen} onClose={() => setChatOpen(false)} user={user} />
     </header>
   );
 };
