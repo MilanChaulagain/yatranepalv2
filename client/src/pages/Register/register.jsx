@@ -47,10 +47,35 @@ const RegisterPage = () => {
     const uploadImageToCloudinary = async () => {
         if (!imageFile) return "";
         
-        console.log("Image upload functionality not configured yet");
-
-        // Return empty string for now - user will be registered without image
-        return "";
+        try {
+            const formData = new FormData();
+            formData.append("image", imageFile); // Changed from "file" to "image" to match backend
+            
+            console.log("Uploading image to backend...");
+            
+            // Upload to your backend server instead of directly to Cloudinary
+            const response = await axios.post(
+                "http://localhost:8800/api/upload/single",
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }
+            );
+            
+            if (response.data.success) {
+                const imageUrl = `http://localhost:8800${response.data.imagePath}`;
+                console.log("Image uploaded successfully:", imageUrl);
+                return imageUrl;
+            } else {
+                throw new Error("Upload failed");
+            }
+        } catch (error) {
+            console.error("Error uploading image:", error);
+            // Return empty string if upload fails - allow registration without image
+            return "";
+        }
     }
 
     const handleSubmit = async (e) => {
@@ -82,19 +107,26 @@ const RegisterPage = () => {
                 console.log("Image upload result:", imageUrl ? "success" : "skipped")
             }
 
+            // Prepare registration data - only include img if it exists
+            const registrationData = {
+                username: formData.username,
+                email: formData.email,
+                password: formData.password,
+                phone: formData.phone,
+                city: formData.city,
+                country: formData.country
+            };
+            
+            // Only add img field if we have a valid image URL
+            if (imageUrl && imageUrl.trim() !== "") {
+                registrationData.img = imageUrl;
+            }
+
             // Send registration request
-            console.log("Sending registration request...")
+            console.log("Sending registration request...", registrationData)
             const registerResponse = await axios.post(
                 "http://localhost:8800/api/auth/register", 
-                {
-                    username: formData.username,
-                    email: formData.email,
-                    password: formData.password,
-                    phone: formData.phone,
-                    city: formData.city,
-                    country: formData.country,
-                    img: imageUrl
-                },
+                registrationData,
                 {
                     withCredentials: true,
                     headers: {
