@@ -6,6 +6,7 @@ import cors from "cors";
 import path from "path";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
+import { initializeDualConnections } from "./utils/dualDatabase.js";
 
 // Create __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -146,8 +147,9 @@ const PORT = process.env.PORT;
 
 const startServer = async () => {
     try {
-        await mongoose.connect(process.env.MONGO);
-        console.log("Connected to MongoDB.");
+        // Initialize dual database connections
+        await initializeDualConnections();
+        
         // Sync indexes to drop outdated ones (e.g., text index on tags)
         try {
             const TravelStory = (await import('./models/TravelStory.js')).default;
@@ -156,8 +158,12 @@ const startServer = async () => {
         } catch (e) {
             console.warn('Index sync warning:', e.message);
         }
+        
         app.listen(PORT, () => {
             console.log(`Backend running at http://localhost:${PORT}`);
+            if (process.env.DUAL_WRITE === 'true') {
+                console.log('🔄 DUAL WRITE MODE ENABLED - Writing to both Atlas and Localhost');
+            }
         });
     } catch (error) {
         console.error("MongoDB connection error:", error);
