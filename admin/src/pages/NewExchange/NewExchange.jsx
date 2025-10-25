@@ -12,23 +12,32 @@ const NewExchange = ({ title }) => {
   const navigate = useNavigate();
   const isMounted = useRef(true);
 
-  const [form, setForm] = useState({
-    name: "",
-    address: "",
-    city: "",
-    contactNumber: "",
-    hours: "",
-    services: "",
-    description: "",
-    isActive: true,
-    lat: "",
-    lng: "",
+  // Load form data from localStorage on mount
+  const [form, setForm] = useState(() => {
+    const saved = localStorage.getItem('newExchangeForm');
+    return saved ? JSON.parse(saved) : {
+      name: "",
+      address: "",
+      city: "",
+      contactNumber: "",
+      hours: "",
+      services: "",
+      description: "",
+      isActive: true,
+      lat: "",
+      lng: "",
+    };
   });
   const [files, setFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [loadingLatLng, setLoadingLatLng] = useState(false);
   const [suggestedLocations, setSuggestedLocations] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // Save form data to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('newExchangeForm', JSON.stringify(form));
+  }, [form]);
 
   useEffect(() => () => { isMounted.current = false; }, []);
 
@@ -54,21 +63,40 @@ const NewExchange = ({ title }) => {
     if (!CLOUD_NAME || !UPLOAD_PRESET) {
       throw new Error("Missing Cloudinary config. Set REACT_APP_CLOUDINARY_CLOUD_NAME and REACT_APP_CLOUDINARY_UPLOAD_PRESET.");
     }
-    const uploadClient = axios.create();
-    uploadClient.interceptors.request.use((config) => {
-      if (config.headers) {
-        delete config.headers.Authorization;
-        delete config.headers.authorization;
-      }
-      return config;
-    });
+    
     const urls = [];
     for (const file of files) {
       const data = new FormData();
       data.append("file", file);
       data.append("upload_preset", UPLOAD_PRESET);
-  const res = await uploadClient.post(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, data, { withCredentials: false });
-      urls.push(res.data.secure_url);
+      
+      // Use XMLHttpRequest to avoid CORS issues
+      const url = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`);
+        xhr.withCredentials = false;
+        
+        xhr.onload = function() {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const response = JSON.parse(xhr.responseText);
+              resolve(response.secure_url || response.url);
+            } catch (e) {
+              reject(new Error('Failed to parse response'));
+            }
+          } else {
+            reject(new Error(`Upload failed: ${xhr.status} ${xhr.statusText}`));
+          }
+        };
+        
+        xhr.onerror = function() {
+          reject(new Error('Network error occurred'));
+        };
+        
+        xhr.send(data);
+      });
+      
+      urls.push(url);
     }
     return urls;
   };
@@ -107,11 +135,14 @@ const NewExchange = ({ title }) => {
       };
       await axios.post("http://localhost:8800/api/money-exchange", payload, { withCredentials: true });
       toast.success("Exchange Center created successfully!");
+      // Clear form and localStorage only after successful submission
+      localStorage.removeItem('newExchangeForm');
       navigate("/money-exchange");
     } catch (err) {
       console.error("Create error:", err);
       const msg = err?.response?.data?.error || err?.response?.data?.message || "Failed to create Exchange Center.";
       toast.error(msg);
+      // Don't clear form on error - user can fix and retry
     } finally {
       if (isMounted.current) setUploading(false);
     }

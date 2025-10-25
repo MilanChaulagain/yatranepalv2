@@ -44,7 +44,7 @@
       .nav-history {
         margin-left: -900px;
         margin-bottom: 20px;
-        display: flex;
+        display: none;
         align-items: center;
         gap: $spacing-unit * 0.75;
 
@@ -54,7 +54,7 @@
           border-radius: 10px;
           border: 1px solid rgba($text-muted, 0.14);
           background: $backbutton-primary;
-          display: flex;
+          display: none;
           align-items: center;
           justify-content: center;
           color: $text-primary;

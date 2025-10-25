@@ -14,6 +14,7 @@ const NewImageSlider = ({ inputs = [], title }) => {
 
   const [file, setFile] = useState(null);
   const [info, setInfo] = useState({});
+  const [showSuccess, setShowSuccess] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -72,8 +73,7 @@ const NewImageSlider = ({ inputs = [], title }) => {
 
     try {
       await axios.post("http://localhost:8800/api/imageslider", sliderData, { withCredentials: true });
-      alert("Image slider added successfully!");
-      navigate("/imageslider");
+      setShowSuccess(true);
     } catch (err) {
       console.error("Failed to create image slider:", err);
       alert("Error saving data");
@@ -148,6 +148,66 @@ const NewImageSlider = ({ inputs = [], title }) => {
           </div>
         </div>
       </div>
+      
+      {showSuccess && (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(0,0,0,0.45)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1000,
+        }}>
+          <div style={{
+            background: "#fff",
+            borderRadius: 12,
+            padding: 24,
+            width: "min(520px, 92vw)",
+            boxShadow: "0 12px 28px rgba(0,0,0,0.18)",
+            textAlign: "center",
+          }}>
+            <h3 style={{ margin: 0, marginBottom: 8, color: "#1f2937" }}>Slider Image Added</h3>
+            <p style={{ margin: 0, marginBottom: 20, color: "#4b5563" }}>
+              Your slider image has been uploaded successfully.
+            </p>
+            <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+              <button
+                onClick={() => navigate("/imageslider")}
+                style={{
+                  padding: "10px 16px",
+                  background: "#2d5c7f",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 8,
+                  cursor: "pointer",
+                  fontWeight: 600,
+                }}
+              >
+                Go to Slider Images
+              </button>
+              <button
+                onClick={() => {
+                  setShowSuccess(false);
+                  setFile(null);
+                  setInfo({});
+                }}
+                style={{
+                  padding: "10px 16px",
+                  background: "#f3f4f6",
+                  color: "#111827",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: 8,
+                  cursor: "pointer",
+                  fontWeight: 600,
+                }}
+              >
+                Add Another
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
